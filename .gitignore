@@ -1,0 +1,11 @@
+# Exclude temporary scripts
+patch_maps.js
+patch_innerhtml.js
+patch_replace.js
+
+# Exclude workspace metadata
+.gemini/
+.DS_Store
+
+# Exclude local env (if any)
+.env

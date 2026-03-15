@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vantiq Spark — Real-Time AI System Designer</title>
+  <meta name="description"
+    content="AI-powered copilot for designing intelligent, event-driven, real-time AI applications. Go from idea to architecture to prototype in minutes.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- ═══ Sidebar ═══ -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="logo-icon" style="background: none; -webkit-text-fill-color: initial;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 21L2.5 5H7.5L12 14.5L16.5 5H21.5L12 21Z" fill="url(#vantiq-grad)" />
+              <defs>
+                <linearGradient id="vantiq-grad" x1="2.5" y1="5" x2="21.5" y2="21" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="var(--brand-primary)" />
+                  <stop offset="1" stop-color="var(--brand-secondary)" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+          <div>
+            <div class="logo-text">Vantiq Spark</div>
+            <div class="logo-subtitle">Solution Designer</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Assistant</div>
+        <div class="nav-item" data-panel="usecase" id="nav-usecase">
+          <span class="nav-icon">💬</span>
+          <span class="nav-text">Usecase Assistant</span>
+        </div>
+        <div class="nav-section-label">Design</div>
+        <div class="nav-item active" data-panel="input" id="nav-input">
+          <span class="nav-icon">💡</span>
+          <span class="nav-text">Problem Input</span>
+        </div>
+        <div class="nav-item disabled" data-panel="analysis" id="nav-analysis">
+          <span class="nav-icon">🔍</span>
+          <span class="nav-text">Problem Analysis</span>
+        </div>
+        <div class="nav-item disabled" data-panel="domain" id="nav-domain">
+          <span class="nav-icon">🧩</span>
+          <span class="nav-text">Domain Model</span>
+        </div>
+
+        <div class="nav-section-label">Architecture</div>
+        <div class="nav-item disabled" data-panel="architecture" id="nav-architecture">
+          <span class="nav-icon">🏗️</span>
+          <span class="nav-text">Architecture</span>
+        </div>
+        <div class="nav-item disabled" data-panel="aimodels" id="nav-aimodels">
+          <span class="nav-icon">🤖</span>
+          <span class="nav-text">AI Models</span>
+        </div>
+        <div class="nav-item disabled" data-panel="agentic" id="nav-agentic">
+          <span class="nav-icon">🧠</span>
+          <span class="nav-text">Agentic AI Guide</span>
+        </div>
+        <div class="nav-item disabled" data-panel="events" id="nav-events">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-text">Event System</span>
+        </div>
+
+        <div class="nav-section-label">Build</div>
+        <div class="nav-item disabled" data-panel="implementation" id="nav-implementation">
+          <span class="nav-icon">🛠️</span>
+          <span class="nav-text">Implementation</span>
+        </div>
+        <div class="nav-item disabled" data-panel="diagrams" id="nav-diagrams">
+          <span class="nav-icon">📊</span>
+          <span class="nav-text">Diagrams</span>
+        </div>
+
+        <div class="nav-section-label">Enablement</div>
+        <div class="nav-item disabled" data-panel="demo" id="nav-demo">
+          <span class="nav-icon">🎬</span>
+          <span class="nav-text">Demo Scenarios</span>
+        </div>
+        <div class="nav-item disabled" data-panel="training" id="nav-training">
+          <span class="nav-icon">🎓</span>
+          <span class="nav-text">Training Labs</span>
+        </div>
+
+
+
+        <div class="nav-section-label">Strategy</div>
+        <div class="nav-item disabled" data-panel="competitive" id="nav-competitive">
+          <span class="nav-icon">🏆</span>
+          <span class="nav-text">Competitive Analysis</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer" style="display: flex; align-items: center; gap: 8px;">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Configure API Key</span>
+        <div style="margin-left:auto; display: flex; gap: 4px;">
+          <button class="btn-ghost" onclick="app.showHistory()" id="btnHistory" style="font-size:14px"
+            title="Session History">🕒</button>
+          <button class="btn-ghost" onclick="app.exportToPDF()" id="btnExportPdf" style="display:none;font-size:14px"
+            title="Export Solution to PDF">📄</button>
+          <button class="btn-ghost" onclick="app.showSettings()" style="font-size:14px" title="Settings">⚙️</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ═══ Main Content ═══ -->
+    <main class="main-content">
+
+      <!-- Pipeline Progress Bar -->
+      <div class="pipeline-bar" id="pipelineBar">
+        <div class="pipeline-step" data-agent="interpreter" id="step-interpreter">
+          <span class="step-icon">🔍</span>
+          <span>Interpreter</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="domain" id="step-domain">
+          <span class="step-icon">🧩</span>
+          <span>Domain</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="architecture" id="step-architecture">
+          <span class="step-icon">🏗️</span>
+          <span>Architecture</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="aimodel" id="step-aimodel">
+          <span class="step-icon">🤖</span>
+          <span>AI Models</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="agentic" id="step-agentic">
+          <span class="step-icon">🧠</span>
+          <span>Agentic</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="events" id="step-events">
+          <span class="step-icon">⚡</span>
+          <span>Events</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="implementation" id="step-implementation">
+          <span class="step-icon">🛠️</span>
+          <span>Implement</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="visualizer" id="step-visualizer">
+          <span class="step-icon">📊</span>
+          <span>Diagrams</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="demo" id="step-demo">
+          <span class="step-icon">🎬</span>
+          <span>Demo</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="training" id="step-training">
+          <span class="step-icon">🎓</span>
+          <span>Training</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="competitive" id="step-competitive">
+          <span class="step-icon">🏆</span>
+          <span>Compete</span>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area">
+
+        <!-- ── Usecase Assistant Panel ── -->
+        <div class="panel" id="panel-usecase">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">💬</span> Vantiq Usecase Assistant</div>
+              <div class="section-subtitle">AI-powered chatbot for Vantiq use case ideation, architecture guidance, and
+                best practices</div>
+            </div>
+            <button class="btn btn-regenerate" onclick="app.clearChat()">
+              🗑️ Clear Chat
+            </button>
+          </div>
+          <div class="chat-container" id="chatContainer">
+            <div class="chat-messages" id="chatMessages">
+              <div class="chat-message assistant">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-bubble">
+                  <p>Hi! I'm the <strong>Vantiq Usecase Assistant</strong>. I can help you brainstorm and design
+                    real-time, event-driven applications on the Vantiq platform.</p>
+                  <p style="margin-top:8px">Try asking me things like:</p>
+                  <ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">
+                    <li>How can Vantiq help with predictive maintenance?</li>
+                    <li>Design a smart building energy optimization system</li>
+                    <li>What Vantiq features support real-time video analytics?</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="chat-input-area">
+              <input type="text" class="chat-input" id="chatInput"
+                placeholder="Ask about Vantiq use cases, architecture, best practices..." autocomplete="off" />
+              <button class="btn btn-primary chat-send-btn" id="chatSendBtn" onclick="app.sendChat()">
+                <span>➤</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Session History Panel ── -->
+        <div class="panel" id="panel-history">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🕒</span> Session History</div>
+              <div class="section-subtitle">Resume your previous AI generation sessions</div>
+            </div>
+            <button class="btn-ghost" onclick="app.clearHistory()" style="font-size:13px;color:var(--text-tertiary)">
+              🧹 Clear All
+            </button>
+          </div>
+          <div id="historyGrid" style="display:flex; flex-direction:column; gap:16px; margin-top:20px;">
+            <p style="color:var(--text-secondary)">No history found.</p>
+          </div>
+        </div>
+
+        <!-- ── Problem Input Panel ── -->
+        <div class="panel active" id="panel-input">
+          <div class="welcome-section">
+            <h1 class="welcome-title">
+              Vantiq <span class="gradient-text">Spark</span>
+            </h1>
+            <p class="welcome-subtitle">
+              Describe your problem and our AI agents will generate a complete system architecture,
+              implementation scaffolding, demo scenarios, and training labs — all in one workflow.
+            </p>
+
+            <div class="input-card">
+              <div class="input-label">
+                <span>📝</span> Problem Description
+              </div>
+              <textarea class="problem-textarea" id="problemInput"
+                placeholder="Describe your real-time AI system problem...&#10;&#10;Example: Design a real-time wildfire detection system using drones and computer vision that can automatically alert emergency response teams."></textarea>
+              <div class="input-actions">
+                <button class="btn btn-primary" id="generateBtn" onclick="app.generate()">
+                  <span>⚡</span> Generate Solution
+                </button>
+                <button class="btn btn-secondary" id="clearBtn" onclick="app.clearInput()">
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            <div class="input-card" style="margin-top:16px">
+              <div class="input-label">
+                <span>🏆</span> Competitors to Compare <span
+                  style="font-size:11px;color:var(--text-tertiary);font-weight:400">(optional)</span>
+              </div>
+              <input type="text" class="modal-input" id="competitorsInput"
+                placeholder="e.g. AWS IoT, Azure IoT, PTC ThingWorx, C3.ai, Siemens MindSphere (leave empty to auto-select 5)" />
+            </div>
+
+            <div class="examples-section">
+              <div class="examples-label">Try an example</div>
+              <div class="example-chips">
+                <div class="example-chip" onclick="app.loadExample(0)">🔥 Wildfire Detection with Drones</div>
+                <div class="example-chip" onclick="app.loadExample(1)">🏥 Hospital Patient Deterioration</div>
+                <div class="example-chip" onclick="app.loadExample(2)">🏭 Industrial Equipment Monitoring</div>
+                <div class="example-chip" onclick="app.loadExample(3)">🚗 Smart Traffic Management</div>
+                <div class="example-chip" onclick="app.loadExample(4)">🏢 Smart Building Energy Optimization</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Problem Analysis Panel ── -->
+        <div class="panel" id="panel-analysis">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🔍</span> Problem Analysis</div>
+              <div class="section-subtitle">Agent 1 — Problem Interpreter output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-interpreter" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('interpreter')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('interpreter')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="analysis-content"></div>
+        </div>
+
+        <!-- ── Domain Model Panel ── -->
+        <div class="panel" id="panel-domain">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🧩</span> Domain Model</div>
+              <div class="section-subtitle">Agent 2 — Domain Model Generator output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-domain" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('domain')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('domain')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="domain-content"></div>
+        </div>
+
+        <!-- ── Architecture Panel ── -->
+        <div class="panel" id="panel-architecture">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🏗️</span> System Architecture</div>
+              <div class="section-subtitle">Agent 3 — Architecture Generator output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-architecture" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('architecture')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('architecture')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="architecture-content"></div>
+          <!-- Inject Linter Review natively at the bottom of the Architecture page -->
+          <div id="linter-content" style="margin-top: 32px;"></div>
+        </div>
+
+        <!-- ── AI Models Panel ── -->
+        <div class="panel" id="panel-aimodels">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🤖</span> AI Model Recommendations</div>
+              <div class="section-subtitle">Agent 4 — AI Model Advisor output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-aimodel" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('aimodel')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('aimodel')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="aimodels-content"></div>
+        </div>
+
+        <!-- ── Agentic AI Guide Panel ── -->
+        <div class="panel" id="panel-agentic">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🧠</span> Agentic AI Guide</div>
+              <div class="section-subtitle">Agent 4b — Agentic AI Architect output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-agentic" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('agentic')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('agentic')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="agentic-content"></div>
+        </div>
+
+        <!-- ── Event System Panel ── -->
+        <div class="panel" id="panel-events">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">⚡</span> Event System Design</div>
+              <div class="section-subtitle">Agent 5 — Event System Designer output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-events" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('events')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('events')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="events-content"></div>
+        </div>
+
+        <!-- ── Implementation Panel ── -->
+        <div class="panel" id="panel-implementation">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🛠️</span> Implementation Scaffolding</div>
+              <div class="section-subtitle">Agent 6 — Implementation Generator output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-implementation" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('implementation')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('implementation')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="implementation-content"></div>
+        </div>
+
+        <!-- ── Diagrams Panel ── -->
+        <div class="panel" id="panel-diagrams">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">📊</span> Architecture Diagrams</div>
+              <div class="section-subtitle">Agent 7 — Architecture Visualizer output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-visualizer" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('visualizer')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('visualizer')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="diagrams-content"></div>
+        </div>
+
+        <!-- ── Demo Panel ── -->
+        <div class="panel" id="panel-demo">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🎬</span> Demo Scenarios</div>
+              <div class="section-subtitle">Agent 8 — Demo Scenario Generator output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-demo" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('demo')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('demo')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="demo-content"></div>
+        </div>
+
+        <!-- ── Training Panel ── -->
+        <div class="panel" id="panel-training">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🎓</span> Training Labs</div>
+              <div class="section-subtitle">Agent 9 — Training Lab Generator output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-training" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('training')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('training')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="training-content"></div>
+        </div>
+
+        <!-- ── Competitive Analysis Panel ── -->
+        <div class="panel" id="panel-competitive">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">🏆</span> Competitive Analysis</div>
+              <div class="section-subtitle">Agent 10 — Competitive Intelligence output</div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-competitive" class="refine-input" placeholder="Refine this phase..."
+                onkeydown="if(event.key==='Enter') app.regenerate('competitive')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('competitive')">
+                ↻ Regenerate
+              </button>
+            </div>
+          </div>
+          <div id="competitive-content"></div>
+        </div>
+      </div>
+
+      <!-- Generating Overlay -->
+      <div class="generating-overlay" id="generatingOverlay">
+        <div class="generating-spinner"></div>
+        <div class="generating-text-container">
+          <div class="generating-text">Generating Solution...</div>
+          <div class="generating-agent" id="generatingAgentName">Starting pipeline...</div>
+        </div>
+      </div>
+
+      <!-- API Key Modal -->
+      <div class="modal-overlay" id="settingsModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2>⚙️ AI Engine Settings</h2>
+            <button class="btn-ghost" onclick="app.hideSettings()" style="font-size:18px">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="input-label">🔑 OpenAI API Key</div>
+            <input type="password" class="modal-input" id="apiKeyInput" placeholder="sk-..." autocomplete="off" />
+            <p style="font-size:11px;color:var(--text-tertiary);margin-top:6px">Your API key is stored only in this
+              browser session and never sent anywhere except api.openai.com.</p>
+
+            <div class="input-label" style="margin-top:20px">🤖 Model</div>
+            <select class="modal-input" id="modelSelect">
+              <option value="gpt-4.1">GPT-4.1 (Recommended)</option>
+              <option value="gpt-4.1-mini">GPT-4.1 Mini (Faster)</option>
+              <option value="gpt-4.1-nano">GPT-4.1 Nano (Fastest)</option>
+              <option value="gpt-4o">GPT-4o</option>
+              <option value="gpt-5.4">GPT-5.4 (Most Capable)</option>
+              <option value="gpt-5.2">GPT-5.2</option>
+              <option value="o3-mini">o3-mini (Reasoning)</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="app.hideSettings()">Cancel</button>
+            <button class="btn btn-primary" onclick="app.saveSettings()">💾 Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="ai-engine.js"></script>
+  <script src="agents.js"></script>
+  <script src="renderers.js"></script>
+  <script src="pdf-generator.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
