@@ -65,22 +65,50 @@ window.PDFGenerator = {
         // ==========================================
         if (results.analysis) {
             const analysisBlocks = [];
+
+            if (results.analysis.domain) {
+                analysisBlocks.push({ text: 'Industry Domain:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: results.analysis.domain, style: 'bodyText' });
+            }
+
+            if (results.analysis.summary) {
+                analysisBlocks.push({ text: 'System Summary:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: results.analysis.summary, style: 'bodyText' });
+            }
+
             if (results.analysis.coreProblem) {
                 analysisBlocks.push({ text: 'Core Problem:', style: 'subsectionHeader' });
                 analysisBlocks.push({ text: results.analysis.coreProblem, style: 'bodyText' });
             }
-            if (results.analysis.primaryActors && results.analysis.primaryActors.length > 0) {
+
+            if (results.analysis.actors && results.analysis.actors.length > 0) {
                 analysisBlocks.push({ text: 'Primary Actors:', style: 'subsectionHeader' });
-                analysisBlocks.push({ ul: results.analysis.primaryActors.filter(a => a).map(a => ({ text: a, style: 'bodyText' })), style: 'list' });
+                analysisBlocks.push({ ul: results.analysis.actors.filter(a => a).map(a => ({ text: a, style: 'bodyText' })), style: 'list' });
             }
+
+            if (results.analysis.entities && results.analysis.entities.length > 0) {
+                analysisBlocks.push({ text: 'Core Entities:', style: 'subsectionHeader' });
+                analysisBlocks.push({ ul: results.analysis.entities.filter(e => e).map(e => ({ text: e, style: 'bodyText' })), style: 'list' });
+            }
+
             if (results.analysis.dataSources && results.analysis.dataSources.length > 0) {
                 analysisBlocks.push({ text: 'Key Data Sources:', style: 'subsectionHeader' });
                 analysisBlocks.push({ ul: results.analysis.dataSources.filter(d => d).map(d => ({ text: d, style: 'bodyText' })), style: 'list' });
             }
+
+            if (results.analysis.events && results.analysis.events.length > 0) {
+                analysisBlocks.push({ text: 'Principal Events:', style: 'subsectionHeader' });
+                analysisBlocks.push({ ul: results.analysis.events.filter(e => e).map(e => ({ text: e, style: 'bodyText' })), style: 'list' });
+            }
+
             if (results.analysis.aiTasks && results.analysis.aiTasks.length > 0) {
                 analysisBlocks.push({ text: 'AI / ML Tasks:', style: 'subsectionHeader' });
-                analysisBlocks.push({ ul: results.analysis.aiTasks.filter(a => a).map(a => ({ text: a, style: 'bodyText' })), style: 'list' });
+                const aiTasksList = results.analysis.aiTasks.map(t => {
+                    return { text: `${t.task} (${t.type}) — Models: ${t.models.join(', ')}`, style: 'bodyText' };
+                });
+                analysisBlocks.push({ ul: aiTasksList, style: 'list' });
             }
+
             if (results.analysis.vantiqSuitability) {
                 analysisBlocks.push({ text: 'Vantiq Suitability:', style: 'subsectionHeader' });
                 analysisBlocks.push({ text: results.analysis.vantiqSuitability, style: 'bodyText' });
@@ -249,15 +277,152 @@ window.PDFGenerator = {
             }
 
             if (archBlocks.length > 0) {
+                // Add Linter / Architecture Review if available
+                if (results.linter && results.linter.findings && results.linter.findings.length > 0) {
+                    archBlocks.push({ text: 'Architecture Review Findings:', style: 'subsectionHeader' });
+                    const findings = results.linter.findings.map(f => {
+                        return { text: `[${f.severity || 'INFO'}] ${f.finding}: ${f.recommendation || ""}`, style: 'bodyText' };
+                    });
+                    archBlocks.push({ ul: findings, style: 'list' });
+                }
+
                 addSection([{ text: '3. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
             }
         }
 
         // ==========================================
-        // AGENT 6: IMPLEMENTATION PLAN
+        // AGENT 4: AI MODEL SELECTION
+        // ==========================================
+        if (results.aiModels && results.aiModels.models && results.aiModels.models.length > 0) {
+            addSection([{ text: '4. AI Model Recommendations', style: 'sectionHeader', pageBreak: 'before' }]);
+
+            const modelBody = [
+                [
+                    { text: 'Capability', style: 'tableHeader' },
+                    { text: 'Recommended Models', style: 'tableHeader' },
+                    { text: 'Justification', style: 'tableHeader' }
+                ]
+            ];
+
+            results.aiModels.models.forEach(m => {
+                modelBody.push([
+                    { text: m.capability || "", style: 'tableCell', bold: true },
+                    { text: (m.recommendations || []).join(', '), style: 'tableCell' },
+                    { text: m.justification || "", style: 'tableCell' }
+                ]);
+            });
+
+            addSection([
+                {
+                    table: {
+                        headerRows: 1,
+                        widths: ['25%', '30%', '45%'],
+                        body: modelBody
+                    },
+                    layout: 'lightHorizontalLines',
+                    margin: [0, 10, 0, 15]
+                }
+            ]);
+
+            if (results.aiModels.infrastructure) {
+                addSection([{ text: 'Infrastructure & Guardrails:', style: 'subsectionHeader' }]);
+                addSection([{ text: results.aiModels.infrastructure, style: 'bodyText' }]);
+            }
+        }
+
+        // ==========================================
+        // AGENT 5: EVENT SYSTEM FLOWS
+        // ==========================================
+        if (results.eventSystem && results.eventSystem.flows && results.eventSystem.flows.length > 0) {
+            addSection([{ text: '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
+
+            results.eventSystem.flows.forEach(f => {
+                addSection([
+                    { text: f.flowName || "Event Flow", style: 'subsectionHeader' },
+                    { text: f.description || "", style: 'bodyText' }
+                ]);
+
+                if (f.steps && f.steps.length > 0) {
+                    const stepList = f.steps.map(s => {
+                        return { text: `[${s.component || 'App'}] ${s.action || ""}`, style: 'bodyText' };
+                    });
+                    addSection([{ ol: stepList, style: 'list' }]);
+                }
+            });
+        }
+
+        // ==========================================
+        // AGENT 4b: AGENTIC AI GUIDE
+        // ==========================================
+        if (results.agenticGuide && results.agenticGuide.agents && results.agenticGuide.agents.length > 0) {
+            addSection([{ text: '6. Agentic AI Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
+
+            results.agenticGuide.agents.forEach(a => {
+                addSection([
+                    { text: a.agentName || "AI Agent", style: 'subsectionHeader' },
+                    { text: `Role: ${a.role || ""}`, style: 'bodyText', bold: true },
+                    { text: a.description || "", style: 'bodyText' }
+                ]);
+
+                if (a.tools && a.tools.length > 0) {
+                    addSection([{ text: 'Tools & Capabilities:', style: 'bodyText', bold: true, margin: [0, 5, 0, 2] }]);
+                    addSection([{ ul: a.tools, style: 'list' }]);
+                }
+            });
+        }
+
+        // ==========================================
+        // AGENT 10: COMPETITIVE ANALYSIS
+        // ==========================================
+        if (results.competitive) {
+            addSection([{ text: '7. Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }]);
+
+            if (results.competitive.marketLandscape) {
+                addSection([{ text: 'Market Landscape:', style: 'subsectionHeader' }]);
+                addSection([{ text: results.competitive.marketLandscape, style: 'bodyText' }]);
+            }
+
+            if (results.competitive.competitors && results.competitive.competitors.length > 0) {
+                const compBody = [
+                    [
+                        { text: 'Competitor / Approach', style: 'tableHeader' },
+                        { text: 'Strengths', style: 'tableHeader' },
+                        { text: 'Weaknesses / Gaps', style: 'tableHeader' }
+                    ]
+                ];
+                results.competitive.competitors.forEach(c => {
+                    compBody.push([
+                        { text: c.name || "", style: 'tableCell', bold: true },
+                        { text: (c.strengths || []).join(', '), style: 'tableCell' },
+                        { text: (c.weaknesses || []).join(', '), style: 'tableCell' }
+                    ]);
+                });
+
+                addSection([
+                    { text: 'Competitive Comparison:', style: 'subsectionHeader' },
+                    {
+                        table: {
+                            headerRows: 1,
+                            widths: ['30%', '35%', '35%'],
+                            body: compBody
+                        },
+                        layout: 'lightHorizontalLines',
+                        margin: [0, 5, 0, 15]
+                    }
+                ]);
+            }
+
+            if (results.competitive.differentiation && results.competitive.differentiation.length > 0) {
+                addSection([{ text: 'Vantiq Spark Differentiators:', style: 'subsectionHeader' }]);
+                addSection([{ ul: results.competitive.differentiation.map(d => ({ text: d, style: 'bodyText' })), style: 'list' }]);
+            }
+        }
+
+        // ==========================================
+        // FINAL SECTION: IMPLEMENTATION PLAN
         // ==========================================
         if (results.implementation && results.implementation.phases && results.implementation.phases.length > 0) {
-            addSection([{ text: '4. Implementation Plan', style: 'sectionHeader', pageBreak: 'before' }]);
+            addSection([{ text: '8. Implementation Roadmap', style: 'sectionHeader', pageBreak: 'before' }]);
 
             results.implementation.phases.forEach((p, idx) => {
                 const phaseBlocks = [];

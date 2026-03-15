@@ -13,6 +13,10 @@ window.Renderers = {
           <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin:8px 0">${data.domain}</div>
           <p style="font-size:13px;color:var(--text-secondary)">${data.summary}</p>
         </div>
+        <div class="glass-card accent-rose" style="animation-delay:0.04s; grid-column: span 2">
+          <div class="card-title"><span class="card-icon">🎯</span> Core Problem</div>
+          <p style="font-size:14px;color:var(--text-primary);margin-top:8px">${data.coreProblem}</p>
+        </div>
         <div class="glass-card accent-cyan" style="animation-delay:0.08s">
           <div class="card-title"><span class="card-icon">👥</span> Actors</div>
           <div class="tag-list">${(data.actors || []).map(a => `<span class="tag tag-cyan">${a}</span>`).join('')}</div>
@@ -32,6 +36,10 @@ window.Renderers = {
         <div class="glass-card accent-purple" style="animation-delay:0.4s">
           <div class="card-title"><span class="card-icon">🧩</span> Entities</div>
           <div class="tag-list">${(data.entities || []).map(e => `<span class="tag tag-purple">${e}</span>`).join('')}</div>
+        </div>
+        <div class="glass-card accent-green" style="animation-delay:0.48s; grid-column: span 3">
+          <div class="card-title"><span class="card-icon">🚀</span> Why Vantiq?</div>
+          <p style="font-size:14px;color:var(--text-primary);margin-top:8px; line-height: 1.5">${data.vantiqSuitability}</p>
         </div>
       </div>`;
   },

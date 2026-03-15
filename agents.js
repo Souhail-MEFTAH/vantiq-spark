@@ -80,6 +80,7 @@ You MUST respond with ONLY valid JSON matching this exact schema (no markdown, n
 {
   "domain": "string — specific industry domain",
   "domainIcon": "string — single emoji",
+  "coreProblem": "string — concise definition of the root challenge being solved",
   "actors": ["string array — 3-6 key actors/systems"],
   "entities": ["string array — 4-8 core domain entities"],
   "events": ["string array — 4-6 events in snake_case"],
@@ -87,7 +88,8 @@ You MUST respond with ONLY valid JSON matching this exact schema (no markdown, n
   "aiTasks": [
     { "task": "string — AI task name", "models": ["2-3 real model names"], "type": "string — AI category" }
   ],
-  "summary": "string — 2-3 sentence summary of the system"
+  "summary": "string — 2-3 sentence summary of the system",
+  "vantiqSuitability": "string — why Vantiq is the ideal platform for this specific problem"
 }`
   },
 
