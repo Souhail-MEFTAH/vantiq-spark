@@ -237,7 +237,7 @@
             </button>
           </div>
           <div id="historyGrid" style="display:flex; flex-direction:column; gap:16px; margin-top:20px;">
-            <p style="color:var(--text-secondary)">No history found.</p>
+            <p style="color:var(--text-secondary)" data-i18n="history-empty">No history found.</p>
           </div>
         </div>
 
@@ -543,16 +543,16 @@
               <option value="gpt-4o">GPT-4o</option>
               <option value="gpt-5.4" data-i18n="model-capable">GPT-5.4 (Most Capable)</option>
               <option value="gpt-5.2">GPT-5.2</option>
-              <option value="o3-mini">o3-mini (Reasoning)</option>
+              <option value="o3-mini">o3-mini <span data-i18n="model-reasoning">(Reasoning)</span></option>
             </select>
 
             <div class="input-label" style="margin-top:20px">🌐 <span data-i18n="settings-language">Language</span>
             </div>
             <select class="modal-input" id="langSelect" onchange="app.updateLanguage()">
-              <option value="en">English (Default)</option>
-              <option value="ko">한국어 (Korean)</option>
-              <option value="ja">日本語 (Japanese)</option>
-              <option value="ar">العربية (Arabic)</option>
+              <option value="en" data-i18n="lang-en">English</option>
+              <option value="ko" data-i18n="lang-ko">Korean</option>
+              <option value="ja" data-i18n="lang-ja">Japanese</option>
+              <option value="ar" data-i18n="lang-ar">Arabic</option>
             </select>
           </div>
           <div class="modal-footer">

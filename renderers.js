@@ -31,7 +31,7 @@ window.Renderers = {
         </div>
         <div class="glass-card accent-rose" style="animation-delay:0.32s">
           <div class="card-title"><span class="card-icon">🧠</span> <span data-i18n="label-ai-tasks">AI Tasks</span></div>
-          <ul class="data-list">${(data.aiTasks || []).map(t => `<li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">${t.task}</strong><br/><span style="font-size:11px">${t.type} — ${t.models.join(', ')}</span></div></li>`).join('')}</ul>
+          <ul class="data-list">${(data.aiTasks || []).map(t => `<li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">${t.task}</strong><br/><span style="font-size:11px"><span data-i18n="type-${t.type.toLowerCase()}">${t.type}</span> — ${t.models.join(', ')}</span></div></li>`).join('')}</ul>
         </div>
         <div class="glass-card accent-purple" style="animation-delay:0.4s">
           <div class="card-title"><span class="card-icon">🧩</span> <span data-i18n="label-entities">Entities</span></div>
@@ -60,7 +60,7 @@ window.Renderers = {
           <div>
             <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-primary)">${e.name}</span>
           </div>
-          <span class="tag tag-${e.type === 'Alert' ? 'rose' : e.type === 'Detection' ? 'warm' : e.type === 'Command' ? 'purple' : 'cyan'}">${e.type}</span>
+          <span class="tag tag-${e.type === 'Alert' ? 'rose' : e.type === 'Detection' ? 'warm' : e.type === 'Command' ? 'purple' : 'cyan'}" data-i18n="type-${e.type.toLowerCase()}">${e.type}</span>
         </div>
       </div>`).join('');
 
@@ -156,8 +156,8 @@ window.Renderers = {
             <div class="model-info">
               <div class="model-name">${rec.task}</div>
               <div class="model-meta">
-                <span class="tag tag-purple">${rec.type}</span>
-                <span class="tag tag-cyan">${rec.deployment.strategy}</span>
+                <span class="tag tag-purple" data-i18n="type-${rec.type.toLowerCase()}">${rec.type}</span>
+                <span class="tag tag-cyan" data-i18n="label-${rec.deployment.strategy.toLowerCase()}">${rec.deployment.strategy}</span>
               </div>
             </div>
           </div>
@@ -165,17 +165,17 @@ window.Renderers = {
           <div style="margin-top:16px">
             <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px" data-i18n="label-deployment">Deployment</div>
             <div class="card-grid">
-              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--text-accent)">Edge:</strong> ${rec.deployment.edge}</div>
-              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--brand-secondary)">Cloud:</strong> ${rec.deployment.cloud}</div>
+              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--text-accent)" data-i18n="label-edge">Edge</strong>: ${rec.deployment.edge}</div>
+              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--brand-secondary)" data-i18n="label-cloud">Cloud</strong>: ${rec.deployment.cloud}</div>
             </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">⏱️ Latency: <strong style="color:var(--brand-success)">${rec.deployment.latency}</strong></div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">⏱️ <span data-i18n="label-latency">Latency</span>: <strong style="color:var(--brand-success)">${rec.deployment.latency}</strong></div>
           </div>
           <div style="margin-top:16px">
             <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px" data-i18n="label-hardware">Hardware</div>
             <div class="tag-list">
-              <span class="tag tag-warm">Edge: ${rec.hardware.edge}</span>
-              <span class="tag tag-cyan">Cloud: ${rec.hardware.cloud}</span>
-              <span class="tag tag-purple">RAM: ${rec.hardware.memory}</span>
+              <span class="tag tag-warm"><span data-i18n="label-edge">Edge</span>: ${rec.hardware.edge}</span>
+              <span class="tag tag-cyan"><span data-i18n="label-cloud">Cloud</span>: ${rec.hardware.cloud}</span>
+              <span class="tag tag-purple"><span data-i18n="label-ram">RAM</span>: ${rec.hardware.memory}</span>
             </div>
           </div>
         </div>`;
@@ -205,8 +205,8 @@ window.Renderers = {
         <div class="card-title"><span class="card-icon">🤖</span> ${a.name}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin:6px 0">${a.role}</p>
         <div class="tag-list" style="margin:8px 0">
-          <span class="tag tag-purple">LLM: ${a.llm}</span>
-          <span class="tag tag-cyan">${a.memoryType}</span>
+          <span class="tag tag-purple"><span data-i18n="label-llm">LLM</span>: ${a.llm}</span>
+          <span class="tag tag-cyan" data-i18n="label-${a.memoryType.toLowerCase()}">${a.memoryType}</span>
           <span class="tag tag-green">${a.vantiqComponent}</span>
         </div>
         <div style="margin-top:10px">
@@ -231,7 +231,7 @@ window.Renderers = {
           <td><span class="tag tag-purple">${m.provider}</span></td>
           <td>${m.bestFor}</td>
           <td>${m.contextWindow}</td>
-          <td><span class="tag tag-${m.costTier === 'Low' ? 'green' : m.costTier === 'Medium' ? 'warm' : 'rose'}">${m.costTier}</span></td>
+          <td><span class="tag tag-${m.costTier === 'Low' ? 'green' : m.costTier === 'Medium' ? 'warm' : 'rose'}" data-i18n="cost-${m.costTier.toLowerCase()}">${m.costTier}</span></td>
           <td style="font-size:12px;color:var(--text-tertiary)">${m.vantiqSource}</td>
         </tr>`).join('');
 
@@ -286,7 +286,7 @@ window.Renderers = {
       <div class="glass-card" style="padding:14px;margin-bottom:8px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text-primary)">${s.name}</span>
-          <span class="tag tag-${s.type === 'Alert' ? 'rose' : s.type === 'Detection' ? 'warm' : 'cyan'}">${s.type}</span>
+          <span class="tag tag-${s.type === 'Alert' ? 'rose' : s.type === 'Detection' ? 'warm' : 'cyan'}" data-i18n="type-${s.type.toLowerCase()}">${s.type}</span>
         </div>
         <div class="code-block" style="margin-top:8px;font-size:11px">${JSON.stringify(s.schema, null, 2)}</div>
       </div>`).join('');
@@ -348,8 +348,8 @@ window.Renderers = {
         <div class="card-title"><span class="card-icon">⚙️</span> ${s.name}</div>
         <p style="font-size:12px;color:var(--text-secondary);margin:6px 0">${s.description}</p>
         <div class="tag-list" style="margin:8px 0">
-          <span class="tag tag-cyan">Input: ${s.inputEvent}</span>
-          <span class="tag tag-green">Output: ${s.outputEvent}</span>
+          <span class="tag tag-cyan"><span data-i18n="label-input">Input</span>: ${s.inputEvent}</span>
+          <span class="tag tag-green"><span data-i18n="label-output">Output</span>: ${s.outputEvent}</span>
         </div>
         <div class="pseudo-code-block">
           <div class="pseudo-title"><span data-i18n="label-pseudo-code">Pseudo-Code</span> — ${s.name}</div>
@@ -409,7 +409,7 @@ window.Renderers = {
   renderDemo(data, container) {
     const scenariosHTML = (data.scenarios || []).map(sc => {
       const stepsHTML = (sc.steps || []).map(st => `
-        <li><div class="step-content"><strong>${st.title}</strong>${st.description}<br/><span style="font-size:11px;color:var(--brand-success)">✓ Expected: ${st.expected}</span></div></li>`).join('');
+        <li><div class="step-content"><strong>${st.title}</strong>${st.description}<br/><span style="font-size:11px;color:var(--brand-success)">✓ <span data-i18n="label-expected">Expected</span>: ${st.expected}</span></div></li>`).join('');
 
       const eventsHTML = (sc.simulatedEvents || []).map(ev => `
         <div class="glass-card" style="padding:12px;margin-bottom:8px">
@@ -446,7 +446,7 @@ window.Renderers = {
   renderTraining(data, container) {
     const labsHTML = (data.labs || []).map((lab, li) => {
       const stepsHTML = (lab.steps || []).map(st => `
-        <li><div class="step-content"><strong>${st.instruction}</strong>${st.detail}<br/><span style="font-size:11px;color:var(--brand-warning)">💡 Hint: ${st.hint}</span></div></li>`).join('');
+        <li><div class="step-content"><strong>${st.instruction}</strong>${st.detail}<br/><span style="font-size:11px;color:var(--brand-warning)">💡 <span data-i18n="label-hint">Hint</span>: ${st.hint}</span></div></li>`).join('');
 
       const objHTML = (lab.objectives || []).map(o => `<li><span class="list-icon">◆</span>${o}</li>`).join('');
 
@@ -456,7 +456,7 @@ window.Renderers = {
             <h3>📚 ${lab.title}</h3>
             <p>${lab.description}</p>
             <div class="tag-list" style="margin-top:8px">
-              <span class="tag tag-${lab.difficulty === 'Beginner' ? 'green' : lab.difficulty === 'Intermediate' ? 'warm' : 'rose'}">${lab.difficulty}</span>
+              <span class="tag tag-${lab.difficulty === 'Beginner' ? 'green' : lab.difficulty === 'Intermediate' ? 'warm' : 'rose'}" data-i18n="diff-${lab.difficulty.toLowerCase()}">${lab.difficulty}</span>
               <span class="tag tag-cyan">⏱️ ${lab.duration}</span>
             </div>
           </div>
@@ -513,10 +513,10 @@ window.Renderers = {
           <div class="glass-card" style="margin-bottom: var(--space-3); border-left: 4px solid ${badgeColor}">
             <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
               <strong style="color:var(--text-primary)">${escapeHtml(warning.component)}</strong>
-              <span style="background:${badgeColor}; color:white; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600;">${escapeHtml(warning.severity)}</span>
+              <span style="background:${badgeColor}; color:white; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600;" data-i18n="sev-${warning.severity.toLowerCase()}">${escapeHtml(warning.severity)}</span>
             </div>
-            <p style="margin:0 0 8px 0; font-size:14px; color:var(--text-secondary);"><strong>Issue:</strong> ${escapeHtml(warning.issue)}</p>
-            <p style="margin:0; font-size:14px; color:var(--text-secondary);"><strong>Fix:</strong> ${escapeHtml(warning.recommendation)}</p>
+            <p style="margin:0 0 8px 0; font-size:14px; color:var(--text-secondary);"><strong data-i18n="label-issue">Issue</strong>: ${escapeHtml(warning.issue)}</p>
+            <p style="margin:0; font-size:14px; color:var(--text-secondary);"><strong data-i18n="label-fix">Fix</strong>: ${escapeHtml(warning.recommendation)}</p>
           </div>
         `;
     });
@@ -550,11 +550,11 @@ window.Renderers = {
             <span class="card-icon">${isVantiq ? '🏆' : '🏢'}</span> ${escapeHtml(c.name)}${badge}
           </div>
           <span class="tag tag-warm" style="margin:4px 0 8px">${escapeHtml(c.category || '')}</span>
-          <p style="font-size:12px;color:var(--text-secondary);margin:6px 0"><strong>Best for:</strong> ${escapeHtml(c.bestFor || '')}</p>
-          <p style="font-size:12px;color:var(--text-tertiary);margin:4px 0"><strong>Pricing:</strong> ${escapeHtml(c.pricing || '')}</p>
+          <p style="font-size:12px;color:var(--text-secondary);margin:6px 0"><strong data-i18n="label-best-for">Best for</strong>: ${escapeHtml(c.bestFor || '')}</p>
+          <p style="font-size:12px;color:var(--text-tertiary);margin:4px 0"><strong data-i18n="label-pricing">Pricing</strong>: ${escapeHtml(c.pricing || '')}</p>
           <div style="display:flex;gap:16px;margin-top:10px">
-            <div style="flex:1"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600">Strengths</div><ul style="padding-left:16px;margin:0">${strengthsHTML}</ul></div>
-            <div style="flex:1"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600">Weaknesses</div><ul style="padding-left:16px;margin:0">${weaknessesHTML}</ul></div>
+            <div style="flex:1"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600" data-i18n="label-strengths">Strengths</div><ul style="padding-left:16px;margin:0">${strengthsHTML}</ul></div>
+            <div style="flex:1"><div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px;font-weight:600" data-i18n="label-weaknesses">Weaknesses</div><ul style="padding-left:16px;margin:0">${weaknessesHTML}</ul></div>
           </div>
         </div>`;
     }).join('');
@@ -589,7 +589,7 @@ window.Renderers = {
         <div class="glass-card" style="padding:14px;margin-bottom:8px">
           <div style="font-weight:600;font-size:14px;color:var(--brand-primary);margin-bottom:4px">✦ ${escapeHtml(d.feature)}</div>
           <p style="font-size:12px;color:var(--text-primary);margin:4px 0">${escapeHtml(d.description)}</p>
-          <p style="font-size:11px;color:var(--text-tertiary);margin:4px 0"><em>Competitor gap:</em> ${escapeHtml(d.competitorGap)}</p>
+          <p style="font-size:11px;color:var(--text-tertiary);margin:4px 0"><em data-i18n="label-comp-gap">Competitor gap</em>: ${escapeHtml(d.competitorGap)}</p>
         </div>`).join('');
       html += `
         <div class="glass-card accent-green" style="margin-top:20px">

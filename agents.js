@@ -558,7 +558,7 @@ function buildUserMessage(problemText, upstreamContext = {}, refinement = "", pr
     ar: "Arabic (Standard Classical)"
   };
   const targetLang = langNames[language] || "English";
-  msg += `\nMANDATORY LANGUAGE INSTRUCTION: You MUST generate all human-readable descriptions, summaries, justifications, and name fields in ${targetLang}. However, you MUST keep all functional JSON keys and technical identifiers (like snake_case event names) in English as defined in the schema. \n`;
+  msg += `\nMANDATORY LANGUAGE INSTRUCTION: You MUST generate all human-readable descriptions, summaries, justifications, and name fields (including names for events, entities, actors, and services) in ${targetLang}. Technical JSON keys must remain in English as defined in the schema. \n`;
 
   if (upstreamContext.analysis) {
     msg += `\nAGENT 1 OUTPUT(Problem Analysis): \n${JSON.stringify(upstreamContext.analysis)} \n`;

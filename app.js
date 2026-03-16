@@ -148,6 +148,19 @@ const I18N = {
         "model-mini": "GPT-4.1 Mini (Faster)",
         "model-nano": "GPT-4.1 Nano (Fastest)",
         "model-capable": "GPT-5.4 (Most Capable)",
+        "model-reasoning": "Reasoning",
+        "lang-en": "English",
+        "lang-ko": "Korean",
+        "lang-ja": "Japanese",
+        "lang-ar": "Arabic",
+        "label-default": "Default",
+        "history-empty": "No history found.",
+        "chat-welcome-1": "Hi! I'm the <strong>Vantiq Usecase Assistant</strong>. I can help you brainstorm and design real-time, event-driven applications on the Vantiq platform.",
+        "chat-welcome-2": "Try asking me things like:",
+        "chat-example-1": "How can Vantiq help with predictive maintenance?",
+        "chat-example-2": "Design a smart building energy optimization system",
+        "chat-example-3": "What Vantiq features support real-time video analytics?",
+        "btn-clear": "Clear",
         "label-domain": "Domain",
         "label-core-problem": "Core Problem",
         "label-actors": "Actors",
@@ -220,6 +233,40 @@ const I18N = {
         "label-pseudo-code": "Pseudo-Code",
         "label-api-endpoints": "API Endpoints:",
         "th-field": "Field",
+        "label-edge": "Edge",
+        "label-cloud": "Cloud",
+        "label-hybrid": "Hybrid",
+        "label-latency": "Latency",
+        "label-ram": "RAM",
+        "label-llm": "LLM",
+        "label-input": "Input",
+        "label-output": "Output",
+        "label-expected": "Expected",
+        "label-hint": "Hint",
+        "label-issue": "Issue",
+        "label-fix": "Fix",
+        "label-best-for": "Best for",
+        "label-pricing": "Pricing",
+        "label-strengths": "Strengths",
+        "label-weaknesses": "Weaknesses",
+        "label-comp-gap": "Competitor gap",
+        "type-alert": "Alert",
+        "type-detection": "Detection",
+        "type-telemetry": "Telemetry",
+        "type-command": "Command",
+        "type-domain": "Domain",
+        "type-actor": "Actor",
+        "type-entity": "Entity",
+        "diff-beginner": "Beginner",
+        "diff-intermediate": "Intermediate",
+        "diff-advanced": "Advanced",
+        "cost-low": "Low",
+        "cost-medium": "Medium",
+        "cost-high": "High",
+        "sev-critical": "Critical",
+        "sev-high": "High",
+        "sev-medium": "Medium",
+        "sev-low": "Low",
         "confirm-clear-history": "Are you sure you want to clear your entire session history? This cannot be undone.",
         "status-generating-pdf": "📄 Generating PDF Document...",
         "untitled-project": "Untitled AI Project",
@@ -388,7 +435,12 @@ const I18N = {
         "model-recommended": "GPT-4.1 (권장)",
         "model-mini": "GPT-4.1 미니 (빠름)",
         "model-nano": "GPT-4.1 나노 (가장 빠름)",
-        "model-capable": "GPT-5.4 (가장 강력함)",
+        "model-capable": "GPT-5.4 (가장 유능함)",
+        "model-reasoning": "추론",
+        "lang-en": "영어",
+        "lang-ko": "한국어",
+        "lang-ja": "일본어",
+        "lang-ar": "아랍어",
         "label-domain": "도메인",
         "label-core-problem": "핵심 문제",
         "label-actors": "행위자",
@@ -461,6 +513,40 @@ const I18N = {
         "label-pseudo-code": "의사 코드",
         "label-api-endpoints": "API 엔드포인트:",
         "th-field": "필드",
+        "label-edge": "엣지",
+        "label-cloud": "클라우드",
+        "label-hybrid": "하이브리드",
+        "label-latency": "지연 시간",
+        "label-ram": "RAM",
+        "label-llm": "LLM",
+        "label-input": "입력",
+        "label-output": "출력",
+        "label-expected": "예상 결과",
+        "label-hint": "힌트",
+        "label-issue": "문제",
+        "label-fix": "해결책",
+        "label-best-for": "최적 용도",
+        "label-pricing": "가격 정책",
+        "label-strengths": "강점",
+        "label-weaknesses": "약점",
+        "label-comp-gap": "경쟁사 격차",
+        "type-alert": "알림",
+        "type-detection": "감지",
+        "type-telemetry": "텔레메트리",
+        "type-command": "명령",
+        "type-domain": "도메인",
+        "type-actor": "행위자",
+        "type-entity": "엔티티",
+        "diff-beginner": "초급",
+        "diff-intermediate": "중급",
+        "diff-advanced": "고급",
+        "cost-low": "낮음",
+        "cost-medium": "중간",
+        "cost-high": "높음",
+        "sev-critical": "심각",
+        "sev-high": "높음",
+        "sev-medium": "중간",
+        "sev-low": "낮음",
         "confirm-clear-history": "전체 세션 기록을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
         "status-generating-pdf": "📄 PDF 문서 생성 중...",
         "untitled-project": "제목 없는 AI 프로젝트",
@@ -566,6 +652,8 @@ const I18N = {
         "settings-language": "言語",
         "btn-cancel": "キャンセル",
         "btn-save": "設定を保存",
+        "label-default": "デフォルト",
+        "history-empty": "履歴はありません。",
         "title-history": "セッション履歴",
         "title-export": "ソリューションをPDFで書き出す",
         "title-settings": "設定",
@@ -630,6 +718,11 @@ const I18N = {
         "model-mini": "GPT-4.1 Mini (高速)",
         "model-nano": "GPT-4.1 Nano (最速)",
         "model-capable": "GPT-5.4 (最高性能)",
+        "model-reasoning": "推論",
+        "lang-en": "英語",
+        "lang-ko": "韓国語",
+        "lang-ja": "日本語",
+        "lang-ar": "アラビア語",
         "label-domain": "ドメイン",
         "label-core-problem": "核心的な課題",
         "label-actors": "アクター",
@@ -869,6 +962,19 @@ const I18N = {
         "model-mini": "GPT-4.1 Mini (أسرع)",
         "model-nano": "GPT-4.1 Nano (الأسرع)",
         "model-capable": "GPT-5.4 (الأكثر قدرة)",
+        "model-reasoning": "التفكير الاستنتاجي",
+        "lang-en": "الإنجليزية",
+        "lang-ko": "الكورية",
+        "lang-ja": "اليابانية",
+        "lang-ar": "العربية",
+        "label-default": "الافتراضي",
+        "history-empty": "لم يتم العثور على سجل.",
+        "chat-welcome-1": "مرحباً! أنا <strong>مساعد حالات استخدام فانتيك</strong>. يمكنني مساعدتك في العصف الذهني وتصميم تطبيقات تعتمد على الأحداث في الوقت الفعلي على منصة فانتيك.",
+        "chat-welcome-2": "جرب سؤالي عن أشياء مثل:",
+        "chat-example-1": "كيف يمكن لفانتيك المساعدة في الصيانة التنبؤية؟",
+        "chat-example-2": "تصميم نظام لتحسين طاقة المباني الذكية",
+        "chat-example-3": "ما هي ميزات فانتيك التي تدعم تحليلات الفيديو في الوقت الفعلي؟",
+        "btn-clear": "مسح",
         "label-domain": "النطاق",
         "label-core-problem": "المشكلة الجوهرية",
         "label-actors": "جهات الاتصال",
@@ -941,6 +1047,40 @@ const I18N = {
         "label-pseudo-code": "كود تجريبي",
         "label-api-endpoints": "نقاط نهاية API:",
         "th-field": "الحقل",
+        "label-edge": "الحافة",
+        "label-cloud": "السحابة",
+        "label-hybrid": "هجين",
+        "label-latency": "زمن التأخير",
+        "label-ram": "ذاكرة الوصول العشوائي",
+        "label-llm": "نموذج لغوي كبير",
+        "label-input": "المدخلات",
+        "label-output": "المخرجات",
+        "label-expected": "النتيجة المتوقعة",
+        "label-hint": "تلميح",
+        "label-issue": "المشكلة",
+        "label-fix": "الإصلاح",
+        "label-best-for": "الأفضل لـ",
+        "label-pricing": "التسعير",
+        "label-strengths": "نقاط القوة",
+        "label-weaknesses": "نقاط الضعف",
+        "label-comp-gap": "فجوة المنافسين",
+        "type-alert": "تنبيه",
+        "type-detection": "كشف",
+        "type-telemetry": "تتبع عن بعد",
+        "type-command": "أمر",
+        "type-domain": "نطاق",
+        "type-actor": "جهة فاعلة",
+        "type-entity": "كيان",
+        "diff-beginner": "مبتدئ",
+        "diff-intermediate": "متوسط",
+        "diff-advanced": "متقدم",
+        "cost-low": "منخفض",
+        "cost-medium": "متوسط",
+        "cost-high": "مرتفع",
+        "sev-critical": "حرج",
+        "sev-high": "مرتفع",
+        "sev-medium": "متوسط",
+        "sev-low": "منخفض",
         "confirm-clear-history": "هل أنت متأكد أنك تريد مسح سجل الجلسات بالكامل؟ لا يمكن التراجع عن هذا الإجراء.",
         "status-generating-pdf": "📄 جاري إنشاء مستند PDF...",
         "untitled-project": "مشروع ذكاء اصطناعي بدون عنوان",
@@ -1110,7 +1250,7 @@ function saveSettings() {
 }
 
 // ── Session History ──
-const HISTORY_KEY = 'vantiq_studio_history';
+const HISTORY_KEY = 'vantiq_spark_history';
 
 function loadHistory() {
     try {
@@ -1154,7 +1294,7 @@ function renderHistory() {
     if (!grid) return;
 
     if (history.length === 0) {
-        grid.innerHTML = `<p style="color:var(--text-secondary)">${translations['history-empty'] || 'No history found.'}</p>`;
+        grid.innerHTML = `<p style="color:var(--text-secondary)" data-i18n="history-empty">${I18N[state.language]['history-empty'] || 'No history found.'}</p>`;
         return;
     }
 
@@ -1841,16 +1981,17 @@ function clearChat() {
         <div class="chat-message assistant">
             <div class="chat-avatar">🤖</div>
             <div class="chat-bubble">
-                <p>Hi! I'm the <strong>Vantiq Usecase Assistant</strong>. I can help you brainstorm and design real-time, event-driven applications on the Vantiq platform.</p>
-                <p style="margin-top:8px">Try asking me things like:</p>
+                <p data-i18n="chat-welcome-1">${I18N[state.language]['chat-welcome-1'] || I18N['en']['chat-welcome-1']}</p>
+                <p style="margin-top:8px" data-i18n="chat-welcome-2">${I18N[state.language]['chat-welcome-2'] || I18N['en']['chat-welcome-2']}</p>
                 <ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">
-                    <li>How can Vantiq help with predictive maintenance?</li>
-                    <li>Design a smart building energy optimization system</li>
-                    <li>What Vantiq features support real-time video analytics?</li>
+                    <li data-i18n="chat-example-1">${I18N[state.language]['chat-example-1'] || I18N['en']['chat-example-1']}</li>
+                    <li data-i18n="chat-example-2">${I18N[state.language]['chat-example-2'] || I18N['en']['chat-example-2']}</li>
+                    <li data-i18n="chat-example-3">${I18N[state.language]['chat-example-3'] || I18N['en']['chat-example-3']}</li>
                 </ul>
             </div>
         </div>`;
     chatMessageId = 0;
+    localizeUI(); // Ensure new elements are localized
 }
 
 // Bind Enter key on chat input
