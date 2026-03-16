@@ -38,12 +38,175 @@ const EXAMPLES = [
     "Design a smart building energy optimization system that uses occupancy sensors, weather data, and HVAC controls to minimize energy consumption while maintaining comfort levels."
 ];
 
+// State is declared below in the I18N section
+
+// ── I18N Translations ──
+const I18N = {
+    en: {
+        "app-subtitle": "Solution Designer",
+        "nav-assistant": "Assistant",
+        "nav-usecase": "Usecase Assistant",
+        "nav-design": "Design",
+        "nav-input": "Problem Input",
+        "nav-analysis": "Problem Analysis",
+        "nav-domain": "Domain Model",
+        "nav-architecture": "Architecture",
+        "nav-architecture-tab": "Architecture",
+        "nav-aimodels": "AI Models",
+        "nav-agentic": "Agentic AI Guide",
+        "nav-events": "Event System",
+        "nav-build": "Build",
+        "nav-implementation": "Implementation",
+        "nav-diagrams": "Diagrams",
+        "nav-enablement": "Enablement",
+        "nav-demo": "Demo Scenarios",
+        "nav-training": "Training Labs",
+        "nav-strategy": "Strategy",
+        "nav-competitive": "Competitive Analysis",
+        "status-configure": "Configure API Key",
+        "welcome-description": "Describe your problem and our AI agents will generate a complete system architecture, implementation scaffolding, demo scenarios, and training labs — all in one workflow.",
+        "problem-label": "Problem Description",
+        "btn-generate": "Generate Solution",
+        "btn-clear": "Clear",
+        "examples-label": "Try an example",
+        "chat-welcome-1": "Hi! I'm the <strong>Vantiq Usecase Assistant</strong>. I can help you brainstorm and design real-time, event-driven applications on the Vantiq platform.",
+        "chat-welcome-2": "Try asking me things like:",
+        "chat-example-1": "How can Vantiq help with predictive maintenance?",
+        "chat-example-2": "Design a smart building energy optimization system",
+        "chat-example-3": "What Vantiq features support real-time video analytics?",
+        "history-title": "Session History",
+        "history-subtitle": "Resume your previous AI generation sessions",
+        "settings-model": "Model",
+        "settings-language": "Language",
+        "btn-cancel": "Cancel",
+        "btn-save": "Save Settings"
+    },
+    ko: {
+        "app-subtitle": "솔루션 디자이너",
+        "nav-assistant": "어시스턴트",
+        "nav-usecase": "유스케이스 어시스턴트",
+        "nav-design": "디자인",
+        "nav-input": "문제 입력",
+        "nav-analysis": "문제 분석",
+        "nav-domain": "도메인 모델",
+        "nav-architecture": "아키텍처",
+        "nav-architecture-tab": "아키텍처",
+        "nav-aimodels": "AI 모델",
+        "nav-agentic": "에이전틱 AI 가이드",
+        "nav-events": "이벤트 시스템",
+        "nav-build": "빌드",
+        "nav-implementation": "구현",
+        "nav-diagrams": "다이어그램",
+        "nav-enablement": "활성화",
+        "nav-demo": "데모 시나리오",
+        "nav-training": "교육 랩",
+        "nav-strategy": "전략",
+        "nav-competitive": "경쟁 분석",
+        "status-configure": "API 키 설정",
+        "welcome-description": "문제를 설명하면 AI 에이전트가 전체 시스템 아키텍처, 구현 스캐폴딩, 데모 시나리오 및 교육 랩을 하나의 워크플로우로 생성합니다.",
+        "problem-label": "문제 설명",
+        "btn-generate": "솔루션 생성",
+        "btn-clear": "지우기",
+        "examples-label": "예시 시도",
+        "chat-welcome-1": "안녕하세요! 저는 <strong>Vantiq 유스케이스 어시스턴트</strong>입니다. Vantiq 플랫폼에서 실시간 이벤트 기반 애플리케이션을 브레인스토밍하고 디자인하는 것을 도와드릴 수 있습니다.",
+        "chat-welcome-2": "다음과 같이 질문해 보세요:",
+        "chat-example-1": "Vantiq이 예측 유지보수에 어떻게 도움이 되나요?",
+        "chat-example-2": "스마트 빌딩 에너지 최적화 시스템 설계",
+        "chat-example-3": "실시간 비디오 분석을 지원하는 Vantiq 기능은 무엇인가요?",
+        "history-title": "세션 기록",
+        "history-subtitle": "이전 AI 생성 세션 재개",
+        "settings-model": "모델",
+        "settings-language": "언어",
+        "btn-cancel": "취소",
+        "btn-save": "설정 저장"
+    },
+    ja: {
+        "app-subtitle": "ソリューションデザイナー",
+        "nav-assistant": "アシスタント",
+        "nav-usecase": "ユースケースアシスタント",
+        "nav-design": "デザイン",
+        "nav-input": "問題入力",
+        "nav-analysis": "問題分析",
+        "nav-domain": "ドメインモデル",
+        "nav-architecture": "アーキテクチャ",
+        "nav-architecture-tab": "アーキテクチャ",
+        "nav-aimodels": "AIモデル",
+        "nav-agentic": "エージェンティックAIガイド",
+        "nav-events": "イベントシステム",
+        "nav-build": "ビルド",
+        "nav-implementation": "実装",
+        "nav-diagrams": "図面",
+        "nav-enablement": "イネーブルメント",
+        "nav-demo": "デモシナリオ",
+        "nav-training": "トレーニングラボ",
+        "nav-strategy": "戦略",
+        "nav-competitive": "競合分析",
+        "status-configure": "APIキーを設定",
+        "welcome-description": "問題を説明すると、AIエージェントが完全なシステムアーキテクチャ、実装スキャフォールディング、デモシナリオ、トレーニングラボを1つのワークフローで生成します。",
+        "problem-label": "問題の説明",
+        "btn-generate": "ソリューションを生成",
+        "btn-clear": "クリア",
+        "examples-label": "例を試す",
+        "chat-welcome-1": "こんにちは！私は <strong>Vantiqユースケースアシスタント</strong>です。Vantiqプラットフォームでのリアルタイムなイベント駆動型アプリケーションのブレインストーミングと設計をお手伝いします。",
+        "chat-welcome-2": "次のように聞いてみてください：",
+        "chat-example-1": "Vantiqは予兆保全にどのように役立ちますか？",
+        "chat-example-2": "スマートビルのエネルギー最適化システムを設計して",
+        "chat-example-3": "リアルタイムビデオ分析をサポートするVantiqの機能は何ですか？",
+        "history-title": "セッション履歴",
+        "history-subtitle": "以前のAI生成セッションを再開",
+        "settings-model": "モデル",
+        "settings-language": "言語",
+        "btn-cancel": "キャンセル",
+        "btn-save": "設定を保存"
+    },
+    ar: {
+        "app-subtitle": "مصمم الحلول",
+        "nav-assistant": "المساعد",
+        "nav-usecase": "مساعد حالات الاستخدام",
+        "nav-design": "التصميم",
+        "nav-input": "مدخلات المشكلة",
+        "nav-analysis": "تحليل المشكلة",
+        "nav-domain": "نموذج النطاق",
+        "nav-architecture": "البنية التحتية",
+        "nav-architecture-tab": "البنية",
+        "nav-aimodels": "نماذج الذكاء الاصطناعي",
+        "nav-agentic": "دليل الذكاء الاصطناعي الوكيل",
+        "nav-events": "نظام الأحداث",
+        "nav-build": "البناء",
+        "nav-implementation": "التنفيذ",
+        "nav-diagrams": "المخططات",
+        "nav-enablement": "التمكين",
+        "nav-demo": "سيناريوهات العرض",
+        "nav-training": "مختبرات التدريب",
+        "nav-strategy": "الاستراتيجية",
+        "nav-competitive": "التحليل التنافسي",
+        "status-configure": "تكوين مفتاح API",
+        "welcome-description": "صف مشكلتك وسيقوم وكلاء الذكاء الاصطناعي لدينا بإنشاء بنية نظام كاملة، وهياكل تنفيذ، وسيناريوهات عرض، ومختبرات تدريب - كل ذلك في سير عمل واحد.",
+        "problem-label": "وصف المشكلة",
+        "btn-generate": "إنشاء الحل",
+        "btn-clear": "مسح",
+        "examples-label": "جرب مثالاً",
+        "chat-welcome-1": "مرحباً! أنا **مساعد حالات استخدام فانتيك**. يمكنني مساعدتك في العصف الذهني وتصميم تطبيقات تعتمد على الأحداث في الوقت الفعلي على منصة فانتيك.",
+        "chat-welcome-2": "حاول سؤالي عن أشياء مثل:",
+        "chat-example-1": "كيف يمكن لـ فانتيك المساعدة في الصيانة التنبؤية؟",
+        "chat-example-2": "تصميم نظام تحسين طاقة المباني الذكية",
+        "chat-example-3": "ما هي ميزات فانتيك التي تدعم تحليلات الفيديو في الوقت الفعلي؟",
+        "history-title": "سجل الجلسات",
+        "history-subtitle": "استئناف جلسات الإنشاء السابقة",
+        "settings-model": "النموذج",
+        "settings-language": "اللغة",
+        "btn-cancel": "إلغاء",
+        "btn-save": "حفظ الإعدادات"
+    }
+};
+
 // ── App State ──
 const state = {
     currentPanel: 'input',
     results: {},
     problemText: '',
-    generating: false
+    generating: false,
+    language: localStorage.getItem('vantiq_spark_lang') || 'en'
 };
 
 // ── Status Bar ──
@@ -52,10 +215,58 @@ function updateStatus() {
     const text = document.getElementById('statusText');
     if (aiEngine.hasApiKey()) {
         dot.className = 'status-dot connected';
-        text.textContent = `${aiEngine.model} connected`;
+        const lang = state.language || 'en';
+        const connectedLabel = lang === 'ko' ? '연결됨' : lang === 'ja' ? '接続済み' : lang === 'ar' ? 'متصل' : 'connected';
+        text.textContent = `${aiEngine.model} ${connectedLabel}`;
     } else {
         dot.className = 'status-dot disconnected';
-        text.textContent = 'Configure API Key';
+        text.setAttribute('data-i18n', 'status-configure');
+        localizeUI();
+    }
+}
+
+// ── Internationalization ──
+function localizeUI() {
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
+
+    // Update RTL/LTR
+    document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+
+    // Update all elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[key]) {
+            el.innerHTML = translations[key];
+        }
+    });
+
+    // Update dynamic placeholders
+    const problemInput = document.getElementById('problemInput');
+    if (problemInput) {
+        if (lang === 'ko') problemInput.placeholder = "실시간 AI 시스템 문제를 설명하세요...";
+        else if (lang === 'ja') problemInput.placeholder = "リアルタイムAIシステムの問題を説明してください...";
+        else if (lang === 'ar') problemInput.placeholder = "صف مشكلة نظام الذكاء الاصطناعي في الوقت الفعلي...";
+        else problemInput.placeholder = "Describe your real-time AI system problem...";
+    }
+
+    const chatInput = document.getElementById('chatInput');
+    if (chatInput) {
+        if (lang === 'ko') chatInput.placeholder = "Vantiq 유스케이스, 아키텍처 등에 대해 문의하세요...";
+        else if (lang === 'ja') chatInput.placeholder = "Vantiqのユースケースやアーキテクチャについて質問してください...";
+        else if (lang === 'ar') chatInput.placeholder = "اسأل عن حالات استخدام فانتيك، الهندسة المعمارية...";
+        else chatInput.placeholder = "Ask about Vantiq use cases, architecture, best practices...";
+    }
+}
+
+function updateLanguage() {
+    const langSelect = document.getElementById('langSelect');
+    if (langSelect) {
+        state.language = langSelect.value;
+        localStorage.setItem('vantiq_spark_lang', state.language);
+        localizeUI();
+        updateStatus();
     }
 }
 
@@ -64,8 +275,10 @@ function showSettings() {
     const modal = document.getElementById('settingsModal');
     const keyInput = document.getElementById('apiKeyInput');
     const modelSelect = document.getElementById('modelSelect');
+    const langSelect = document.getElementById('langSelect');
     keyInput.value = aiEngine.apiKey || '';
     modelSelect.value = aiEngine.model || 'gpt-4.1';
+    if (langSelect) langSelect.value = state.language || 'en';
     modal.classList.add('visible');
     keyInput.focus();
 }
@@ -79,7 +292,7 @@ function saveSettings() {
     const model = document.getElementById('modelSelect').value;
     aiEngine.setApiKey(key);
     aiEngine.setModel(model);
-    updateStatus();
+    updateLanguage(); // This also calls updateStatus/localizeUI
     hideSettings();
 }
 
@@ -375,7 +588,7 @@ async function generate() {
     try {
         // ── Phase 1: Agent 1 (no dependencies) ──
         updatePipelineStep('interpreter', 'active');
-        state.results.analysis = await Agents.problemInterpreter(text);
+        state.results.analysis = await Agents.problemInterpreter(text, "", null, state.language);
         Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
         updatePipelineStep('interpreter', 'completed');
         enableNav('analysis');
@@ -387,8 +600,8 @@ async function generate() {
         document.getElementById('generatingAgentName').textContent = '🧩 Agent 2 + 🤖 Agent 4 (parallel)';
 
         const [domainResult, aiResult] = await Promise.all([
-            Agents.domainModelGenerator(text, state.results.analysis),
-            Agents.aiModelAdvisor(text, state.results.analysis)
+            Agents.domainModelGenerator(text, state.results.analysis, "", null, state.language),
+            Agents.aiModelAdvisor(text, state.results.analysis, "", null, state.language)
         ]);
 
         state.results.domainModel = domainResult;
@@ -408,8 +621,8 @@ async function generate() {
         document.getElementById('generatingAgentName').textContent = '🏗️ Agent 3 + ⚡ Agent 5 (parallel)';
 
         const [archResult, eventsResult] = await Promise.all([
-            Agents.architectureGenerator(text, state.results.analysis, state.results.domainModel),
-            Agents.eventSystemDesigner(text, state.results.analysis, state.results.domainModel)
+            Agents.architectureGenerator(text, state.results.analysis, state.results.domainModel, "", null, state.language),
+            Agents.eventSystemDesigner(text, state.results.analysis, state.results.domainModel, "", null, state.language)
         ]);
 
         state.results.architecture = archResult;
@@ -426,7 +639,7 @@ async function generate() {
         updatePipelineStep('agentic', 'active');
         document.getElementById('generatingAgentName').textContent = '🧠 Agent 4b — Agentic AI Pattern Guide';
 
-        const agenticResult = await Agents.agenticGuide(text, state.results.analysis, state.results.domainModel, state.results.architecture);
+        const agenticResult = await Agents.agenticGuide(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
         state.results.agenticGuide = agenticResult;
         Renderers.renderAgenticGuide(state.results.agenticGuide, document.getElementById('agentic-content'));
         setTimeout(() => renderMermaidDiagrams(), 100);
@@ -437,7 +650,7 @@ async function generate() {
         updatePipelineStep('implementation', 'active');
         document.getElementById('generatingAgentName').textContent = '🛠️ Agent 6 — Implementation Generator';
 
-        const implResult = await Agents.implementationGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture);
+        const implResult = await Agents.implementationGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
         state.results.implementation = implResult;
         Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
         updatePipelineStep('implementation', 'completed');
@@ -447,7 +660,7 @@ async function generate() {
         updatePipelineStep('linter', 'active');
         document.getElementById('generatingAgentName').textContent = '🛑 Agent 11 — Architecture Linter';
 
-        state.results.linter = await Agents.vantiqLinter(text, state.results.analysis, state.results.architecture, state.results.eventSystem, state.results.implementation, "");
+        state.results.linter = await Agents.vantiqLinter(text, state.results.analysis, state.results.architecture, state.results.eventSystem, state.results.implementation, "", null, state.language);
         Renderers.renderVantiqLinter(state.results.linter, document.getElementById('linter-content'));
         updatePipelineStep('linter', 'completed');
         enableNav('linter');
@@ -458,8 +671,8 @@ async function generate() {
         document.getElementById('generatingAgentName').textContent = '📊 Agent 7 + 🎬 Agent 8 (parallel)';
 
         const [diagResult, demoResult] = await Promise.all([
-            Agents.architectureVisualizer(text, state.results.analysis, state.results.domainModel, state.results.architecture),
-            Agents.demoScenarioGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture)
+            Agents.architectureVisualizer(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language),
+            Agents.demoScenarioGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language)
         ]);
 
         state.results.diagrams = diagResult;
@@ -474,7 +687,7 @@ async function generate() {
 
         // ── Phase 5: Agent 9 (needs implementation from Agent 6) ──
         updatePipelineStep('training', 'active');
-        state.results.training = await Agents.trainingLabGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation);
+        state.results.training = await Agents.trainingLabGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation, "", null, state.language);
         Renderers.renderTraining(state.results.training, document.getElementById('training-content'));
         updatePipelineStep('training', 'completed');
         enableNav('training');
@@ -484,7 +697,7 @@ async function generate() {
         document.getElementById('generatingAgentName').textContent = '🏆 Agent 10 — Competitive Analysis';
         const competitorsInput = document.getElementById('competitorsInput');
         const competitorsText = competitorsInput ? competitorsInput.value.trim() : '';
-        state.results.competitive = await Agents.competitiveAnalysis(text, state.results.analysis, state.results.architecture, competitorsText);
+        state.results.competitive = await Agents.competitiveAnalysis(text, state.results.analysis, state.results.architecture, competitorsText, "", null, state.language);
         Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
         updatePipelineStep('competitive', 'completed');
         enableNav('competitive');
@@ -541,59 +754,59 @@ async function regenerate(agentKey) {
 
     const agentMap = {
         interpreter: async () => {
-            state.results.analysis = await Agents.problemInterpreter(state.problemText, refinement, state.results.analysis);
+            state.results.analysis = await Agents.problemInterpreter(state.problemText, refinement, state.results.analysis, state.language);
             Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
         },
         domain: async () => {
-            state.results.domainModel = await Agents.domainModelGenerator(state.problemText, state.results.analysis, refinement, state.results.domainModel);
+            state.results.domainModel = await Agents.domainModelGenerator(state.problemText, state.results.analysis, refinement, state.results.domainModel, state.language);
             Renderers.renderDomainModel(state.results.domainModel, document.getElementById('domain-content'));
         },
         architecture: async () => {
-            state.results.architecture = await Agents.architectureGenerator(state.problemText, state.results.analysis, state.results.domainModel, refinement, state.results.architecture);
+            state.results.architecture = await Agents.architectureGenerator(state.problemText, state.results.analysis, state.results.domainModel, refinement, state.results.architecture, state.language);
             Renderers.renderArchitecture(state.results.architecture, document.getElementById('architecture-content'));
             setTimeout(() => renderMermaidDiagrams(), 100);
         },
         aimodel: async () => {
-            state.results.aiModels = await Agents.aiModelAdvisor(state.problemText, state.results.analysis, refinement, state.results.aiModels);
+            state.results.aiModels = await Agents.aiModelAdvisor(state.problemText, state.results.analysis, refinement, state.results.aiModels, state.language);
             Renderers.renderAIModels(state.results.aiModels, document.getElementById('aimodels-content'));
         },
         agentic: async () => {
-            state.results.agenticGuide = await Agents.agenticGuide(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.agenticGuide);
+            state.results.agenticGuide = await Agents.agenticGuide(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.agenticGuide, state.language);
             Renderers.renderAgenticGuide(state.results.agenticGuide, document.getElementById('agentic-content'));
             setTimeout(() => renderMermaidDiagrams(), 100);
         },
         events: async () => {
-            state.results.eventSystem = await Agents.eventSystemDesigner(state.problemText, state.results.analysis, state.results.domainModel, refinement, state.results.eventSystem);
+            state.results.eventSystem = await Agents.eventSystemDesigner(state.problemText, state.results.analysis, state.results.domainModel, refinement, state.results.eventSystem, state.language);
             Renderers.renderEventSystem(state.results.eventSystem, document.getElementById('events-content'));
             setTimeout(() => renderMermaidDiagrams(), 100);
         },
         implementation: async () => {
-            state.results.implementation = await Agents.implementationGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.implementation);
+            state.results.implementation = await Agents.implementationGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.implementation, state.language);
             Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
         },
         visualizer: async () => {
-            state.results.diagrams = await Agents.architectureVisualizer(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.diagrams);
+            state.results.diagrams = await Agents.architectureVisualizer(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.diagrams, state.language);
             Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
             setTimeout(() => renderMermaidDiagrams(), 100);
         },
         demo: async () => {
-            state.results.demo = await Agents.demoScenarioGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.demo);
+            state.results.demo = await Agents.demoScenarioGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.demo, state.language);
             Renderers.renderDemo(state.results.demo, document.getElementById('demo-content'));
         },
         training: async () => {
-            state.results.training = await Agents.trainingLabGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation, refinement, state.results.training);
+            state.results.training = await Agents.trainingLabGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation, refinement, state.results.training, state.language);
             Renderers.renderTraining(state.results.training, document.getElementById('training-content'));
         },
         linter: async () => {
             const refineInput = document.getElementById('refine-linter');
             const refText = refineInput ? refineInput.value.trim() : "";
-            state.results.linter = await Agents.vantiqLinter(state.problemText, state.results.analysis, state.results.architecture, state.results.eventSystem, state.results.implementation, refText, state.results.linter);
+            state.results.linter = await Agents.vantiqLinter(state.problemText, state.results.analysis, state.results.architecture, state.results.eventSystem, state.results.implementation, refText, state.results.linter, state.language);
             Renderers.renderVantiqLinter(state.results.linter, document.getElementById('linter-content'));
         },
         competitive: async () => {
             const competitorsInput = document.getElementById('competitorsInput');
             const competitorsText = competitorsInput ? competitorsInput.value.trim() : '';
-            state.results.competitive = await Agents.competitiveAnalysis(state.problemText, state.results.analysis, state.results.architecture, competitorsText, refinement, state.results.competitive);
+            state.results.competitive = await Agents.competitiveAnalysis(state.problemText, state.results.analysis, state.results.architecture, competitorsText, refinement, state.results.competitive, state.language);
             Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
         }
     };
@@ -800,6 +1013,7 @@ document.getElementById('chatInput')?.addEventListener('keydown', (e) => {
 });
 
 // ── Init ──
+localizeUI();
 updateStatus();
 renderHistory();
 
@@ -817,6 +1031,7 @@ window.app = {
     showSettings,
     hideSettings,
     saveSettings,
+    updateLanguage,
     sendChat,
     clearChat,
     loadSession,

@@ -547,8 +547,18 @@ You MUST respond with ONLY valid JSON:
 // Agent Context Builders
 // ══════════════════════════════════════════════
 
-function buildUserMessage(problemText, upstreamContext = {}, refinement = "", previousOutput = null) {
+function buildUserMessage(problemText, upstreamContext = {}, refinement = "", previousOutput = null, language = "en") {
   let msg = `PROBLEM DESCRIPTION: \n${problemText} \n`;
+
+  // Language Instruction
+  const langNames = {
+    en: "English",
+    ko: "Korean",
+    ja: "Japanese",
+    ar: "Arabic (Standard Classical)"
+  };
+  const targetLang = langNames[language] || "English";
+  msg += `\nMANDATORY LANGUAGE INSTRUCTION: You MUST generate all human-readable descriptions, summaries, justifications, and name fields in ${targetLang}. However, you MUST keep all functional JSON keys and technical identifiers (like snake_case event names) in English as defined in the schema. \n`;
 
   if (upstreamContext.analysis) {
     msg += `\nAGENT 1 OUTPUT(Problem Analysis): \n${JSON.stringify(upstreamContext.analysis)} \n`;
@@ -585,96 +595,96 @@ function buildUserMessage(problemText, upstreamContext = {}, refinement = "", pr
 // Agent Functions (GPT Powered)
 // ══════════════════════════════════════════════
 
-async function agentProblemInterpreter(problemText, refinement, previousOutput = null) {
+async function agentProblemInterpreter(problemText, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Problem Interpreter',
     AGENT_PROMPTS.interpreter.system,
-    buildUserMessage(problemText, {}, refinement, previousOutput)
+    buildUserMessage(problemText, {}, refinement, previousOutput, language)
   );
 }
 
-async function agentDomainModelGenerator(problemText, analysis, refinement, previousOutput = null) {
+async function agentDomainModelGenerator(problemText, analysis, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Domain Model Generator',
     AGENT_PROMPTS.domainModel.system,
-    buildUserMessage(problemText, { analysis }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis }, refinement, previousOutput, language)
   );
 }
 
-async function agentArchitectureGenerator(problemText, analysis, domainModel, refinement, previousOutput = null) {
+async function agentArchitectureGenerator(problemText, analysis, domainModel, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Architecture Generator',
     AGENT_PROMPTS.architecture.system,
-    buildUserMessage(problemText, { analysis, domainModel }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, domainModel }, refinement, previousOutput, language)
   );
 }
 
-async function agentAIModelAdvisor(problemText, analysis, refinement, previousOutput = null) {
+async function agentAIModelAdvisor(problemText, analysis, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'AI Model Advisor',
     AGENT_PROMPTS.aiModel.system,
-    buildUserMessage(problemText, { analysis }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis }, refinement, previousOutput, language)
   );
 }
 
-async function agentAgenticGuide(problemText, analysis, domainModel, architecture, refinement, previousOutput = null) {
+async function agentAgenticGuide(problemText, analysis, domainModel, architecture, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Agentic AI Guide',
     AGENT_PROMPTS.agenticGuide.system,
-    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput, language)
   );
 }
 
-async function agentEventSystemDesigner(problemText, analysis, domainModel, refinement, previousOutput = null) {
+async function agentEventSystemDesigner(problemText, analysis, domainModel, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Event System Designer',
     AGENT_PROMPTS.eventSystem.system,
-    buildUserMessage(problemText, { analysis, domainModel }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, domainModel }, refinement, previousOutput, language)
   );
 }
 
-async function agentImplementationGenerator(problemText, analysis, domainModel, architecture, refinement, previousOutput = null) {
+async function agentImplementationGenerator(problemText, analysis, domainModel, architecture, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Implementation Generator',
     AGENT_PROMPTS.implementation.system,
-    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput, language)
   );
 }
 
-async function agentArchitectureVisualizer(problemText, analysis, domainModel, architecture, refinement, previousOutput = null) {
+async function agentArchitectureVisualizer(problemText, analysis, domainModel, architecture, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Architecture Visualizer',
     AGENT_PROMPTS.visualizer.system,
-    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput, language)
   );
 }
 
-async function agentDemoScenarioGenerator(problemText, analysis, domainModel, architecture, refinement, previousOutput = null) {
+async function agentDemoScenarioGenerator(problemText, analysis, domainModel, architecture, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Demo Scenario Generator',
     AGENT_PROMPTS.demo.system,
-    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, domainModel, architecture }, refinement, previousOutput, language)
   );
 }
 
-async function agentTrainingLabGenerator(problemText, analysis, domainModel, architecture, implementation, refinement, previousOutput = null) {
+async function agentTrainingLabGenerator(problemText, analysis, domainModel, architecture, implementation, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Training Lab Generator',
     AGENT_PROMPTS.training.system,
-    buildUserMessage(problemText, { analysis, domainModel, architecture, implementation }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, domainModel, architecture, implementation }, refinement, previousOutput, language)
   );
 }
 
-async function agentVantiqLinter(problemText, analysis, architecture, eventSystem, implementation, refinement, previousOutput = null) {
+async function agentVantiqLinter(problemText, analysis, architecture, eventSystem, implementation, refinement, previousOutput = null, language = "en") {
   return await aiEngine.callAgent(
     'Architecture Linter',
     AGENT_PROMPTS.vantiqLinter.system,
-    buildUserMessage(problemText, { analysis, architecture, eventSystem, implementation }, refinement, previousOutput)
+    buildUserMessage(problemText, { analysis, architecture, eventSystem, implementation }, refinement, previousOutput, language)
   );
 }
 
-async function agentCompetitiveAnalysis(problemText, analysis, architecture, competitors, refinement, previousOutput = null) {
-  let userMsg = buildUserMessage(problemText, { analysis, architecture }, refinement, previousOutput);
+async function agentCompetitiveAnalysis(problemText, analysis, architecture, competitors, refinement, previousOutput = null, language = "en") {
+  let userMsg = buildUserMessage(problemText, { analysis, architecture }, refinement, previousOutput, language);
   if (competitors && competitors.trim()) {
     userMsg += `\nUSER - SPECIFIED COMPETITORS: \n${competitors} \n`;
   }

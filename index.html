@@ -33,81 +33,81 @@
           </div>
           <div>
             <div class="logo-text">Vantiq Spark</div>
-            <div class="logo-subtitle">Solution Designer</div>
+            <div class="logo-subtitle" data-i18n="app-subtitle">Solution Designer</div>
           </div>
         </div>
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-section-label">Assistant</div>
+        <div class="nav-section-label" data-i18n="nav-assistant">Assistant</div>
         <div class="nav-item" data-panel="usecase" id="nav-usecase">
           <span class="nav-icon">💬</span>
-          <span class="nav-text">Usecase Assistant</span>
+          <span class="nav-text" data-i18n="nav-usecase">Usecase Assistant</span>
         </div>
-        <div class="nav-section-label">Design</div>
+        <div class="nav-section-label" data-i18n="nav-design">Design</div>
         <div class="nav-item active" data-panel="input" id="nav-input">
           <span class="nav-icon">💡</span>
-          <span class="nav-text">Problem Input</span>
+          <span class="nav-text" data-i18n="nav-input">Problem Input</span>
         </div>
         <div class="nav-item disabled" data-panel="analysis" id="nav-analysis">
           <span class="nav-icon">🔍</span>
-          <span class="nav-text">Problem Analysis</span>
+          <span class="nav-text" data-i18n="nav-analysis">Problem Analysis</span>
         </div>
         <div class="nav-item disabled" data-panel="domain" id="nav-domain">
           <span class="nav-icon">🧩</span>
-          <span class="nav-text">Domain Model</span>
+          <span class="nav-text" data-i18n="nav-domain">Domain Model</span>
         </div>
 
-        <div class="nav-section-label">Architecture</div>
+        <div class="nav-section-label" data-i18n="nav-architecture">Architecture</div>
         <div class="nav-item disabled" data-panel="architecture" id="nav-architecture">
           <span class="nav-icon">🏗️</span>
-          <span class="nav-text">Architecture</span>
+          <span class="nav-text" data-i18n="nav-architecture-tab">Architecture</span>
         </div>
         <div class="nav-item disabled" data-panel="aimodels" id="nav-aimodels">
           <span class="nav-icon">🤖</span>
-          <span class="nav-text">AI Models</span>
+          <span class="nav-text" data-i18n="nav-aimodels">AI Models</span>
         </div>
         <div class="nav-item disabled" data-panel="agentic" id="nav-agentic">
           <span class="nav-icon">🧠</span>
-          <span class="nav-text">Agentic AI Guide</span>
+          <span class="nav-text" data-i18n="nav-agentic">Agentic AI Guide</span>
         </div>
         <div class="nav-item disabled" data-panel="events" id="nav-events">
           <span class="nav-icon">⚡</span>
-          <span class="nav-text">Event System</span>
+          <span class="nav-text" data-i18n="nav-events">Event System</span>
         </div>
 
-        <div class="nav-section-label">Build</div>
+        <div class="nav-section-label" data-i18n="nav-build">Build</div>
         <div class="nav-item disabled" data-panel="implementation" id="nav-implementation">
           <span class="nav-icon">🛠️</span>
-          <span class="nav-text">Implementation</span>
+          <span class="nav-text" data-i18n="nav-implementation">Implementation</span>
         </div>
         <div class="nav-item disabled" data-panel="diagrams" id="nav-diagrams">
           <span class="nav-icon">📊</span>
-          <span class="nav-text">Diagrams</span>
+          <span class="nav-text" data-i18n="nav-diagrams">Diagrams</span>
         </div>
 
-        <div class="nav-section-label">Enablement</div>
+        <div class="nav-section-label" data-i18n="nav-enablement">Enablement</div>
         <div class="nav-item disabled" data-panel="demo" id="nav-demo">
           <span class="nav-icon">🎬</span>
-          <span class="nav-text">Demo Scenarios</span>
+          <span class="nav-text" data-i18n="nav-demo">Demo Scenarios</span>
         </div>
         <div class="nav-item disabled" data-panel="training" id="nav-training">
           <span class="nav-icon">🎓</span>
-          <span class="nav-text">Training Labs</span>
+          <span class="nav-text" data-i18n="nav-training">Training Labs</span>
         </div>
 
 
 
-        <div class="nav-section-label">Strategy</div>
+        <div class="nav-section-label" data-i18n="nav-strategy">Strategy</div>
         <div class="nav-item disabled" data-panel="competitive" id="nav-competitive">
           <span class="nav-icon">🏆</span>
-          <span class="nav-text">Competitive Analysis</span>
+          <span class="nav-text" data-i18n="nav-competitive">Competitive Analysis</span>
         </div>
       </nav>
 
       <div class="sidebar-footer" style="display: flex; align-items: center; gap: 8px;">
         <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">Configure API Key</span>
+        <span id="statusText" data-i18n="status-configure">Configure API Key</span>
         <div style="margin-left:auto; display: flex; gap: 4px;">
           <button class="btn-ghost" onclick="app.showHistory()" id="btnHistory" style="font-size:14px"
             title="Session History">🕒</button>
@@ -198,14 +198,14 @@
             <div class="chat-messages" id="chatMessages">
               <div class="chat-message assistant">
                 <div class="chat-avatar">🤖</div>
-                <div class="chat-bubble">
-                  <p>Hi! I'm the <strong>Vantiq Usecase Assistant</strong>. I can help you brainstorm and design
-                    real-time, event-driven applications on the Vantiq platform.</p>
-                  <p style="margin-top:8px">Try asking me things like:</p>
+                <div class="chat-bubble" id="welcomeMessage">
+                  <p data-i18n="chat-welcome-1">Hi! I'm the <strong>Vantiq Usecase Assistant</strong>. I can help you
+                    brainstorm and design real-time, event-driven applications on the Vantiq platform.</p>
+                  <p style="margin-top:8px" data-i18n="chat-welcome-2">Try asking me things like:</p>
                   <ul style="margin:8px 0 0 16px;font-size:13px;color:var(--text-secondary)">
-                    <li>How can Vantiq help with predictive maintenance?</li>
-                    <li>Design a smart building energy optimization system</li>
-                    <li>What Vantiq features support real-time video analytics?</li>
+                    <li data-i18n="chat-example-1">How can Vantiq help with predictive maintenance?</li>
+                    <li data-i18n="chat-example-2">Design a smart building energy optimization system</li>
+                    <li data-i18n="chat-example-3">What Vantiq features support real-time video analytics?</li>
                   </ul>
                 </div>
               </div>
@@ -224,8 +224,10 @@
         <div class="panel" id="panel-history">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🕒</span> Session History</div>
-              <div class="section-subtitle">Resume your previous AI generation sessions</div>
+              <div class="section-title"><span class="section-icon">🕒</span> <span data-i18n="history-title">Session
+                  History</span></div>
+              <div class="section-subtitle" data-i18n="history-subtitle">Resume your previous AI generation sessions
+              </div>
             </div>
             <button class="btn-ghost" onclick="app.clearHistory()" style="font-size:13px;color:var(--text-tertiary)">
               🧹 Clear All
@@ -242,22 +244,22 @@
             <h1 class="welcome-title">
               Vantiq <span class="gradient-text">Spark</span>
             </h1>
-            <p class="welcome-subtitle">
+            <p class="welcome-subtitle" data-i18n="welcome-description">
               Describe your problem and our AI agents will generate a complete system architecture,
               implementation scaffolding, demo scenarios, and training labs — all in one workflow.
             </p>
 
             <div class="input-card">
               <div class="input-label">
-                <span>📝</span> Problem Description
+                <span>📝</span> <span data-i18n="problem-label">Problem Description</span>
               </div>
               <textarea class="problem-textarea" id="problemInput"
                 placeholder="Describe your real-time AI system problem...&#10;&#10;Example: Design a real-time wildfire detection system using drones and computer vision that can automatically alert emergency response teams."></textarea>
               <div class="input-actions">
                 <button class="btn btn-primary" id="generateBtn" onclick="app.generate()">
-                  <span>⚡</span> Generate Solution
+                  <span>⚡</span> <span data-i18n="btn-generate">Generate Solution</span>
                 </button>
-                <button class="btn btn-secondary" id="clearBtn" onclick="app.clearInput()">
+                <button class="btn btn-secondary" id="clearBtn" onclick="app.clearInput()" data-i18n="btn-clear">
                   Clear
                 </button>
               </div>
@@ -273,7 +275,7 @@
             </div>
 
             <div class="examples-section">
-              <div class="examples-label">Try an example</div>
+              <div class="examples-label" data-i18n="examples-label">Try an example</div>
               <div class="example-chips">
                 <div class="example-chip" onclick="app.loadExample(0)">🔥 Wildfire Detection with Drones</div>
                 <div class="example-chip" onclick="app.loadExample(1)">🏥 Hospital Patient Deterioration</div>
@@ -508,7 +510,7 @@
             <p style="font-size:11px;color:var(--text-tertiary);margin-top:6px">Your API key is stored only in this
               browser session and never sent anywhere except api.openai.com.</p>
 
-            <div class="input-label" style="margin-top:20px">🤖 Model</div>
+            <div class="input-label" style="margin-top:20px">🤖 <span data-i18n="settings-model">Model</span></div>
             <select class="modal-input" id="modelSelect">
               <option value="gpt-4.1">GPT-4.1 (Recommended)</option>
               <option value="gpt-4.1-mini">GPT-4.1 Mini (Faster)</option>
@@ -518,10 +520,20 @@
               <option value="gpt-5.2">GPT-5.2</option>
               <option value="o3-mini">o3-mini (Reasoning)</option>
             </select>
+
+            <div class="input-label" style="margin-top:20px">🌐 <span data-i18n="settings-language">Language</span>
+            </div>
+            <select class="modal-input" id="langSelect" onchange="app.updateLanguage()">
+              <option value="en">English (Default)</option>
+              <option value="ko">한국어 (Korean)</option>
+              <option value="ja">日本語 (Japanese)</option>
+              <option value="ar">العربية (Arabic Standard Classical)</option>
+            </select>
           </div>
           <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="app.hideSettings()">Cancel</button>
-            <button class="btn btn-primary" onclick="app.saveSettings()">💾 Save Settings</button>
+            <button class="btn btn-secondary" onclick="app.hideSettings()" data-i18n="btn-cancel">Cancel</button>
+            <button class="btn btn-primary" onclick="app.saveSettings()">💾 <span data-i18n="btn-save">Save
+                Settings</span></button>
           </div>
         </div>
       </div>
