@@ -10,13 +10,47 @@ window.PDFGenerator = {
         }
 
         const lang = state.language || 'en';
+        const isArabic = lang === 'ar';
         const translations = I18N[lang] || I18N.en;
         const results = state.results;
         const untitledName = translations['untitled-project'] || "Vantiq AI Project";
         const projectName = results.domainModel?.projectName || untitledName;
         const dateStr = new Date().toLocaleDateString(lang);
 
-        // 1. Initialize Document Definition
+        // 1. Configure Fonts for Global Character Support
+        // We use Google Fonts TTF files directly via their canonical URLs
+        pdfMake.fonts = {
+            Roboto: {
+                normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
+                bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
+                italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
+                bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
+            },
+            NotoSans: {
+                normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSans/NotoSans-Regular.ttf',
+                bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSans/NotoSans-Bold.ttf'
+            },
+            NotoSansJP: {
+                normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/OTC/NotoSansCJKjp-Regular.otf',
+                bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/OTC/NotoSansCJKjp-Bold.otf'
+            },
+            NotoSansKR: {
+                normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/OTC/NotoSansCJKkr-Regular.otf',
+                bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/OTC/NotoSansCJKkr-Bold.otf'
+            },
+            NotoSansArabic: {
+                normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSansArabic/NotoSansArabic-Regular.ttf',
+                bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSansArabic/NotoSansArabic-Bold.ttf'
+            }
+        };
+
+        // Select primary font based on language
+        let primaryFont = 'Roboto';
+        if (lang === 'ko') primaryFont = 'NotoSansKR';
+        else if (lang === 'ja') primaryFont = 'NotoSansJP';
+        else if (lang === 'ar') primaryFont = 'NotoSansArabic';
+
+        // 2. Initialize Document Definition
         const docDefinition = {
             info: {
                 title: projectName,
@@ -27,10 +61,11 @@ window.PDFGenerator = {
             pageOrientation: 'portrait',
             pageMargins: [40, 60, 40, 60],
             defaultStyle: {
-                font: 'Roboto',
+                font: primaryFont,
                 fontSize: 10,
                 color: '#333333',
-                lineHeight: 1.3
+                lineHeight: 1.3,
+                alignment: isArabic ? 'right' : 'left'
             },
             styles: {
                 title: { fontSize: 24, bold: true, color: '#00c389', margin: [0, 0, 0, 10] },
@@ -42,13 +77,21 @@ window.PDFGenerator = {
                 tableCell: { fontSize: 9, margin: [4, 4, 4, 4] },
                 list: { margin: [0, 0, 0, 10] }
             },
-            content: []
+            content: {
+                stack: [],
+                dir: isArabic ? 'rtl' : 'ltr'
+            }
         };
 
         // Helper to add sections safely
         const addSection = (contentArray) => {
             if (contentArray && Array.isArray(contentArray)) {
-                docDefinition.content.push(...contentArray);
+                contentArray.forEach(item => {
+                    if (isArabic) {
+                        item.alignment = item.alignment || 'right';
+                    }
+                });
+                docDefinition.content.stack.push(...contentArray);
             }
         };
 
