@@ -9,9 +9,12 @@ window.PDFGenerator = {
             return;
         }
 
+        const lang = state.language || 'en';
+        const translations = I18N[lang] || I18N.en;
         const results = state.results;
-        const projectName = results.domainModel?.projectName || "Vantiq AI Project";
-        const dateStr = new Date().toLocaleDateString();
+        const untitledName = translations['untitled-project'] || "Vantiq AI Project";
+        const projectName = results.domainModel?.projectName || untitledName;
+        const dateStr = new Date().toLocaleDateString(lang);
 
         // 1. Initialize Document Definition
         const docDefinition = {
@@ -54,9 +57,9 @@ window.PDFGenerator = {
         // ==========================================
         addSection([
             { text: projectName, style: 'title' },
-            { text: `Vantiq Spark Architecture Blueprint — ${dateStr}`, style: 'subtitle' },
-            { text: 'Problem Statement:', style: 'subsectionHeader' },
-            { text: state.problemText || "No problem statement provided.", style: 'bodyText', italics: true },
+            { text: `${translations['pdf-blueprint'] || 'Architecture Blueprint'} — ${dateStr}`, style: 'subtitle' },
+            { text: translations['pdf-problem-stmt'] || 'Problem Statement:', style: 'subsectionHeader' },
+            { text: state.problemText || translations['pdf-no-problem'] || "No problem statement provided.", style: 'bodyText', italics: true },
             { text: '', pageBreak: 'after' } // Force page break after title
         ]);
 
@@ -67,42 +70,42 @@ window.PDFGenerator = {
             const analysisBlocks = [];
 
             if (results.analysis.domain) {
-                analysisBlocks.push({ text: 'Industry Domain:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-industry'] || 'Industry Domain:', style: 'subsectionHeader' });
                 analysisBlocks.push({ text: results.analysis.domain, style: 'bodyText' });
             }
 
             if (results.analysis.summary) {
-                analysisBlocks.push({ text: 'System Summary:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-summary'] || 'System Summary:', style: 'subsectionHeader' });
                 analysisBlocks.push({ text: results.analysis.summary, style: 'bodyText' });
             }
 
             if (results.analysis.coreProblem) {
-                analysisBlocks.push({ text: 'Core Problem:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['label-core-problem'] || 'Core Problem:', style: 'subsectionHeader' });
                 analysisBlocks.push({ text: results.analysis.coreProblem, style: 'bodyText' });
             }
 
             if (results.analysis.actors && results.analysis.actors.length > 0) {
-                analysisBlocks.push({ text: 'Primary Actors:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-actors'] || 'Primary Actors:', style: 'subsectionHeader' });
                 analysisBlocks.push({ ul: results.analysis.actors.filter(a => a).map(a => ({ text: a, style: 'bodyText' })), style: 'list' });
             }
 
             if (results.analysis.entities && results.analysis.entities.length > 0) {
-                analysisBlocks.push({ text: 'Core Entities:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-entities'] || 'Core Entities:', style: 'subsectionHeader' });
                 analysisBlocks.push({ ul: results.analysis.entities.filter(e => e).map(e => ({ text: e, style: 'bodyText' })), style: 'list' });
             }
 
             if (results.analysis.dataSources && results.analysis.dataSources.length > 0) {
-                analysisBlocks.push({ text: 'Key Data Sources:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-data-sources'] || 'Key Data Sources:', style: 'subsectionHeader' });
                 analysisBlocks.push({ ul: results.analysis.dataSources.filter(d => d).map(d => ({ text: d, style: 'bodyText' })), style: 'list' });
             }
 
             if (results.analysis.events && results.analysis.events.length > 0) {
-                analysisBlocks.push({ text: 'Principal Events:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-principal-events'] || 'Principal Events:', style: 'subsectionHeader' });
                 analysisBlocks.push({ ul: results.analysis.events.filter(e => e).map(e => ({ text: e, style: 'bodyText' })), style: 'list' });
             }
 
             if (results.analysis.aiTasks && results.analysis.aiTasks.length > 0) {
-                analysisBlocks.push({ text: 'AI / ML Tasks:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-ai-tasks'] || 'AI / ML Tasks:', style: 'subsectionHeader' });
                 const aiTasksList = results.analysis.aiTasks.map(t => {
                     return { text: `${t.task} (${t.type}) — Models: ${t.models.join(', ')}`, style: 'bodyText' };
                 });
@@ -110,13 +113,13 @@ window.PDFGenerator = {
             }
 
             if (results.analysis.vantiqSuitability) {
-                analysisBlocks.push({ text: 'Vantiq Suitability:', style: 'subsectionHeader' });
+                analysisBlocks.push({ text: translations['pdf-vantiq-suitability'] || 'Vantiq Suitability:', style: 'subsectionHeader' });
                 analysisBlocks.push({ text: results.analysis.vantiqSuitability, style: 'bodyText' });
             }
 
             if (analysisBlocks.length > 0) {
                 addSection([
-                    { text: '1. Problem Analysis & Scope', style: 'sectionHeader' },
+                    { text: translations['pdf-sec-analysis'] || '1. Problem Analysis & Scope', style: 'sectionHeader' },
                     ...analysisBlocks
                 ]);
             }
@@ -136,9 +139,9 @@ window.PDFGenerator = {
             if (results.domainModel.entities && results.domainModel.entities.length > 0) {
                 const entityBody = [
                     [
-                        { text: 'Entity / Type Name', style: 'tableHeader' },
-                        { text: 'Type classification', style: 'tableHeader' },
-                        { text: 'Properties', style: 'tableHeader' }
+                        { text: translations['pdf-th-entity-name'] || 'Entity / Type Name', style: 'tableHeader' },
+                        { text: translations['pdf-th-type-class'] || 'Type classification', style: 'tableHeader' },
+                        { text: translations['pdf-th-props'] || 'Properties', style: 'tableHeader' }
                     ]
                 ];
                 results.domainModel.entities.forEach(e => {
@@ -149,7 +152,7 @@ window.PDFGenerator = {
                     ]);
                 });
 
-                domainBlocks.push({ text: 'Vantiq Types (Entities)', style: 'subsectionHeader' });
+                domainBlocks.push({ text: translations['pdf-vantiq-types'] || 'Vantiq Types (Entities)', style: 'subsectionHeader' });
                 domainBlocks.push({
                     table: {
                         headerRows: 1,
@@ -165,9 +168,9 @@ window.PDFGenerator = {
             if (results.domainModel.events && results.domainModel.events.length > 0) {
                 const eventBody = [
                     [
-                        { text: 'Event Name', style: 'tableHeader' },
-                        { text: 'Event Type', style: 'tableHeader' },
-                        { text: 'Payload Structure', style: 'tableHeader' }
+                        { text: translations['pdf-th-event-name'] || 'Event Name', style: 'tableHeader' },
+                        { text: translations['pdf-th-event-type'] || 'Event Type', style: 'tableHeader' },
+                        { text: translations['pdf-th-payload'] || 'Payload Structure', style: 'tableHeader' }
                     ]
                 ];
                 results.domainModel.events.forEach(e => {
@@ -178,7 +181,7 @@ window.PDFGenerator = {
                     ]);
                 });
 
-                domainBlocks.push({ text: 'Event Streams', style: 'subsectionHeader' });
+                domainBlocks.push({ text: translations['pdf-event-streams'] || 'Event Streams', style: 'subsectionHeader' });
                 domainBlocks.push({
                     table: {
                         headerRows: 1,
@@ -194,8 +197,8 @@ window.PDFGenerator = {
             if (results.domainModel.services && results.domainModel.services.length > 0) {
                 const serviceBody = [
                     [
-                        { text: 'Service Name', style: 'tableHeader' },
-                        { text: 'Responsibility', style: 'tableHeader' }
+                        { text: translations['pdf-th-service-name'] || 'Service Name', style: 'tableHeader' },
+                        { text: translations['pdf-th-resp'] || 'Responsibility', style: 'tableHeader' }
                     ]
                 ];
                 results.domainModel.services.forEach(s => {
@@ -205,7 +208,7 @@ window.PDFGenerator = {
                     ]);
                 });
 
-                domainBlocks.push({ text: 'Microservices', style: 'subsectionHeader' });
+                domainBlocks.push({ text: translations['pdf-microservices'] || 'Microservices', style: 'subsectionHeader' });
                 domainBlocks.push({
                     table: {
                         headerRows: 1,
@@ -218,7 +221,7 @@ window.PDFGenerator = {
             }
 
             if (domainBlocks.length > 0) {
-                addSection([{ text: '2. Domain Model', style: 'sectionHeader', pageBreak: 'before' }, ...domainBlocks]);
+                addSection([{ text: translations['pdf-sec-domain'] || '2. Domain Model', style: 'sectionHeader', pageBreak: 'before' }, ...domainBlocks]);
             }
         }
 
@@ -236,9 +239,9 @@ window.PDFGenerator = {
             if (results.architecture.components && results.architecture.components.length > 0) {
                 const compBody = [
                     [
-                        { text: 'Component', style: 'tableHeader' },
-                        { text: 'Description', style: 'tableHeader' },
-                        { text: 'Technologies', style: 'tableHeader' }
+                        { text: translations['pdf-th-comp'] || 'Component', style: 'tableHeader' },
+                        { text: translations['th-description'] || 'Description', style: 'tableHeader' },
+                        { text: translations['pdf-th-tech'] || 'Technologies', style: 'tableHeader' }
                     ]
                 ];
                 results.architecture.components.forEach(c => {
@@ -249,7 +252,7 @@ window.PDFGenerator = {
                     ]);
                 });
 
-                archBlocks.push({ text: 'Architecture Components', style: 'subsectionHeader' });
+                archBlocks.push({ text: translations['pdf-arch-comps'] || 'Architecture Components', style: 'subsectionHeader' });
                 archBlocks.push({
                     table: {
                         headerRows: 1,
@@ -263,7 +266,7 @@ window.PDFGenerator = {
 
             // Integrations
             if (results.architecture.integrations && results.architecture.integrations.length > 0) {
-                archBlocks.push({ text: 'Integration Flows', style: 'subsectionHeader' });
+                archBlocks.push({ text: translations['pdf-int-flows'] || 'Integration Flows', style: 'subsectionHeader' });
                 const ol = results.architecture.integrations.map(i => {
                     return { text: `[${i.protocol || 'API'}] ${i.from || "?"} → ${i.to || "?"}: ${i.description || ""}`, style: 'bodyText' };
                 });
@@ -272,21 +275,21 @@ window.PDFGenerator = {
 
             // Principles
             if (results.architecture.principles && results.architecture.principles.length > 0) {
-                archBlocks.push({ text: 'Architecture Principles', style: 'subsectionHeader' });
+                archBlocks.push({ text: translations['pdf-arch-principles'] || 'Architecture Principles', style: 'subsectionHeader' });
                 archBlocks.push({ ul: results.architecture.principles.map(p => ({ text: p, style: 'bodyText' })), style: 'list' });
             }
 
             if (archBlocks.length > 0) {
                 // Add Linter / Architecture Review if available
                 if (results.linter && results.linter.findings && results.linter.findings.length > 0) {
-                    archBlocks.push({ text: 'Architecture Review Findings:', style: 'subsectionHeader' });
+                    archBlocks.push({ text: translations['pdf-arch-review'] || 'Architecture Review Findings:', style: 'subsectionHeader' });
                     const findings = results.linter.findings.map(f => {
                         return { text: `[${f.severity || 'INFO'}] ${f.finding}: ${f.recommendation || ""}`, style: 'bodyText' };
                     });
                     archBlocks.push({ ul: findings, style: 'list' });
                 }
 
-                addSection([{ text: '3. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
+                addSection([{ text: translations['pdf-sec-arch'] || '3. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
             }
         }
 
@@ -294,13 +297,13 @@ window.PDFGenerator = {
         // AGENT 4: AI MODEL SELECTION
         // ==========================================
         if (results.aiModels && results.aiModels.models && results.aiModels.models.length > 0) {
-            addSection([{ text: '4. AI Model Recommendations', style: 'sectionHeader', pageBreak: 'before' }]);
+            addSection([{ text: translations['pdf-sec-aimodels'] || '4. AI Model Recommendations', style: 'sectionHeader', pageBreak: 'before' }]);
 
             const modelBody = [
                 [
-                    { text: 'Capability', style: 'tableHeader' },
-                    { text: 'Recommended Models', style: 'tableHeader' },
-                    { text: 'Justification', style: 'tableHeader' }
+                    { text: translations['pdf-th-capability'] || 'Capability', style: 'tableHeader' },
+                    { text: translations['pdf-th-models'] || 'Recommended Models', style: 'tableHeader' },
+                    { text: translations['pdf-th-justification'] || 'Justification', style: 'tableHeader' }
                 ]
             ];
 
@@ -325,7 +328,7 @@ window.PDFGenerator = {
             ]);
 
             if (results.aiModels.infrastructure) {
-                addSection([{ text: 'Infrastructure & Guardrails:', style: 'subsectionHeader' }]);
+                addSection([{ text: translations['pdf-infra-guardrails'] || 'Infrastructure & Guardrails:', style: 'subsectionHeader' }]);
                 addSection([{ text: results.aiModels.infrastructure, style: 'bodyText' }]);
             }
         }
@@ -334,7 +337,7 @@ window.PDFGenerator = {
         // AGENT 5: EVENT SYSTEM FLOWS
         // ==========================================
         if (results.eventSystem && results.eventSystem.flows && results.eventSystem.flows.length > 0) {
-            addSection([{ text: '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
+            addSection([{ text: translations['pdf-sec-events'] || '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
 
             results.eventSystem.flows.forEach(f => {
                 addSection([
@@ -355,7 +358,7 @@ window.PDFGenerator = {
         // AGENT 4b: AGENTIC AI GUIDE
         // ==========================================
         if (results.agenticGuide && results.agenticGuide.agents && results.agenticGuide.agents.length > 0) {
-            addSection([{ text: '6. Agentic AI Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
+            addSection([{ text: translations['pdf-sec-agentic'] || '6. Agentic AI Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
 
             results.agenticGuide.agents.forEach(a => {
                 addSection([
@@ -375,19 +378,19 @@ window.PDFGenerator = {
         // AGENT 10: COMPETITIVE ANALYSIS
         // ==========================================
         if (results.competitive) {
-            addSection([{ text: '7. Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }]);
+            addSection([{ text: translations['pdf-sec-compete'] || '7. Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }]);
 
             if (results.competitive.marketLandscape) {
-                addSection([{ text: 'Market Landscape:', style: 'subsectionHeader' }]);
+                addSection([{ text: translations['pdf-market-landscape'] || 'Market Landscape:', style: 'subsectionHeader' }]);
                 addSection([{ text: results.competitive.marketLandscape, style: 'bodyText' }]);
             }
 
             if (results.competitive.competitors && results.competitive.competitors.length > 0) {
                 const compBody = [
                     [
-                        { text: 'Competitor / Approach', style: 'tableHeader' },
-                        { text: 'Strengths', style: 'tableHeader' },
-                        { text: 'Weaknesses / Gaps', style: 'tableHeader' }
+                        { text: translations['pdf-th-approach'] || 'Competitor / Approach', style: 'tableHeader' },
+                        { text: translations['label-strengths'] || 'Strengths', style: 'tableHeader' },
+                        { text: translations['label-weaknesses'] || 'Weaknesses / Gaps', style: 'tableHeader' }
                     ]
                 ];
                 results.competitive.competitors.forEach(c => {
@@ -399,7 +402,7 @@ window.PDFGenerator = {
                 });
 
                 addSection([
-                    { text: 'Competitive Comparison:', style: 'subsectionHeader' },
+                    { text: translations['pdf-comp-compare'] || 'Competitive Comparison:', style: 'subsectionHeader' },
                     {
                         table: {
                             headerRows: 1,
@@ -413,7 +416,7 @@ window.PDFGenerator = {
             }
 
             if (results.competitive.differentiation && results.competitive.differentiation.length > 0) {
-                addSection([{ text: 'Vantiq Spark Differentiators:', style: 'subsectionHeader' }]);
+                addSection([{ text: translations['pdf-vantiq-diff'] || 'Vantiq Spark Differentiators:', style: 'subsectionHeader' }]);
                 addSection([{ ul: results.competitive.differentiation.map(d => ({ text: d, style: 'bodyText' })), style: 'list' }]);
             }
         }
@@ -422,7 +425,7 @@ window.PDFGenerator = {
         // FINAL SECTION: IMPLEMENTATION PLAN
         // ==========================================
         if (results.implementation && results.implementation.phases && results.implementation.phases.length > 0) {
-            addSection([{ text: '8. Implementation Roadmap', style: 'sectionHeader', pageBreak: 'before' }]);
+            addSection([{ text: translations['pdf-sec-roadmap'] || '8. Implementation Roadmap', style: 'sectionHeader', pageBreak: 'before' }]);
 
             results.implementation.phases.forEach((p, idx) => {
                 const phaseBlocks = [];

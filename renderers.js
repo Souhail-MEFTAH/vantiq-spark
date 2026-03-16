@@ -9,39 +9,40 @@ window.Renderers = {
     if (container) container.innerHTML = `
       <div class="card-grid">
         <div class="glass-card accent-purple" style="animation-delay:0s">
-          <div class="card-title"><span class="card-icon">${data.domainIcon}</span> Domain</div>
+          <div class="card-title"><span class="card-icon">${data.domainIcon}</span> <span data-i18n="label-domain">Domain</span></div>
           <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin:8px 0">${data.domain}</div>
           <p style="font-size:13px;color:var(--text-secondary)">${data.summary}</p>
         </div>
         <div class="glass-card accent-rose" style="animation-delay:0.04s; grid-column: span 2">
-          <div class="card-title"><span class="card-icon">🎯</span> Core Problem</div>
+          <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-core-problem">Core Problem</span></div>
           <p style="font-size:14px;color:var(--text-primary);margin-top:8px">${data.coreProblem}</p>
         </div>
         <div class="glass-card accent-cyan" style="animation-delay:0.08s">
-          <div class="card-title"><span class="card-icon">👥</span> Actors</div>
+          <div class="card-title"><span class="card-icon">👥</span> <span data-i18n="label-actors">Actors</span></div>
           <div class="tag-list">${(data.actors || []).map(a => `<span class="tag tag-cyan">${a}</span>`).join('')}</div>
         </div>
         <div class="glass-card accent-green" style="animation-delay:0.16s">
-          <div class="card-title"><span class="card-icon">📊</span> Data Sources</div>
+          <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-data-sources">Data Sources</span></div>
           <ul class="data-list">${(data.dataSources || []).map(d => `<li><span class="list-icon">◆</span>${d}</li>`).join('')}</ul>
         </div>
         <div class="glass-card accent-warm" style="animation-delay:0.24s">
-          <div class="card-title"><span class="card-icon">⚡</span> Events</div>
+          <div class="card-title"><span class="card-icon">⚡</span> <span data-i18n="label-events">Events</span></div>
           <div class="tag-list">${(data.events || []).map(e => `<span class="tag tag-warm">${e}</span>`).join('')}</div>
         </div>
         <div class="glass-card accent-rose" style="animation-delay:0.32s">
-          <div class="card-title"><span class="card-icon">🧠</span> AI Tasks</div>
+          <div class="card-title"><span class="card-icon">🧠</span> <span data-i18n="label-ai-tasks">AI Tasks</span></div>
           <ul class="data-list">${(data.aiTasks || []).map(t => `<li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">${t.task}</strong><br/><span style="font-size:11px">${t.type} — ${t.models.join(', ')}</span></div></li>`).join('')}</ul>
         </div>
         <div class="glass-card accent-purple" style="animation-delay:0.4s">
-          <div class="card-title"><span class="card-icon">🧩</span> Entities</div>
+          <div class="card-title"><span class="card-icon">🧩</span> <span data-i18n="label-entities">Entities</span></div>
           <div class="tag-list">${(data.entities || []).map(e => `<span class="tag tag-purple">${e}</span>`).join('')}</div>
         </div>
         <div class="glass-card accent-green" style="animation-delay:0.48s; grid-column: span 3">
-          <div class="card-title"><span class="card-icon">🚀</span> Why Vantiq?</div>
+          <div class="card-title"><span class="card-icon">🚀</span> <span data-i18n="label-why-vantiq">Why Vantiq?</span></div>
           <p style="font-size:14px;color:var(--text-primary);margin-top:8px; line-height: 1.5">${data.vantiqSuitability}</p>
         </div>
       </div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Domain Model (Agent 2) ──
@@ -70,23 +71,24 @@ window.Renderers = {
 
     if (container) container.innerHTML = `
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">📦</span> Entities</div>
+        <div class="card-title"><span class="card-icon">📦</span> <span data-i18n="label-entities">Entities</span></div>
         <div class="entity-grid" style="margin-top:12px">${entitiesHTML}</div>
       </div>
       <div class="card-grid">
         <div class="glass-card accent-cyan">
-          <div class="card-title"><span class="card-icon">⚡</span> Events</div>
+          <div class="card-title"><span class="card-icon">⚡</span> <span data-i18n="label-events">Events</span></div>
           ${eventsHTML}
         </div>
         <div class="glass-card accent-green">
-          <div class="card-title"><span class="card-icon">⚙️</span> Services</div>
+          <div class="card-title"><span class="card-icon">⚙️</span> <span data-i18n="label-services">Services</span></div>
           <ul class="data-list">${servicesHTML}</ul>
         </div>
       </div>
       <div class="glass-card accent-warm">
-        <div class="card-title"><span class="card-icon">📋</span> Commands</div>
+        <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-commands">Commands</span></div>
         <div class="tag-list">${commandsHTML}</div>
       </div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Architecture (Agent 3) ──
@@ -109,7 +111,7 @@ window.Renderers = {
 
     if (container) container.innerHTML = `
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">📝</span> Architecture Overview</div>
+        <div class="card-title"><span class="card-icon">📝</span> <span data-i18n="label-arch-overview">Architecture Overview</span></div>
         <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.description}</p>
         <div style="margin-top:12px">
           <div class="code-block" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-accent)">${data.dataFlow}</div>
@@ -117,20 +119,21 @@ window.Renderers = {
         <div class="tag-list" style="margin-top:12px">${(data.principles || []).map(p => `<span class="tag tag-green">${p}</span>`).join('')}</div>
       </div>
       <div class="glass-card accent-cyan">
-        <div class="card-title"><span class="card-icon">🏗️</span> System Components</div>
+        <div class="card-title"><span class="card-icon">🏗️</span> <span data-i18n="label-sys-components">System Components</span></div>
         <div class="card-grid-3" style="margin-top:12px">${componentsHTML}</div>
       </div>
       <div class="glass-card accent-warm">
-        <div class="card-title"><span class="card-icon">🔗</span> Integration Points</div>
+        <div class="card-title"><span class="card-icon">🔗</span> <span data-i18n="label-int-points">Integration Points</span></div>
         <table class="data-table" style="margin-top:12px">
-          <thead><tr><th>From</th><th></th><th>To</th><th>Protocol</th><th>Description</th></tr></thead>
+          <thead><tr><th data-i18n="th-from">From</th><th></th><th data-i18n="th-to">To</th><th data-i18n="th-protocol">Protocol</th><th data-i18n="th-description">Description</th></tr></thead>
           <tbody>${integrationsHTML}</tbody>
         </table>
       </div>
       <div class="glass-card accent-green">
-        <div class="card-title"><span class="card-icon">📊</span> Architecture Diagram</div>
+        <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-arch-diagram">Architecture Diagram</span></div>
         <div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>
       </div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── AI Models (Agent 4) ──
@@ -140,7 +143,7 @@ window.Renderers = {
         <div class="glass-card" style="padding:12px 16px;margin-bottom:8px;${m.isPrimary ? 'border-left:3px solid var(--brand-success)' : ''}">
           <div style="display:flex;align-items:center;gap:8px">
             <span style="font-weight:600;color:var(--text-primary)">${m.name}</span>
-            ${m.isPrimary ? '<span class="tag tag-green">Recommended</span>' : ''}
+            ${m.isPrimary ? '<span class="tag tag-green" data-i18n="label-recommended">Recommended</span>' : ''}
           </div>
           <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">✅ ${m.pros}</div>
           <div style="font-size:12px;color:var(--text-tertiary)">⚠️ ${m.cons}</div>
@@ -160,7 +163,7 @@ window.Renderers = {
           </div>
           <div style="margin-top:16px">${modelsHTML}</div>
           <div style="margin-top:16px">
-            <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">Deployment</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px" data-i18n="label-deployment">Deployment</div>
             <div class="card-grid">
               <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--text-accent)">Edge:</strong> ${rec.deployment.edge}</div>
               <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--brand-secondary)">Cloud:</strong> ${rec.deployment.cloud}</div>
@@ -168,7 +171,7 @@ window.Renderers = {
             <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">⏱️ Latency: <strong style="color:var(--brand-success)">${rec.deployment.latency}</strong></div>
           </div>
           <div style="margin-top:16px">
-            <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px">Hardware</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px" data-i18n="label-hardware">Hardware</div>
             <div class="tag-list">
               <span class="tag tag-warm">Edge: ${rec.hardware.edge}</span>
               <span class="tag tag-cyan">Cloud: ${rec.hardware.cloud}</span>
@@ -180,18 +183,19 @@ window.Renderers = {
 
     if (container) container.innerHTML = `
       <div class="glass-card accent-cyan">
-        <div class="card-title"><span class="card-icon">🎯</span> Overall Strategy</div>
+        <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-overall-strategy">Overall Strategy</span></div>
         <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${data.overallStrategy}</p>
-        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)">Vantiq Integration:</strong> ${data.vantiqIntegration}</p>
+        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)" data-i18n="label-vantiq-int">Vantiq Integration:</strong> ${data.vantiqIntegration}</p>
       </div>
       ${recsHTML}`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Agentic AI Guide (Agent 4b) ──
   renderAgenticGuide(data, container) {
     const orchHTML = `
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">🔄</span> Orchestration: ${data.orchestrationPattern.name}</div>
+        <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="label-orchestration">Orchestration</span>: ${data.orchestrationPattern.name}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${data.orchestrationPattern.description}</p>
         <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)">Vantiq:</strong> ${data.orchestrationPattern.vantiqImplementation}</p>
       </div>`;
@@ -206,16 +210,16 @@ window.Renderers = {
           <span class="tag tag-green">${a.vantiqComponent}</span>
         </div>
         <div style="margin-top:10px">
-          <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px">Tools</div>
+          <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px" data-i18n="label-tools">Tools</div>
           <div class="tag-list" style="margin-top:4px">${(a.tools || []).map(t => '<span class="tag tag-warm">' + t + '</span>').join('')}</div>
         </div>
         <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap">
           <div>
-            <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase">Inputs</div>
+            <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase" data-i18n="label-inputs">Inputs</div>
             <div class="tag-list" style="margin-top:4px">${(a.inputs || []).map(i => '<span class="tag tag-cyan">' + i + '</span>').join('')}</div>
           </div>
           <div>
-            <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase">Outputs</div>
+            <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase" data-i18n="label-outputs">Outputs</div>
             <div class="tag-list" style="margin-top:4px">${(a.outputs || []).map(o => '<span class="tag tag-green">' + o + '</span>').join('')}</div>
           </div>
         </div>
@@ -241,38 +245,39 @@ window.Renderers = {
 
     if (container) container.innerHTML = `
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">🧠</span> Architecture Overview</div>
+        <div class="card-title"><span class="card-icon">🧠</span> <span data-i18n="label-arch-overview">Architecture Overview</span></div>
         <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.architectureOverview}</p>
       </div>
       ${orchHTML}
       <div class="card-grid">${agentsHTML}</div>
       <div class="glass-card accent-green">
-        <div class="card-title"><span class="card-icon">📊</span> LLM Comparison</div>
+        <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-llm-comp">LLM Comparison</span></div>
         <table class="data-table" style="margin-top:12px">
-          <thead><tr><th>Model</th><th>Provider</th><th>Best For</th><th>Context</th><th>Cost</th><th>Vantiq Source</th></tr></thead>
+          <thead><tr><th data-i18n="th-model">Model</th><th data-i18n="th-provider">Provider</th><th data-i18n="th-best-for">Best For</th><th data-i18n="th-context">Context</th><th data-i18n="th-cost">Cost</th><th data-i18n="th-vantiq-source">Vantiq Source</th></tr></thead>
           <tbody>${llmRows}</tbody>
         </table>
       </div>
       <div class="glass-card accent-warm">
-        <div class="card-title"><span class="card-icon">📦</span> Required Artifacts</div>
+        <div class="card-title"><span class="card-icon">📦</span> <span data-i18n="label-req-artifacts">Required Artifacts</span></div>
         <table class="data-table" style="margin-top:12px">
-          <thead><tr><th>Artifact</th><th>Type</th><th>Description</th><th>Vantiq Resource</th></tr></thead>
+          <thead><tr><th data-i18n="th-artifact">Artifact</th><th data-i18n="th-type">Type</th><th data-i18n="th-description">Description</th><th data-i18n="th-vantiq-resource">Vantiq Resource</th></tr></thead>
           <tbody>${artifactRows}</tbody>
         </table>
       </div>
       <div class="glass-card accent-rose">
-        <div class="card-title"><span class="card-icon">🛡️</span> Safety & Guardrails</div>
+        <div class="card-title"><span class="card-icon">🛡️</span> <span data-i18n="label-safety">Safety & Guardrails</span></div>
         <ul class="data-list">
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">Input Validation</strong><br/>${data.guardrails.inputValidation}</div></li>
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">Output Validation</strong><br/>${data.guardrails.outputValidation}</div></li>
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">Human-in-the-Loop</strong><br/>${data.guardrails.humanInTheLoop}</div></li>
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">Fallback Strategy</strong><br/>${data.guardrails.fallbackStrategy}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-input-val">Input Validation</strong><br/>${data.guardrails.inputValidation}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-output-val">Output Validation</strong><br/>${data.guardrails.outputValidation}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-hitl">Human-in-the-Loop</strong><br/>${data.guardrails.humanInTheLoop}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-fallback">Fallback Strategy</strong><br/>${data.guardrails.fallbackStrategy}</div></li>
         </ul>
       </div>
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">📊</span> Agent Interaction Diagram</div>
+        <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-interaction-diagram">Agent Interaction Diagram</span></div>
         <div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>
       </div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Event System (Agent 5) ──
@@ -303,29 +308,30 @@ window.Renderers = {
 
     if (container) container.innerHTML = `
       <div class="glass-card accent-cyan">
-        <div class="card-title"><span class="card-icon">🔄</span> Orchestration Pattern</div>
+        <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="label-orchestration">Orchestration Pattern</span></div>
         <p style="font-size:14px;font-weight:600;color:var(--text-primary);margin:8px 0">${data.orchestration.pattern}</p>
         <p style="font-size:13px;color:var(--text-secondary)">${data.orchestration.description}</p>
         <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px">🛡️ ${data.orchestration.errorHandling}</p>
       </div>
       <div class="glass-card accent-warm">
-        <div class="card-title"><span class="card-icon">📋</span> Event Schemas</div>
+        <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-event-schemas">Event Schemas</span></div>
         ${schemasHTML}
       </div>
       <div class="card-grid">
         <div class="glass-card accent-green">
-          <div class="card-title"><span class="card-icon">📤</span> Producers</div>
-          <table class="data-table"><thead><tr><th>Producer</th><th>Events</th><th>Protocol</th><th>Frequency</th></tr></thead><tbody>${producersHTML}</tbody></table>
+          <div class="card-title"><span class="card-icon">📤</span> <span data-i18n="label-producers">Producers</span></div>
+          <table class="data-table"><thead><tr><th data-i18n="th-producer">Producer</th><th data-i18n="th-events">Events</th><th data-i18n="th-protocol">Protocol</th><th data-i18n="th-frequency">Frequency</th></tr></thead><tbody>${producersHTML}</tbody></table>
         </div>
         <div class="glass-card accent-purple">
-          <div class="card-title"><span class="card-icon">📥</span> Consumers</div>
-          <table class="data-table"><thead><tr><th>Consumer</th><th>Subscribes To</th><th>Action</th></tr></thead><tbody>${consumersHTML}</tbody></table>
+          <div class="card-title"><span class="card-icon">📥</span> <span data-i18n="label-consumers">Consumers</span></div>
+          <table class="data-table"><thead><tr><th data-i18n="th-consumer">Consumer</th><th data-i18n="th-subscribes">Subscribes To</th><th data-i18n="th-action">Action</th></tr></thead><tbody>${consumersHTML}</tbody></table>
         </div>
       </div>
       <div class="glass-card accent-rose">
-        <div class="card-title"><span class="card-icon">📊</span> Event Flow Diagram</div>
+        <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-event-flow">Event Flow Diagram</span></div>
         <div class="diagram-container"><pre class="mermaid">${data.flowDiagram}</pre></div>
       </div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Implementation (Agent 6) ──
@@ -346,10 +352,10 @@ window.Renderers = {
           <span class="tag tag-green">Output: ${s.outputEvent}</span>
         </div>
         <div class="pseudo-code-block">
-          <div class="pseudo-title">Pseudo-Code — ${s.name}</div>
+          <div class="pseudo-title"><span data-i18n="label-pseudo-code">Pseudo-Code</span> — ${s.name}</div>
           <ul class="pseudo-steps">${stepsHTML}</ul>
         </div>
-        <div style="margin-top:12px;font-size:12px;font-weight:600;color:var(--text-tertiary)">API Endpoints:</div>
+        <div style="margin-top:12px;font-size:12px;font-weight:600;color:var(--text-tertiary)" data-i18n="label-api-endpoints">API Endpoints:</div>
         ${(s.endpoints || []).map(ep => `<div style="font-size:12px;margin-top:4px"><span class="tag tag-warm">${ep.method}</span> <span style="font-family:'JetBrains Mono',monospace;color:var(--text-secondary)">${ep.path}</span></div>`).join('')}
       </div>`;
     }).join('');
@@ -366,7 +372,7 @@ window.Renderers = {
       <div class="glass-card" style="padding:14px;margin-bottom:8px">
         <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text-accent)">${et.name}</span>
         <table class="data-table" style="margin-top:8px">
-          <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+          <thead><tr><th data-i18n="th-field">Field</th><th data-i18n="th-type">Type</th><th data-i18n="th-description">Description</th></tr></thead>
           <tbody>${fieldsHTML}</tbody>
         </table>
       </div>`;
@@ -377,14 +383,15 @@ window.Renderers = {
 
     if (container) container.innerHTML = `
       <div class="glass-card accent-cyan">
-        <div class="card-title"><span class="card-icon">📂</span> Project Structure</div>
+        <div class="card-title"><span class="card-icon">📂</span> <span data-i18n="label-project-struct">Project Structure</span></div>
         <ul class="data-list">${structureHTML}</ul>
       </div>
       ${servicesHTML}
       <div class="glass-card accent-green">
-        <div class="card-title"><span class="card-icon">📝</span> Event Type Definitions</div>
+        <div class="card-title"><span class="card-icon">📝</span> <span data-i18n="label-event-defs">Event Type Definitions</span></div>
         ${typesHTML}
       </div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Diagrams (Agent 7) ──
@@ -423,15 +430,16 @@ window.Renderers = {
           </div>
         </div>
         <div class="glass-card accent-cyan">
-          <div class="card-title"><span class="card-icon">📋</span> Demo Steps</div>
+          <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-demo-steps">Demo Steps</span></div>
           <ol class="step-list" style="margin-top:12px">${stepsHTML}</ol>
         </div>
         <div class="glass-card accent-warm">
-          <div class="card-title"><span class="card-icon">⚡</span> Simulated Events</div>
+          <div class="card-title"><span class="card-icon">⚡</span> <span data-i18n="label-sim-events">Simulated Events</span></div>
           ${eventsHTML}
         </div>`;
     }).join('');
     if (container) container.innerHTML = scenariosHTML;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Training Labs (Agent 9) ──
@@ -454,19 +462,20 @@ window.Renderers = {
           </div>
           <div class="lab-card-body">
             <div class="lab-objectives">
-              <h4>🎯 Learning Objectives</h4>
+              <h4 data-i18n="label-learning-obj">🎯 Learning Objectives</h4>
               <ul class="data-list">${objHTML}</ul>
             </div>
-            <h4 style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px">📝 Steps</h4>
+            <h4 style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px" data-i18n="label-steps">📝 Steps</h4>
             <ol class="step-list">${stepsHTML}</ol>
             <div class="glass-card accent-green" style="margin-top:16px">
-              <div class="card-title"><span class="card-icon">✅</span> Expected Outcome</div>
+              <div class="card-title"><span class="card-icon">✅</span> <span data-i18n="label-outcome">Expected Outcome</span></div>
               <p style="font-size:13px;color:var(--text-secondary)">${lab.expectedOutcome}</p>
             </div>
           </div>
         </div>`;
     }).join('');
     if (container) container.innerHTML = labsHTML;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Architecture Linter (Agent 11) ──
@@ -486,11 +495,11 @@ window.Renderers = {
           ${data.overallScore}
         </div>
         <div>
-          <h3 style="margin-top:0; margin-bottom:8px; color:var(--text-primary);">Architecture Grade</h3>
+          <h3 style="margin-top:0; margin-bottom:8px; color:var(--text-primary);" data-i18n="label-arch-grade">Architecture Grade</h3>
           <p style="margin:0; color:var(--text-secondary); line-height:1.5;">${escapeHtml(data.summary)}</p>
         </div>
       </div>
-      <h3 style="margin-top:var(--space-6); margin-bottom:var(--space-4); border-bottom: 1px solid var(--border-default); padding-bottom: 8px;">Audit Findings</h3>
+      <h3 style="margin-top:var(--space-6); margin-bottom:var(--space-4); border-bottom: 1px solid var(--border-default); padding-bottom: 8px;" data-i18n="label-audit-findings">Audit Findings</h3>
     `;
 
     data.warnings.forEach(warning => {
@@ -524,7 +533,7 @@ window.Renderers = {
     // Use case summary
     let html = `
       <div class="glass-card accent-cyan" style="margin-bottom:20px">
-        <div class="card-title"><span class="card-icon">🎯</span> Use Case Context</div>
+        <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-use-case-context">Use Case Context</span></div>
         <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${escapeHtml(data.useCaseSummary || '')}</p>
       </div>`;
 
@@ -566,9 +575,9 @@ window.Renderers = {
       }).join('');
       html += `
         <div class="glass-card accent-warm" style="margin-top:20px;overflow-x:auto">
-          <div class="card-title"><span class="card-icon">📊</span> Feature Comparison Matrix</div>
+          <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-feature-matrix">Feature Comparison Matrix</span></div>
           <table style="width:100%;border-collapse:collapse;margin-top:12px">
-            <thead><tr><th style="padding:8px;font-size:11px;color:var(--text-secondary);text-align:left">Criterion</th>${headerCells}</tr></thead>
+            <thead><tr><th style="padding:8px;font-size:11px;color:var(--text-secondary);text-align:left" data-i18n="th-criterion">Criterion</th>${headerCells}</tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>`;
@@ -584,7 +593,7 @@ window.Renderers = {
         </div>`).join('');
       html += `
         <div class="glass-card accent-green" style="margin-top:20px">
-          <div class="card-title"><span class="card-icon">💎</span> Vantiq Differentiators</div>
+          <div class="card-title"><span class="card-icon">💎</span> <span data-i18n="label-vantiq-differentiators">Vantiq Differentiators</span></div>
           ${diffHTML}
         </div>`;
     }
@@ -598,7 +607,7 @@ window.Renderers = {
         </div>`).join('');
       html += `
         <div class="glass-card accent-rose" style="margin-top:20px">
-          <div class="card-title"><span class="card-icon">🛡️</span> Objection Handling</div>
+          <div class="card-title"><span class="card-icon">🛡️</span> <span data-i18n="label-objection-handling">Objection Handling</span></div>
           ${objHTML}
         </div>`;
     }
@@ -607,12 +616,13 @@ window.Renderers = {
     if (data.recommendation) {
       html += `
         <div class="glass-card accent-cyan" style="margin-top:20px">
-          <div class="card-title"><span class="card-icon">🎯</span> Recommendation</div>
+          <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-recommendation">Recommendation</span></div>
           <p style="font-size:14px;color:var(--text-primary);margin:8px 0;line-height:1.6">${escapeHtml(data.recommendation)}</p>
         </div>`;
     }
 
     if (container) container.innerHTML = html;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   }
 };
 

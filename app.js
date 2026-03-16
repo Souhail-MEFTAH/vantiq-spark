@@ -30,13 +30,17 @@ mermaid.initialize({
 });
 
 // ── Example Problems ──
-const EXAMPLES = [
-    "Design a real-time wildfire detection system using drones and computer vision that can automatically alert emergency response teams when fires are detected in forest areas.",
-    "Design a real-time hospital patient deterioration detection system that monitors vital signs, predicts clinical deterioration, and alerts nursing staff before critical events occur.",
-    "Design a predictive maintenance system for industrial manufacturing equipment that uses vibration sensors, temperature monitors, and machine learning to predict equipment failures before they happen.",
-    "Design a smart traffic management system that uses cameras and sensors at intersections to optimize traffic signal timing, detect accidents, and reduce congestion in real-time.",
-    "Design a smart building energy optimization system that uses occupancy sensors, weather data, and HVAC controls to minimize energy consumption while maintaining comfort levels."
-];
+function getExamples() {
+    const lang = state.language || 'en';
+    const t = I18N[lang] || I18N.en;
+    return [
+        t['example-prompt-wildfire'] || "Design a real-time wildfire detection system...",
+        t['example-prompt-hospital'] || "Design a real-time hospital patient deterioration detection system...",
+        t['example-prompt-industrial'] || "Design a predictive maintenance system for industrial manufacturing equipment...",
+        t['example-prompt-traffic'] || "Design a smart traffic management system...",
+        t['example-prompt-building'] || "Design a smart building energy optimization system..."
+    ];
+}
 
 // State is declared below in the I18N section
 
@@ -79,7 +83,209 @@ const I18N = {
         "settings-model": "Model",
         "settings-language": "Language",
         "btn-cancel": "Cancel",
-        "btn-save": "Save Settings"
+        "btn-save": "Save Settings",
+        "title-history": "Session History",
+        "title-export": "Export Solution to PDF",
+        "title-settings": "Settings",
+        "step-interpreter": "Interpreter",
+        "step-domain": "Domain",
+        "step-architecture": "Architecture",
+        "step-aimodel": "AI Models",
+        "step-agentic": "Agentic",
+        "step-events": "Events",
+        "step-implementation": "Implement",
+        "step-visualizer": "Diagrams",
+        "step-demo": "Demo",
+        "step-training": "Training",
+        "step-competitive": "Compete",
+        "chat-title": "Vantiq Usecase Assistant",
+        "chat-subtitle": "AI-powered chatbot for Vantiq use case ideation, architecture guidance, and best practices",
+        "btn-clear-chat": "Clear Chat",
+        "chat-placeholder": "Ask about Vantiq use cases, architecture, best practices...",
+        "btn-clear-all": "Clear All",
+        "problem-placeholder": "Describe your real-time AI system problem...\n\nExample: Design a real-time wildfire detection system using drones and computer vision that can automatically alert emergency response teams.",
+        "competitors-label": "Competitors to Compare",
+        "optional-label": "(optional)",
+        "competitors-placeholder": "e.g. AWS IoT, Azure IoT, PTC ThingWorx, C3.ai, Siemens MindSphere (leave empty to auto-select 5)",
+        "example-wildfire": "Wildfire Detection",
+        "example-hospital": "Hospital Patient Deterioration",
+        "example-industrial": "Industrial Predictive Maintenance",
+        "example-traffic": "Smart Traffic Management",
+        "example-building": "Smart Building Energy",
+        "analysis-title": "Problem Analysis",
+        "analysis-subtitle": "Agent 1 — Problem Interpreter output",
+        "refine-placeholder": "Refine this phase...",
+        "btn-regenerate": "Regenerate",
+        "domain-title": "Domain Model",
+        "domain-subtitle": "Agent 2 — Entity & Context Mapping",
+        "architecture-title": "System Architecture",
+        "architecture-subtitle": "Agent 3 — Blueprint & Infrastructure",
+        "aimodels-title": "AI Models",
+        "aimodels-subtitle": "Agent 4 — Model Advisory",
+        "agentic-title": "Agentic AI",
+        "agentic-subtitle": "Agent 4b — Autonomous Workflow Guide",
+        "events-title": "Event System",
+        "events-subtitle": "Agent 5 — Real-time Orchestration",
+        "implementation-title": "Implementation",
+        "implementation-subtitle": "Agent 6 — Resource & Code Generator",
+        "diagrams-title": "Diagrams",
+        "diagrams-subtitle": "Agent 7 — Architecture Visualizer",
+        "demo-title": "Demo Scenarios",
+        "demo-subtitle": "Agent 8 — Solution Narrative & Validation",
+        "training-title": "Training Labs",
+        "training-subtitle": "Agent 9 — Education & Workshop Guide",
+        "linter-title": "Arch Linter",
+        "linter-subtitle": "Agent 11 — Vantiq Best Practices Audit",
+        "competitive-title": "Competitive Strategy",
+        "competitive-subtitle": "Agent 10 — Market Analysis & Differentiators",
+        "gen-main-status": "Generating Solution...",
+        "gen-starting": "Starting pipeline...",
+        "settings-title": "⚙️ AI Engine Settings",
+        "settings-key": "🔑 OpenAI API Key",
+        "key-placeholder": "sk-...",
+        "settings-key-note": "Your API key is stored only in this browser session and never sent anywhere except api.openai.com.",
+        "model-recommended": "GPT-4.1 (Recommended)",
+        "model-mini": "GPT-4.1 Mini (Faster)",
+        "model-nano": "GPT-4.1 Nano (Fastest)",
+        "model-capable": "GPT-5.4 (Most Capable)",
+        "label-domain": "Domain",
+        "label-core-problem": "Core Problem",
+        "label-actors": "Actors",
+        "label-data-sources": "Data Sources",
+        "label-events": "Events",
+        "label-ai-tasks": "AI Tasks",
+        "label-entities": "Entities",
+        "label-why-vantiq": "Why Vantiq?",
+        "label-services": "Services",
+        "label-commands": "Commands",
+        "label-arch-overview": "Architecture Overview",
+        "label-sys-components": "System Components",
+        "label-int-points": "Integration Points",
+        "label-arch-diagram": "Architecture Diagram",
+        "label-overall-strategy": "Overall Strategy",
+        "label-vantiq-int": "Vantiq Integration:",
+        "label-llm-comp": "LLM Comparison",
+        "label-req-artifacts": "Required Artifacts",
+        "label-safety": "Safety & Guardrails",
+        "label-interaction-diagram": "Agent Interaction Diagram",
+        "label-orchestration": "Orchestration Pattern",
+        "label-event-schemas": "Event Schemas",
+        "label-producers": "Producers",
+        "label-consumers": "Consumers",
+        "label-event-flow": "Event Flow Diagram",
+        "label-project-struct": "Project Structure",
+        "label-event-defs": "Event Type Definitions",
+        "label-demo-steps": "Demo Steps",
+        "label-sim-events": "Simulated Events",
+        "label-learning-obj": "Learning Objectives",
+        "label-steps": "Steps",
+        "label-outcome": "Expected Outcome",
+        "label-arch-grade": "Architecture Grade",
+        "label-audit-findings": "Audit Findings",
+        "label-use-case-context": "Use Case Context",
+        "label-feature-matrix": "Feature Comparison Matrix",
+        "label-vantiq-differentiators": "Vantiq Differentiators",
+        "label-objection-handling": "Objection Handling",
+        "label-recommendation": "Recommendation",
+        "th-from": "From",
+        "th-to": "To",
+        "th-protocol": "Protocol",
+        "th-description": "Description",
+        "th-model": "Model",
+        "th-provider": "Provider",
+        "th-best-for": "Best For",
+        "th-context": "Context",
+        "th-cost": "Cost",
+        "th-vantiq-source": "Vantiq Source",
+        "th-artifact": "Artifact",
+        "th-type": "Type",
+        "th-vantiq-resource": "Vantiq Resource",
+        "th-producer": "Producer",
+        "th-events": "Events",
+        "th-frequency": "Frequency",
+        "th-consumer": "Consumer",
+        "th-subscribes": "Subscribes To",
+        "th-action": "Action",
+        "th-criterion": "Criterion",
+        "li-input-val": "Input Validation",
+        "li-output-val": "Output Validation",
+        "li-hitl": "Human-in-the-Loop",
+        "li-fallback": "Fallback Strategy",
+        "label-recommended": "Recommended",
+        "label-deployment": "Deployment",
+        "label-hardware": "Hardware",
+        "label-tools": "Tools",
+        "label-inputs": "Inputs",
+        "label-outputs": "Outputs",
+        "label-pseudo-code": "Pseudo-Code",
+        "label-api-endpoints": "API Endpoints:",
+        "th-field": "Field",
+        "confirm-clear-history": "Are you sure you want to clear your entire session history? This cannot be undone.",
+        "status-generating-pdf": "📄 Generating PDF Document...",
+        "untitled-project": "Untitled AI Project",
+        "prompt-rename": "Enter new project name:",
+        "pdf-blueprint": "Architecture Blueprint",
+        "pdf-problem-stmt": "Problem Statement:",
+        "pdf-no-problem": "No problem statement provided.",
+        "pdf-industry": "Industry Domain:",
+        "pdf-summary": "System Summary:",
+        "pdf-actors": "Primary Actors:",
+        "pdf-entities": "Core Entities:",
+        "pdf-data-sources": "Key Data Sources:",
+        "pdf-principal-events": "Principal Events:",
+        "pdf-ai-tasks": "AI / ML Tasks:",
+        "pdf-vantiq-suitability": "Vantiq Suitability:",
+        "pdf-sec-analysis": "1. Problem Analysis & Scope",
+        "pdf-th-entity-name": "Entity / Type Name",
+        "pdf-th-type-class": "Type classification",
+        "pdf-th-props": "Properties",
+        "pdf-vantiq-types": "Vantiq Types (Entities)",
+        "pdf-th-event-name": "Event Name",
+        "pdf-th-event-type": "Event Type",
+        "pdf-th-payload": "Payload Structure",
+        "pdf-event-streams": "Event Streams",
+        "pdf-th-service-name": "Service Name",
+        "pdf-th-resp": "Responsibility",
+        "pdf-microservices": "Microservices",
+        "pdf-sec-domain": "2. Domain Model",
+        "pdf-th-comp": "Component",
+        "pdf-th-tech": "Technologies",
+        "pdf-arch-comps": "Architecture Components",
+        "pdf-int-flows": "Integration Flows",
+        "pdf-arch-principles": "Architecture Principles",
+        "pdf-arch-review": "Architecture Review Findings:",
+        "pdf-sec-arch": "3. System Architecture",
+        "pdf-th-capability": "Capability",
+        "pdf-th-models": "Recommended Models",
+        "pdf-th-justification": "Justification",
+        "pdf-sec-aimodels": "4. AI Model Recommendations",
+        "pdf-infra-guardrails": "Infrastructure & Guardrails:",
+        "pdf-sec-events": "5. Event System & Orchestration",
+        "pdf-sec-agentic": "6. Agentic AI Orchestration",
+        "pdf-market-landscape": "Market Landscape:",
+        "pdf-th-approach": "Competitor / Approach",
+        "pdf-sec-compete": "7. Competitive Strategy",
+        "pdf-comp-compare": "Competitive Comparison:",
+        "pdf-vantiq-diff": "Vantiq Spark Differentiators:",
+        "pdf-sec-roadmap": "8. Implementation Roadmap",
+        "error-gen-failed": "Generation Failed",
+        "error-pipeline-halted": "The pipeline was halted. Please check your model selection or API key permissions in Settings.",
+        "example-prompt-wildfire": "Design a real-time wildfire detection system using drones and computer vision that can automatically alert emergency response teams when fires are detected in forest areas.",
+        "example-prompt-hospital": "Design a real-time hospital patient deterioration detection system that monitors vital signs, predicts clinical deterioration, and alerts nursing staff before critical events occur.",
+        "example-prompt-industrial": "Design a predictive maintenance system for industrial manufacturing equipment that uses vibration sensors, temperature monitors, and machine learning to predict equipment failures before they happen.",
+        "example-prompt-traffic": "Design a smart traffic management system that uses cameras and sensors at intersections to optimize traffic signal timing, detect accidents, and reduce congestion in real-time.",
+        "example-prompt-building": "Design a smart building energy optimization system that uses occupancy sensors, weather data, and HVAC controls to minimize energy consumption while maintaining comfort levels.",
+        "reg-interpreter": "Agent 1 — Interpreter",
+        "reg-domain": "Agent 2 — Domain",
+        "reg-architecture": "Agent 3 — Architecture",
+        "reg-aimodel": "Agent 4 — AI Models",
+        "reg-agentic": "Agent 4b — Agentic",
+        "reg-events": "Agent 5 — Events",
+        "reg-implementation": "Agent 6 — Implement",
+        "reg-visualizer": "Agent 7 — Visualizer",
+        "reg-demo": "Agent 8 — Demo",
+        "reg-training": "Agent 9 — Training",
+        "reg-competitive": "Agent 10 — Compete"
     },
     ko: {
         "app-subtitle": "솔루션 디자이너",
@@ -118,7 +324,209 @@ const I18N = {
         "settings-model": "모델",
         "settings-language": "언어",
         "btn-cancel": "취소",
-        "btn-save": "설정 저장"
+        "btn-save": "설정 저장",
+        "title-history": "세션 기록",
+        "title-export": "PDF로 솔루션 내보내기",
+        "title-settings": "설정",
+        "step-interpreter": "해석기",
+        "step-domain": "도메인",
+        "step-architecture": "아키텍처",
+        "step-aimodel": "AI 모델",
+        "step-agentic": "에이전틱",
+        "step-events": "이벤트",
+        "step-implementation": "구현",
+        "step-visualizer": "다이어그램",
+        "step-demo": "데모",
+        "step-training": "교육",
+        "step-competitive": "경쟁",
+        "chat-title": "Vantiq 유스케이스 어시스턴트",
+        "chat-subtitle": "유스케이스 아이디어 구상, 아키텍처 가이드 및 모범 사례를 위한 AI 기반 챗봇",
+        "btn-clear-chat": "채팅 지우기",
+        "chat-placeholder": "Vantiq 유스케이스, 아키텍처 등에 대해 문의하세요...",
+        "btn-clear-all": "모두 지우기",
+        "problem-placeholder": "실시간 AI 시스템 문제를 설명하세요...\n\n예: 드론과 컴퓨터 비전을 사용하여 소방 대원에게 자동으로 알림을 보낼 수 있는 실시간 산불 감지 시스템 설계.",
+        "competitors-label": "비교할 경쟁사",
+        "optional-label": "(선택 사항)",
+        "competitors-placeholder": "예: AWS IoT, Azure IoT (자동 선택하려면 비워 두세요)",
+        "example-wildfire": "산불 감지",
+        "example-hospital": "병원 환자 악화",
+        "example-industrial": "산업용 예측 유지보수",
+        "example-traffic": "스마트 교통 관리",
+        "example-building": "스마트 빌딩 에너지",
+        "analysis-title": "문제 분석",
+        "analysis-subtitle": "에이전트 1 — 문제 해석기 결과",
+        "refine-placeholder": "이 단계 수정하기...",
+        "btn-regenerate": "재생성",
+        "domain-title": "도메인 모델",
+        "domain-subtitle": "에이전트 2 — 엔티티 및 컨텍스트 매핑",
+        "architecture-title": "시스템 아키텍처",
+        "architecture-subtitle": "에이전트 3 — 청사진 및 인프라",
+        "aimodels-title": "AI 모델",
+        "aimodels-subtitle": "에이전트 4 — 모델 자문",
+        "agentic-title": "에이전틱 AI",
+        "agentic-subtitle": "에이전트 4b — 자율 워크플로우 가이드",
+        "events-title": "이벤트 시스템",
+        "events-subtitle": "에이전트 5 — 실시간 오케스트레이션",
+        "implementation-title": "구현",
+        "implementation-subtitle": "에이전트 6 — 리소스 및 코드 생성기",
+        "diagrams-title": "다이어그램",
+        "diagrams-subtitle": "에이전트 7 — 아키텍처 시각화",
+        "demo-title": "데모 시나리오",
+        "demo-subtitle": "에이전트 8 — 솔루션 내러티브 및 검증",
+        "training-title": "교육 실습",
+        "training-subtitle": "에이전트 9 — 교육 및 워크숍 가이드",
+        "linter-title": "아키텍처 린터",
+        "linter-subtitle": "에이전트 11 — Vantiq 베스트 프랙티스 감사",
+        "competitive-title": "경쟁 전략",
+        "competitive-subtitle": "에이전트 10 — 시장 분석 및 차별화 요소",
+        "gen-main-status": "솔루션 생성 중...",
+        "gen-starting": "파이프라인 시작 중...",
+        "settings-title": "⚙️ AI 엔진 설정",
+        "settings-key": "🔑 OpenAI API 키",
+        "key-placeholder": "sk-...",
+        "settings-key-note": "API 키는 이 브라우저 세션에만 저장되며 api.openai.com 이외의 장소로 전송되지 않습니다.",
+        "model-recommended": "GPT-4.1 (권장)",
+        "model-mini": "GPT-4.1 미니 (빠름)",
+        "model-nano": "GPT-4.1 나노 (가장 빠름)",
+        "model-capable": "GPT-5.4 (가장 강력함)",
+        "label-domain": "도메인",
+        "label-core-problem": "핵심 문제",
+        "label-actors": "행위자",
+        "label-data-sources": "데이터 소스",
+        "label-events": "이벤트",
+        "label-ai-tasks": "AI 작업",
+        "label-entities": "엔티티",
+        "label-why-vantiq": "왜 Vantiq인가?",
+        "label-services": "서비스",
+        "label-commands": "명령",
+        "label-arch-overview": "아키텍처 개요",
+        "label-sys-components": "시스템 구성 요소",
+        "label-int-points": "통합 포인트",
+        "label-arch-diagram": "아키텍처 다이어그램",
+        "label-overall-strategy": "전반적인 전략",
+        "label-vantiq-int": "Vantiq 통합:",
+        "label-llm-comp": "LLM 비교",
+        "label-req-artifacts": "필요한 산출물",
+        "label-safety": "안전 및 가드레일",
+        "label-interaction-diagram": "에이전트 상호 작용 다이어그램",
+        "label-orchestration": "오케스트레이션 패턴",
+        "label-event-schemas": "이벤트 스키마",
+        "label-producers": "생산자",
+        "label-consumers": "소비자",
+        "label-event-flow": "이벤트 흐름 다이어그램",
+        "label-project-struct": "프로젝트 구조",
+        "label-event-defs": "이벤트 유형 정의",
+        "label-demo-steps": "데모 단계",
+        "label-sim-events": "시뮬레이션된 이벤트",
+        "label-learning-obj": "학습 목표",
+        "label-steps": "단계",
+        "label-outcome": "예상 결과",
+        "label-arch-grade": "아키텍처 등급",
+        "label-audit-findings": "감사 결과",
+        "label-use-case-context": "유스케이스 맥락",
+        "label-feature-matrix": "기능 비교 매트릭스",
+        "label-vantiq-differentiators": "Vantiq 차별점",
+        "label-objection-handling": "이의 제기 처리",
+        "label-recommendation": "권장 사항",
+        "th-from": "출발지",
+        "th-to": "목적지",
+        "th-protocol": "프로토콜",
+        "th-description": "설명",
+        "th-model": "모델",
+        "th-provider": "제공자",
+        "th-best-for": "적합 용도",
+        "th-context": "컨텍스트",
+        "th-cost": "비용",
+        "th-vantiq-source": "Vantiq 소스",
+        "th-artifact": "산출물",
+        "th-type": "유형",
+        "th-vantiq-resource": "Vantiq 리소스",
+        "th-producer": "생산자",
+        "th-events": "이벤트",
+        "th-frequency": "빈도",
+        "th-consumer": "소비자",
+        "th-subscribes": "구독 대상",
+        "th-action": "작업",
+        "th-criterion": "기준",
+        "li-input-val": "입력 유효성 검사",
+        "li-output-val": "출력 유효성 검사",
+        "li-hitl": "사람의 개입 (HITL)",
+        "li-fallback": "대체 전략",
+        "label-recommended": "권장됨",
+        "label-deployment": "배포",
+        "label-hardware": "하드웨어",
+        "label-tools": "도구",
+        "label-inputs": "입력",
+        "label-outputs": "출력",
+        "label-pseudo-code": "의사 코드",
+        "label-api-endpoints": "API 엔드포인트:",
+        "th-field": "필드",
+        "confirm-clear-history": "전체 세션 기록을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+        "status-generating-pdf": "📄 PDF 문서 생성 중...",
+        "untitled-project": "제목 없는 AI 프로젝트",
+        "prompt-rename": "새 프로젝트 이름을 입력하세요:",
+        "pdf-blueprint": "아키텍처 설계도",
+        "pdf-problem-stmt": "문제 설명:",
+        "pdf-no-problem": "제공된 문제 설명이 없습니다.",
+        "pdf-industry": "산업 도메인:",
+        "pdf-summary": "시스템 요약:",
+        "pdf-actors": "주요 행위자:",
+        "pdf-entities": "핵심 엔티티:",
+        "pdf-data-sources": "주요 데이터 소스:",
+        "pdf-principal-events": "주요 이벤트:",
+        "pdf-ai-tasks": "AI / ML 작업:",
+        "pdf-vantiq-suitability": "Vantiq 적합성:",
+        "pdf-sec-analysis": "1. 문제 분석 및 범위",
+        "pdf-th-entity-name": "엔티티 / 유형 이름",
+        "pdf-th-type-class": "유형 분류",
+        "pdf-th-props": "속성",
+        "pdf-vantiq-types": "Vantiq 유형 (엔티티)",
+        "pdf-th-event-name": "이벤트 이름",
+        "pdf-th-event-type": "이벤트 유형",
+        "pdf-th-payload": "페이로드 구조",
+        "pdf-event-streams": "이벤트 스트림",
+        "pdf-th-service-name": "서비스 이름",
+        "pdf-th-resp": "책임",
+        "pdf-microservices": "마이크로서비스",
+        "pdf-sec-domain": "2. 도메인 모델",
+        "pdf-th-comp": "구성 요소",
+        "pdf-th-tech": "기술",
+        "pdf-arch-comps": "아키텍처 구성 요소",
+        "pdf-int-flows": "통합 흐름",
+        "pdf-arch-principles": "아키텍처 원칙",
+        "pdf-arch-review": "아키텍처 검토 결과:",
+        "pdf-sec-arch": "3. 시스템 아키텍처",
+        "pdf-th-capability": "역량",
+        "pdf-th-models": "권장 모델",
+        "pdf-th-justification": "타당성",
+        "pdf-sec-aimodels": "4. AI 모델 권장 사항",
+        "pdf-infra-guardrails": "인프라 및 가드레일:",
+        "pdf-sec-events": "5. 이벤트 시스템 및 오케스트레이션",
+        "pdf-sec-agentic": "6. 에이전틱 AI 오케스트레이션",
+        "pdf-market-landscape": "시장 현황:",
+        "pdf-th-approach": "경쟁사 / 접근 방식",
+        "pdf-sec-compete": "7. 경쟁 전략",
+        "pdf-comp-compare": "경쟁 비교:",
+        "pdf-vantiq-diff": "Vantiq Spark 차별점:",
+        "pdf-sec-roadmap": "8. 구현 로드맵",
+        "error-gen-failed": "생성 실패",
+        "error-pipeline-halted": "파이프라인이 중단되었습니다. 설정에서 모델 선택 또는 API 키 권한을 확인하십시오.",
+        "example-prompt-wildfire": "드론과 컴퓨터 비전을 사용하여 산불이 감지되면 자동으로 비상 대응 팀에 알릴 수 있는 실시간 산불 감지 시스템을 설계하십시오.",
+        "example-prompt-hospital": "활력 징후를 모니터링하고, 임상 악화를 예측하며, 심각한 사건이 발생하기 전에 간호 직원에게 알리는 실시간 병원 환자 상태 악화 감지 시스템을 설계하십시오.",
+        "example-prompt-industrial": "진동 센서, 온도 모니터 및 머신 러닝을 사용하여 장비 고장이 발생하기 전에 예측하는 산업용 제조 장비의 예측 유지 보수 시스템을 설계하십시오.",
+        "example-prompt-traffic": "교차로의 카메라와 센서를 사용하여 교통 신호 타이밍을 최적화하고, 사고를 감지하며, 실시간으로 혼잡을 줄이는 스마트 교통 관리 시스템을 설계하십시오.",
+        "example-prompt-building": "점유 센서, 날씨 데이터 및 HVAC 제어를 사용하여 쾌적함을 유지하면서 에너지 소비를 최소화하는 스마트 빌딩 에너지 최적화 시스템을 설계하십시오.",
+        "reg-interpreter": "에이전트 1 — 해석기",
+        "reg-domain": "에이전트 2 — 도메인",
+        "reg-architecture": "에이전트 3 — 아키텍처",
+        "reg-aimodel": "에이전트 4 — AI 모델",
+        "reg-agentic": "에이전트 4b — 에이전틱",
+        "reg-events": "에이전트 5 — 이벤트",
+        "reg-implementation": "에이전트 6 — 구현",
+        "reg-visualizer": "에이전트 7 — 시각화",
+        "reg-demo": "에이전트 8 — 데모",
+        "reg-training": "에이전트 9 — 교육",
+        "reg-competitive": "에이전트 10 — 경쟁"
     },
     ja: {
         "app-subtitle": "ソリューションデザイナー",
@@ -157,7 +565,209 @@ const I18N = {
         "settings-model": "モデル",
         "settings-language": "言語",
         "btn-cancel": "キャンセル",
-        "btn-save": "設定を保存"
+        "btn-save": "設定を保存",
+        "title-history": "セッション履歴",
+        "title-export": "ソリューションをPDFで書き出す",
+        "title-settings": "設定",
+        "step-interpreter": "解釈",
+        "step-domain": "ドメイン",
+        "step-architecture": "構成",
+        "step-aimodel": "AIモデル",
+        "step-agentic": "エージェント",
+        "step-events": "イベント",
+        "step-implementation": "実装",
+        "step-visualizer": "図面",
+        "step-demo": "デモ",
+        "step-training": "トレーニング",
+        "step-competitive": "競合",
+        "chat-title": "Vantiqユースケースアシスタント",
+        "chat-subtitle": "Vantiqのユースケース、アーキテクチャ、ベストプラクティスに関するAIチャットボット",
+        "btn-clear-chat": "チャットをクリア",
+        "chat-placeholder": "Vantiqのユースケース、アーキテクチャについて質問する...",
+        "btn-clear-all": "すべてクリア",
+        "problem-placeholder": "リアルタイムAIシステムの問題を説明してください...\n\n例：ドローンとコンピュータビジョンを使用して自動的に消防隊に通知するリアルタイム森林火災検知システムを設計する。",
+        "competitors-label": "比較する競合他社",
+        "optional-label": "（任意）",
+        "competitors-placeholder": "例：AWS IoT, Azure IoT (自動選択する場合は空欄)",
+        "example-wildfire": "火災検知",
+        "example-hospital": "病院の病状悪化",
+        "example-industrial": "産業用予兆保全",
+        "example-traffic": "スマート交通管理",
+        "example-building": "スマートビルエネルギー",
+        "analysis-title": "問題分析",
+        "analysis-subtitle": "エージェント 1 — 問題解釈出力",
+        "refine-placeholder": "このフェーズを洗練させる...",
+        "btn-regenerate": "再生成",
+        "domain-title": "ドメインモデル",
+        "domain-subtitle": "エージェント 2 — エンティティ & コンテキストマッピング",
+        "architecture-title": "システム構成",
+        "architecture-subtitle": "エージェント 3 — 設計図 & インフラ",
+        "aimodels-title": "AIモデル",
+        "aimodels-subtitle": "エージェント 4 — モデルの助言",
+        "agentic-title": "エージェントAI",
+        "agentic-subtitle": "エージェント 4b — 自律ワークフローガイド",
+        "events-title": "イベントシステム",
+        "events-subtitle": "エージェント 5 — リアルタイムオーケストレーション",
+        "implementation-title": "実装",
+        "implementation-subtitle": "エージェント 6 — リソース & コード生成",
+        "diagrams-title": "図面",
+        "diagrams-subtitle": "エージェント 7 — アーキテクチャ可視化",
+        "demo-title": "デモシナリオ",
+        "demo-subtitle": "エージェント 8 — ソリューションナラティブ & 検証",
+        "training-title": "トレーニングラボ",
+        "training-subtitle": "エージェント 9 — 教育 & ワークショップガイド",
+        "linter-title": "アーキテクトリンター",
+        "linter-subtitle": "エージェント 11 — Vantiqベストプラクティス監査",
+        "competitive-title": "競合戦略",
+        "competitive-subtitle": "エージェント 10 — 市場分析 & 差別化要因",
+        "gen-main-status": "ソリューションを生成中...",
+        "gen-starting": "パイプラインを開始中...",
+        "settings-title": "⚙️ AIエンジン設定",
+        "settings-key": "🔑 OpenAI APIキー",
+        "key-placeholder": "sk-...",
+        "settings-key-note": "APIキーはこのブラウザセッションにのみ保存され、api.openai.com以外には送信されません。",
+        "model-recommended": "GPT-4.1 (推奨)",
+        "model-mini": "GPT-4.1 Mini (高速)",
+        "model-nano": "GPT-4.1 Nano (最速)",
+        "model-capable": "GPT-5.4 (最高性能)",
+        "label-domain": "ドメイン",
+        "label-core-problem": "核心的な課題",
+        "label-actors": "アクター",
+        "label-data-sources": "データソース",
+        "label-events": "イベント",
+        "label-ai-tasks": "AIタスク",
+        "label-entities": "エンティティ",
+        "label-why-vantiq": "なぜVantiqなのか？",
+        "label-services": "サービス",
+        "label-commands": "コマンド",
+        "label-arch-overview": "アーキテクチャの概要",
+        "label-sys-components": "システムコンポーネント",
+        "label-int-points": "統合ポイント",
+        "label-arch-diagram": "アーキテクチャ図",
+        "label-overall-strategy": "全体戦略",
+        "label-vantiq-int": "Vantiq統合:",
+        "label-llm-comp": "LLM比較",
+        "label-req-artifacts": "必要なアーティファクト",
+        "label-safety": "安全とガードレール",
+        "label-interaction-diagram": "エージェント相互作用図",
+        "label-orchestration": "オーケストレーションパターン",
+        "label-event-schemas": "イベントスキーマ",
+        "label-producers": "プロデューサー",
+        "label-consumers": "コンシューマー",
+        "label-event-flow": "イベントフロー図",
+        "label-project-struct": "プロジェクト構造",
+        "label-event-defs": "イベント型定義",
+        "label-demo-steps": "デモステップ",
+        "label-sim-events": "シミュレーションイベント",
+        "label-learning-obj": "学習目標",
+        "label-steps": "ステップ",
+        "label-outcome": "期待される成果",
+        "label-arch-grade": "アーキテクチャグレード",
+        "label-audit-findings": "監査結果",
+        "label-use-case-context": "ユースケースコンテキスト",
+        "label-feature-matrix": "機能比較マトリックス",
+        "label-vantiq-differentiators": "Vantiqの差別化要因",
+        "label-objection-handling": "反論処理",
+        "label-recommendation": "推奨事項",
+        "th-from": "送信元",
+        "th-to": "送信先",
+        "th-protocol": "プロトコル",
+        "th-description": "説明",
+        "th-model": "モデル",
+        "th-provider": "プロバイダー",
+        "th-best-for": "用途",
+        "th-context": "コンテキスト",
+        "th-cost": "コスト",
+        "th-vantiq-source": "Vantiqソース",
+        "th-artifact": "成果物",
+        "th-type": "種類",
+        "th-vantiq-resource": "Vantiqリソース",
+        "th-producer": "プロデューサー",
+        "th-events": "イベント",
+        "th-frequency": "頻度",
+        "th-consumer": "コンシューマー",
+        "th-subscribes": "購読先",
+        "th-action": "アクション",
+        "th-criterion": "基準",
+        "li-input-val": "入力検証",
+        "li-output-val": "出力検証",
+        "li-hitl": "人の介入 (HITL)",
+        "li-fallback": "フォールバック戦略",
+        "label-recommended": "推奨",
+        "label-deployment": "デプロイメント",
+        "label-hardware": "ハードウェア",
+        "label-tools": "ツール",
+        "label-inputs": "入力",
+        "label-outputs": "出力",
+        "label-pseudo-code": "疑似コード",
+        "label-api-endpoints": "APIエンドポイント:",
+        "th-field": "フィールド",
+        "confirm-clear-history": "セッション履歴をすべて削除してもよろしいですか？この操作は取り消せません。",
+        "status-generating-pdf": "📄 PDFドキュメントを生成中...",
+        "untitled-project": "無題のAIプロジェクト",
+        "prompt-rename": "新しいプロジェクト名を入力してください:",
+        "pdf-blueprint": "アーキテクチャ設計図",
+        "pdf-problem-stmt": "問題の説明:",
+        "pdf-no-problem": "問題の説明が提供されていません。",
+        "pdf-industry": "産業ドメイン:",
+        "pdf-summary": "システム概要:",
+        "pdf-actors": "主要アクター:",
+        "pdf-entities": "コアエンティティ:",
+        "pdf-data-sources": "主要データソース:",
+        "pdf-principal-events": "主要イベント:",
+        "pdf-ai-tasks": "AI / MLタスク:",
+        "pdf-vantiq-suitability": "Vantiqの適合性:",
+        "pdf-sec-analysis": "1. 問題分析とスコープ",
+        "pdf-th-entity-name": "エンティティ / 型名",
+        "pdf-th-type-class": "型分類",
+        "pdf-th-props": "プロパティ",
+        "pdf-vantiq-types": "Vantiq型 (エンティティ)",
+        "pdf-th-event-name": "イベント名",
+        "pdf-th-event-type": "イベント型",
+        "pdf-th-payload": "ペイロード構造",
+        "pdf-event-streams": "イベントストリーム",
+        "pdf-th-service-name": "サービス名",
+        "pdf-th-resp": "責任",
+        "pdf-microservices": "マイクロサービス",
+        "pdf-sec-domain": "2. ドメインモデル",
+        "pdf-th-comp": "コンポーネント",
+        "pdf-th-tech": "技術",
+        "pdf-arch-comps": "アーキテクチャコンポーネント",
+        "pdf-int-flows": "統合フロー",
+        "pdf-arch-principles": "アーキテクチャ原則",
+        "pdf-arch-review": "アーキテクチャレビューの結果:",
+        "pdf-sec-arch": "3. システムアーキテクチャ",
+        "pdf-th-capability": "機能",
+        "pdf-th-models": "推奨モデル",
+        "pdf-th-justification": "正当性",
+        "pdf-sec-aimodels": "4. AIモデル推奨事項",
+        "pdf-infra-guardrails": "インフラとガードレール:",
+        "pdf-sec-events": "5. イベントシステムとオーケストレーション",
+        "pdf-sec-agentic": "6. エージェント型AIオーケストレーション",
+        "pdf-market-landscape": "市場環境:",
+        "pdf-th-approach": "競合 / アプローチ",
+        "pdf-sec-compete": "7. 競争戦略",
+        "pdf-comp-compare": "競合比較:",
+        "pdf-vantiq-diff": "Vantiq Sparkの差別化要因:",
+        "pdf-sec-roadmap": "8. 実装ロードマップ",
+        "error-gen-failed": "生成に失敗しました",
+        "error-pipeline-halted": "パイプラインが停止しました。設定からモデルの選択またはAPIキーの権限を確認してください。",
+        "example-prompt-wildfire": "ドローンとコンピュータビジョンを使用して、森林エリアで火災が検出されたときに緊急対応チームに自動的に通知するリアルタイム森林火災検知システムを設計する。",
+        "example-prompt-hospital": "バイタルサインを監視し、臨床的な悪化を予測し、重大なイベントが発生する前に看護スタッフに通知するリアルタイム病院患者悪化検知システムを設計する。",
+        "example-prompt-industrial": "振動センサー、温度モニター、機械学習を使用して、故障が発生する前に機器の故障を予測する産業用製造機器の予兆保全システムを設計する。",
+        "example-prompt-traffic": "交差点のカメラとセンサーを使用して交通信号のタイミングを最適化し、事故を検出し、リアルタイムで渋滞を緩和するスマート交通管理システムを設計する。",
+        "example-prompt-building": "占有センサー、気象データ、空調制御を使用して、快適性を維持しながらエネルギー消費を最小限に抑えるスマートビルエネルギー最適化システムを設計する。",
+        "reg-interpreter": "エージェント 1 — 解釈",
+        "reg-domain": "エージェント 2 — ドメイン",
+        "reg-architecture": "エージェント 3 — 構成",
+        "reg-aimodel": "エージェント 4 — AIモデル",
+        "reg-agentic": "エージェント 4b — エージェント",
+        "reg-events": "エージェント 5 — イベント",
+        "reg-implementation": "エージェント 6 — 実装",
+        "reg-visualizer": "エージェント 7 — 図面",
+        "reg-demo": "エージェント 8 — デモ",
+        "reg-training": "エージェント 9 — トレーニング",
+        "reg-competitive": "エージェント 10 — 競合"
     },
     ar: {
         "app-subtitle": "مصمم الحلول",
@@ -196,7 +806,207 @@ const I18N = {
         "settings-model": "النموذج",
         "settings-language": "اللغة",
         "btn-cancel": "إلغاء",
-        "btn-save": "حفظ الإعدادات"
+        "btn-save": "حفظ الإعدادات",
+        "title-history": "سجل الجلسات",
+        "title-export": "تصدير الحل إلى PDF",
+        "title-settings": "الإعدادات",
+        "step-interpreter": "المفسر",
+        "step-domain": "النطاق",
+        "step-architecture": "البنية",
+        "step-aimodel": "النماذج",
+        "step-agentic": "الوكيل",
+        "step-events": "الأحداث",
+        "step-implementation": "التنفيذ",
+        "step-visualizer": "المخططات",
+        "step-demo": "العرض",
+        "step-training": "التدريب",
+        "step-competitive": "المنافسة",
+        "chat-title": "مساعد حالات استخدام فانتيك",
+        "chat-subtitle": "روبوت دردشة ذكاء اصطناعي لأفكار حالات الاستخدام وإرشادات الهندسة المعمارية",
+        "btn-clear-chat": "مسح المحادثة",
+        "chat-placeholder": "اسأل عن حالات استخدام فانتيك، الهندسة المعمارية...",
+        "btn-clear-all": "مسح الكل",
+        "problem-placeholder": "صف مشكلة نظام الذكاء الاصطناعي في الوقت الفعلي...\n\nمثال: تصميم نظام للكشف عن حرائق الغابات باستخدام الطائرات بدون طيار ورؤية الكمبيوتر.",
+        "competitors-label": "المنافسون للمقارنة",
+        "optional-label": "(اختياري)",
+        "competitors-placeholder": "مثال: AWS IoT، Azure IoT (اتركه فارغاً للاختيار التلقائي)",
+        "example-wildfire": "🔥 الكشف عن حرائق الغابات",
+        "example-hospital": "🏥 تدهور حالة مرضى المستشفى",
+        "example-industrial": "🏭 مراقبة المعدات الصناعية",
+        "example-traffic": "🚗 الإدارة الذكية لحركة المرور",
+        "example-building": "🏢 تحسين طاقة المباني الذكية",
+        "analysis-title": "تحليل المشكلة",
+        "analysis-subtitle": "الوكيل 1 — مخرجات مفسر المشكلة",
+        "refine-placeholder": "تحسين هذه المرحلة...",
+        "btn-regenerate": "إعادة الإنشاء",
+        "domain-title": "نموذج النطاق",
+        "domain-subtitle": "الوكيل 2 — مخرجات منشئ نموذج النطاق",
+        "arch-title": "بنية النظام",
+        "arch-subtitle": "الوكيل 3 — مخرجات منشئ البنية",
+        "aimodels-title": "توصيات نماذج الذكاء الاصطناعي",
+        "aimodels-subtitle": "الوكيل 4 — مخرجات مستشار نماذج الذكاء الاصطناعي",
+        "agentic-title": "دليل الذكاء الاصطناعي الوكيل",
+        "agentic-subtitle": "الوكيل 4ب — مخرجات مهندس الذكاء الاصطناعي الوكيل",
+        "events-title": "تصميم نظام الأحداث",
+        "events-subtitle": "الوكيل 5 — مخرجات مصمم نظام الأحداث",
+        "impl-title": "هياكل التنفيذ",
+        "impl-subtitle": "الوكيل 6 — مخرجات منشئ التنفيذ",
+        "diagrams-title": "مخططات الهندسة المعمارية",
+        "diagrams-subtitle": "الوكيل 7 — مخرجات مصور الهندسة المعمارية",
+        "demo-title": "سيناريوهات العرض",
+        "demo-subtitle": "الوكيل 8 — مخرجات منشئ سيناريوهات العرض",
+        "training-title": "مختبرات التدريب",
+        "training-subtitle": "الوكيل 9 — مخرجات منشئ مختبر التدريب",
+        "competitive-title": "التحليل التنافسي",
+        "competitive-subtitle": "الوكيل 10 — مخرجات الاستخبارات التنافسية",
+        "gen-main-status": "جاري إنشاء الحل...",
+        "gen-starting": "جاري بدء خط الأنابيب...",
+        "settings-title": "⚙️ إعدادات محرك الذكاء الاصطناعي",
+        "settings-key": "🔑 مفتاح OpenAI API",
+        "key-placeholder": "sk-...",
+        "settings-key-note": "يتم تخزين مفتاح API الخاص بك فقط في جلسة المتصفح هذه ولا يتم إرساله أبداً إلى أي مكان باستثناء api.openai.com.",
+        "model-recommended": "GPT-4.1 (موصى به)",
+        "model-mini": "GPT-4.1 Mini (أسرع)",
+        "model-nano": "GPT-4.1 Nano (الأسرع)",
+        "model-capable": "GPT-5.4 (الأكثر قدرة)",
+        "label-domain": "النطاق",
+        "label-core-problem": "المشكلة الجوهرية",
+        "label-actors": "جهات الاتصال",
+        "label-data-sources": "مصادر البيانات",
+        "label-events": "الأحداث",
+        "label-ai-tasks": "مهام الذكاء الاصطناعي",
+        "label-entities": "الكيانات",
+        "label-why-vantiq": "لماذا فانتيك؟",
+        "label-services": "الخدمات",
+        "label-commands": "الأوامر",
+        "label-arch-overview": "نظرة عامة على البنية",
+        "label-sys-components": "مكونات النظام",
+        "label-int-points": "نقاط التكامل",
+        "label-arch-diagram": "مخطط البنية",
+        "label-overall-strategy": "الاستراتيجية العامة",
+        "label-vantiq-int": "تكامل فانتيك:",
+        "label-llm-comp": "مقارنة نماذج اللغة Large",
+        "label-req-artifacts": "النماذج المطلوبة",
+        "label-safety": "الأمان والقواعد",
+        "label-interaction-diagram": "مخطط تفاعل الوكلاء",
+        "label-orchestration": "نمط التنسيق",
+        "label-event-schemas": "مخططات الأحداث",
+        "label-producers": "المنتجون",
+        "label-consumers": "المستهلكون",
+        "label-event-flow": "مخطط تدفق الأحداث",
+        "label-project-struct": "هيكل المشروع",
+        "label-event-defs": "تعريفات أنواع الأحداث",
+        "label-demo-steps": "خطوات العرض",
+        "label-sim-events": "الأحداث المحاكية",
+        "label-learning-obj": "أهداف التعلم",
+        "label-steps": "الخطوات",
+        "label-outcome": "النتيجة المتوقعة",
+        "label-arch-grade": "درجة البنية",
+        "label-audit-findings": "نتائج التدقيق",
+        "label-use-case-context": "سياق حالة الاستخدام",
+        "label-feature-matrix": "مصفوفة مقارنة المميزات",
+        "label-vantiq-differentiators": "مميزات فانتيك التنافسية",
+        "label-objection-handling": "التعامل مع الاعتراضات",
+        "label-recommendation": "التوصية",
+        "th-from": "من",
+        "th-to": "إلى",
+        "th-protocol": "البروتوكول",
+        "th-description": "الوصف",
+        "th-model": "النموذج",
+        "th-provider": "المزود",
+        "th-best-for": "الأفضل لـ",
+        "th-context": "السياق",
+        "th-cost": "التكلفة",
+        "th-vantiq-source": "مصدر فانتيك",
+        "th-artifact": "المخرج",
+        "th-type": "النوع",
+        "th-vantiq-resource": "مورد فانتيك",
+        "th-producer": "المنتج",
+        "th-events": "الأحداث",
+        "th-frequency": "التكرار",
+        "th-consumer": "المستهلك",
+        "th-subscribes": "يشترك في",
+        "th-action": "الإجراء",
+        "th-criterion": "المعيار",
+        "li-input-val": "التحقق من المدخلات",
+        "li-output-val": "التحقق من المخرجات",
+        "li-hitl": "التدخل البشري",
+        "li-fallback": "استراتيجية التراجع",
+        "label-recommended": "موصى به",
+        "label-deployment": "النشر",
+        "label-hardware": "الأجهزة",
+        "label-tools": "الأدوات",
+        "label-inputs": "المدخلات",
+        "label-outputs": "المخرجات",
+        "label-pseudo-code": "كود تجريبي",
+        "label-api-endpoints": "نقاط نهاية API:",
+        "th-field": "الحقل",
+        "confirm-clear-history": "هل أنت متأكد أنك تريد مسح سجل الجلسات بالكامل؟ لا يمكن التراجع عن هذا الإجراء.",
+        "status-generating-pdf": "📄 جاري إنشاء مستند PDF...",
+        "untitled-project": "مشروع ذكاء اصطناعي بدون عنوان",
+        "prompt-rename": "أدخل اسم المشروع الجديد:",
+        "pdf-blueprint": "مخطط الهندسة المعمارية",
+        "pdf-problem-stmt": "بيان المشكلة:",
+        "pdf-no-problem": "لم يتم تقديم بيان للمشكلة.",
+        "pdf-industry": "نطاق الصناعة:",
+        "pdf-summary": "ملخص النظام:",
+        "pdf-actors": "الأطراف الرئيسية:",
+        "pdf-entities": "الكيانات الجوهرية:",
+        "pdf-data-sources": "مصادر البيانات الرئيسية:",
+        "pdf-principal-events": "الأحداث الرئيسية:",
+        "pdf-ai-tasks": "مهام الذكاء الاصطناعي:",
+        "pdf-vantiq-suitability": "ملاءمة فانتيك:",
+        "pdf-sec-analysis": "1. تحليل المشكلة والنطاق",
+        "pdf-th-entity-name": "اسم الكيان / النوع",
+        "pdf-th-type-class": "تصنيف النوع",
+        "pdf-th-props": "الخصائص",
+        "pdf-vantiq-types": "أنواع فانتيك (الكيانات)",
+        "pdf-th-event-name": "اسم الحدث",
+        "pdf-th-event-type": "نوع الحدث",
+        "pdf-th-payload": "هيكل البيانات",
+        "pdf-event-streams": "تدفقات الأحداث",
+        "pdf-th-service-name": "اسم الخدمة",
+        "pdf-th-resp": "المسؤولية",
+        "pdf-microservices": "الخدمات المصغرة",
+        "pdf-sec-domain": "2. نموذج النطاق",
+        "pdf-th-comp": "المكون",
+        "pdf-th-tech": "التقنيات",
+        "pdf-arch-comps": "مكونات الهندسة المعمارية",
+        "pdf-int-flows": "تدفقات التكامل",
+        "pdf-arch-principles": "مبادئ الهندسة المعمارية",
+        "pdf-arch-review": "نتائج مراجعة الهندسة المعمارية:",
+        "pdf-sec-arch": "3. بنية النظام",
+        "pdf-th-capability": "القدرة",
+        "pdf-th-models": "النماذج الموصى بها",
+        "pdf-th-justification": "التبرير",
+        "pdf-sec-aimodels": "4. توصيات نماذج الذكاء الاصطناعي",
+        "pdf-infra-guardrails": "البنية التحتية والقواعد:",
+        "pdf-sec-events": "5. نظام الأحداث والتنسيق",
+        "pdf-sec-agentic": "6. تنسيق الذكاء الاصطناعي الوكيل",
+        "pdf-market-landscape": "مشهد السوق:",
+        "pdf-th-approach": "المنافس / النهج",
+        "pdf-sec-compete": "7. الاستراتيجية التنافسية",
+        "pdf-comp-compare": "المقارنة التنافسية:",
+        "pdf-vantiq-diff": "مميزات فانتيك سبارك التنافسية:",
+        "pdf-sec-roadmap": "8. خارطة طريق التنفيذ",
+        "error-gen-failed": "فشل الإنشاء",
+        "error-pipeline-halted": "توقف خط الأنابيب. يرجى التحقق من اختيار النموذج أو أذونات مفتاح API في الإعدادات.",
+        "example-prompt-wildfire": "تصميم نظام للكشف عن حرائق الغابات في الوقت الفعلي باستخدام الطائرات بدون طيار ورؤية الكمبيوتر الذي يمكنه تنبيه فرق الاستجابة للطوارئ تلقائياً عند اكتشاف الحرائق في مناطق الغابات.",
+        "example-prompt-hospital": "تصميم نظام كشف تدهور حالة مرضى المستشفى في الوقت الفعلي الذي يراقب العلامات الحيوية، ويتنبأ بالتدهور السريري، وينبه طاقم التمريض قبل وقوع الأحداث الحرجة.",
+        "example-prompt-industrial": "تصميم نظام صيانة تنبؤية لمعدات التصنيع الصناعية التي تستخدم مستشعرات الاهتزاز ومراقبة درجة الحرارة والتعلم الآلي للتنبؤ بأعطال المعدات قبل حدوثها.",
+        "example-prompt-traffic": "تصميم نظام ذكي لإدارة حركة المرور يستخدم الكاميرات والمستشعرات عند التقاطعات لتحسين توقيت إشارات المرور، واكتشاف الحوادث، وتقليل الازدحام في الوقت الفعلي.",
+        "example-prompt-building": "تصميم نظام تحسين طاقة المباني الذكية الذي يستخدم مستشعرات الإشغال وبيانات الطقس وعناصر التحكم في التدفئة والتهوية وتكييف الهواء لتقليل استهلاك الطاقة مع الحفاظ على مستويات الراحة.",
+        "reg-interpreter": "الوكيل 1 — المفسر",
+        "reg-domain": "الوكيل 2 — النطاق",
+        "reg-architecture": "الوكيل 3 — البنية",
+        "reg-aimodel": "الوكيل 4 — النماذج",
+        "reg-agentic": "الوكيل 4ب — الوكيل",
+        "reg-events": "الوكيل 5 — الأحداث",
+        "reg-implementation": "الوكيل 6 — التنفيذ",
+        "reg-visualizer": "الوكيل 7 — المخططات",
+        "reg-demo": "الوكيل 8 — العرض",
+        "reg-training": "الوكيل 9 — التدريب",
+        "reg-competitive": "الوكيل 10 — المنافسة"
     }
 };
 
@@ -234,30 +1044,33 @@ function localizeUI() {
     document.body.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
 
-    // Update all elements with data-i18n
+    // Update all elements with data-i18n (innerHTML)
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (translations[key]) {
             el.innerHTML = translations[key];
+        } else if (I18N.en[key]) {
+            el.innerHTML = I18N.en[key];
         }
     });
 
-    // Update dynamic placeholders
-    const problemInput = document.getElementById('problemInput');
-    if (problemInput) {
-        if (lang === 'ko') problemInput.placeholder = "실시간 AI 시스템 문제를 설명하세요...";
-        else if (lang === 'ja') problemInput.placeholder = "リアルタイムAIシステムの問題を説明してください...";
-        else if (lang === 'ar') problemInput.placeholder = "صف مشكلة نظام الذكاء الاصطناعي في الوقت الفعلي...";
-        else problemInput.placeholder = "Describe your real-time AI system problem...";
-    }
+    // Update title attributes (tooltips)
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (translations[key]) {
+            el.title = translations[key];
+        }
+    });
 
-    const chatInput = document.getElementById('chatInput');
-    if (chatInput) {
-        if (lang === 'ko') chatInput.placeholder = "Vantiq 유스케이스, 아키텍처 등에 대해 문의하세요...";
-        else if (lang === 'ja') chatInput.placeholder = "Vantiqのユースケースやアーキテクチャについて質問してください...";
-        else if (lang === 'ar') chatInput.placeholder = "اسأل عن حالات استخدام فانتيك، الهندسة المعمارية...";
-        else chatInput.placeholder = "Ask about Vantiq use cases, architecture, best practices...";
-    }
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        if (translations[key]) {
+            el.placeholder = translations[key];
+        } else if (I18N.en[key]) {
+            el.placeholder = I18N.en[key];
+        }
+    });
 }
 
 function updateLanguage() {
@@ -325,36 +1138,43 @@ function saveHistory(sessionState) {
 }
 
 function clearHistory() {
-    if (confirm("Are you sure you want to clear your entire session history? This cannot be undone.")) {
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
+    if (confirm(translations['confirm-clear-history'] || "Are you sure?")) {
         localStorage.removeItem(HISTORY_KEY);
         renderHistory();
     }
 }
 
 function renderHistory() {
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
     const history = loadHistory();
     const grid = document.getElementById('historyGrid');
     if (!grid) return;
 
     if (history.length === 0) {
-        grid.innerHTML = '<p style="color:var(--text-secondary)">No history found.</p>';
+        grid.innerHTML = `<p style="color:var(--text-secondary)">${translations['history-empty'] || 'No history found.'}</p>`;
         return;
     }
 
     grid.innerHTML = history.map(session => {
-        const dateStr = new Date(session.date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+        const dateStr = new Date(session.date).toLocaleString(lang, { dateStyle: 'medium', timeStyle: 'short' });
         const summary = session.problemText.length > 100 ? session.problemText.substring(0, 100) + '...' : session.problemText;
+        const untitledName = translations['untitled-project'] || 'Untitled AI Project';
+        const projName = session.results.domainModel?.projectName || untitledName;
         return `
             <div class="glass-card panel-card" style="cursor:pointer" onclick="app.loadSession('${session.id}')">
                <div style="font-size:12px;color:var(--text-tertiary);margin-bottom:8px">${dateStr}</div>
                <div style="font-weight:600;font-size:15px;color:var(--text-primary);margin-bottom:8px; display:flex; justify-content:space-between; align-items:center">
-                 <span>${session.results.domainModel?.projectName || 'Untitled AI Project'}</span>
-                 <button class="btn-ghost" onclick="event.stopPropagation(); app.renameSession('${session.id}')" style="font-size:12px; padding:2px 6px" title="Rename Session">✏️</button>
+                 <span>${projName}</span>
+                 <button class="btn-ghost" onclick="event.stopPropagation(); app.renameSession('${session.id}')" style="font-size:12px; padding:2px 6px" data-i18n-title="prompt-rename">✏️</button>
                </div>
                <div style="font-size:13px;color:var(--text-secondary);line-height:1.5">${escapeHtml(summary)}</div>
             </div>
         `;
     }).join('');
+    localizeUI(); // Update potential tooltips
 }
 
 function showHistory() {
@@ -362,11 +1182,14 @@ function showHistory() {
 }
 
 function renameSession(id) {
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
     const history = loadHistory();
     const session = history.find(s => s.id === id);
     if (!session) return;
-    const currentName = session.results.domainModel && session.results.domainModel.projectName ? session.results.domainModel.projectName : "Untitled AI Project";
-    const newName = prompt("Enter new project name:", currentName);
+    const untitledName = translations['untitled-project'] || 'Untitled AI Project';
+    const currentName = session.results.domainModel && session.results.domainModel.projectName ? session.results.domainModel.projectName : untitledName;
+    const newName = prompt(translations['prompt-rename'] || "Enter name:", currentName);
     if (newName && newName.trim() !== "") {
         if (!session.results.domainModel) session.results.domainModel = {};
         session.results.domainModel.projectName = newName.trim();
@@ -381,7 +1204,9 @@ function exportToPDF() {
         alert("Please generate a solution first before exporting.");
         return;
     }
-    document.getElementById('generatingAgentName').textContent = '📄 Generating PDF Document...';
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
+    document.getElementById('generatingAgentName').textContent = translations['status-generating-pdf'] || 'Generating PDF...';
     document.getElementById('generatingOverlay').classList.add('visible');
 
     setTimeout(() => {
@@ -392,7 +1217,8 @@ function exportToPDF() {
             alert("Failed to generate PDF. Check console for details.");
         } finally {
             document.getElementById('generatingOverlay').classList.remove('visible');
-            document.getElementById('generatingAgentName').textContent = 'Starting pipeline...';
+            document.getElementById('generatingAgentName').setAttribute('data-i18n', 'gen-starting');
+            localizeUI();
         }
     }, 100);
 }
@@ -523,20 +1349,41 @@ function updatePipelineStep(agentKey, status) {
 
     // Update overlay text
     const overlay = document.getElementById('generatingAgentName');
-    const names = {
-        interpreter: '🔍 Agent 1 — Problem Interpreter',
-        domain: '🧩 Agent 2 — Domain Model Generator',
-        architecture: '🏗️ Agent 3 — Architecture Generator',
-        aimodel: '🤖 Agent 4 — AI Model Advisor',
-        agentic: '🧠 Agent 4b — Agentic AI Guide',
-        events: '⚡ Agent 5 — Event System Designer',
-        implementation: '🛠️ Agent 6 — Implementation Generator',
-        visualizer: '📊 Agent 7 — Architecture Visualizer',
-        demo: '🎬 Agent 8 — Demo Scenario Generator',
-        training: '🎓 Agent 9 — Training Lab Generator'
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
+
+    // Agent names/labels from I18N
+    const stepKeys = {
+        interpreter: 'step-interpreter',
+        domain: 'step-domain',
+        architecture: 'step-architecture',
+        aimodel: 'step-aimodel',
+        agentic: 'step-agentic',
+        events: 'step-events',
+        implementation: 'step-implementation',
+        visualizer: 'step-visualizer',
+        demo: 'step-demo',
+        training: 'step-training'
     };
+
     if (status === 'active' && overlay) {
-        overlay.textContent = names[agentKey] || agentKey;
+        const key = stepKeys[agentKey];
+        const label = translations[key] || agentKey;
+        const icon = {
+            interpreter: '🔍', domain: '🧩', architecture: '🏗️', aimodel: '🤖',
+            agentic: '🧠', events: '⚡', implementation: '🛠️', visualizer: '📊',
+            demo: '🎬', training: '🎓'
+        }[agentKey] || '';
+
+        // Use a prefix like "Agent X — " translated if needed, but for simplicity we can use Agent number
+        const agentNumber = {
+            interpreter: 1, domain: 2, architecture: 3, aimodel: 4,
+            agentic: '4b', events: 5, implementation: 6, visualizer: 7,
+            demo: 8, training: 9
+        }[agentKey];
+
+        const agentLabel = lang === 'ko' ? '에이전트' : lang === 'ja' ? 'エージェント' : lang === 'ar' ? 'الوكيل' : 'Agent';
+        overlay.textContent = `${icon} ${agentLabel} ${agentNumber} — ${label}`;
     }
 }
 
@@ -723,10 +1570,11 @@ async function generate() {
             // Display the error in the analysis panel so it's visible
             const el = document.getElementById('analysis-content'); if (el) el.innerHTML = `
               <div class="glass-card accent-rose" style="margin-top: 20px;">
-                <div class="card-title"><span class="card-icon">⚠️</span> Generation Failed</div>
+                <div class="card-title"><span class="card-icon">⚠️</span> <span data-i18n="error-gen-failed">Generation Failed</span></div>
                 <p style="font-size:14px;color:var(--text-primary);margin:12px 0">${errorMsg}</p>
-                <p style="font-size:12px;color:var(--text-tertiary)">The pipeline was halted. Please check your model selection or API key permissions in Settings.</p>
+                <p style="font-size:12px;color:var(--text-tertiary)" data-i18n="error-pipeline-halted">The pipeline was halted. Please check your model selection or API key permissions in Settings.</p>
               </div>`;
+            localizeUI();
             switchPanel('analysis');
         }
     }
@@ -844,7 +1692,8 @@ async function regenerate(agentKey) {
 // ── Load Example ──
 function loadExample(index) {
     const input = document.getElementById('problemInput');
-    input.value = EXAMPLES[index] || EXAMPLES[0];
+    const examples = getExamples();
+    input.value = examples[index] || examples[0];
     input.focus();
 }
 

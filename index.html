@@ -110,10 +110,11 @@
         <span id="statusText" data-i18n="status-configure">Configure API Key</span>
         <div style="margin-left:auto; display: flex; gap: 4px;">
           <button class="btn-ghost" onclick="app.showHistory()" id="btnHistory" style="font-size:14px"
-            title="Session History">🕒</button>
+            data-i18n-title="title-history">🕒</button>
           <button class="btn-ghost" onclick="app.exportToPDF()" id="btnExportPdf" style="display:none;font-size:14px"
-            title="Export Solution to PDF">📄</button>
-          <button class="btn-ghost" onclick="app.showSettings()" style="font-size:14px" title="Settings">⚙️</button>
+            data-i18n-title="title-export">📄</button>
+          <button class="btn-ghost" onclick="app.showSettings()" style="font-size:14px"
+            data-i18n-title="title-settings">⚙️</button>
         </div>
       </div>
     </aside>
@@ -125,57 +126,57 @@
       <div class="pipeline-bar" id="pipelineBar">
         <div class="pipeline-step" data-agent="interpreter" id="step-interpreter">
           <span class="step-icon">🔍</span>
-          <span>Interpreter</span>
+          <span data-i18n="step-interpreter">Interpreter</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="domain" id="step-domain">
           <span class="step-icon">🧩</span>
-          <span>Domain</span>
+          <span data-i18n="step-domain">Domain</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="architecture" id="step-architecture">
           <span class="step-icon">🏗️</span>
-          <span>Architecture</span>
+          <span data-i18n="step-architecture">Architecture</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="aimodel" id="step-aimodel">
           <span class="step-icon">🤖</span>
-          <span>AI Models</span>
+          <span data-i18n="step-aimodel">AI Models</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="agentic" id="step-agentic">
           <span class="step-icon">🧠</span>
-          <span>Agentic</span>
+          <span data-i18n="step-agentic">Agentic</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="events" id="step-events">
           <span class="step-icon">⚡</span>
-          <span>Events</span>
+          <span data-i18n="step-events">Events</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="implementation" id="step-implementation">
           <span class="step-icon">🛠️</span>
-          <span>Implement</span>
+          <span data-i18n="step-implementation">Implement</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="visualizer" id="step-visualizer">
           <span class="step-icon">📊</span>
-          <span>Diagrams</span>
+          <span data-i18n="step-visualizer">Diagrams</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="demo" id="step-demo">
           <span class="step-icon">🎬</span>
-          <span>Demo</span>
+          <span data-i18n="step-demo">Demo</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="training" id="step-training">
           <span class="step-icon">🎓</span>
-          <span>Training</span>
+          <span data-i18n="step-training">Training</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="competitive" id="step-competitive">
           <span class="step-icon">🏆</span>
-          <span>Compete</span>
+          <span data-i18n="step-competitive">Compete</span>
         </div>
       </div>
 
@@ -186,12 +187,14 @@
         <div class="panel" id="panel-usecase">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">💬</span> Vantiq Usecase Assistant</div>
-              <div class="section-subtitle">AI-powered chatbot for Vantiq use case ideation, architecture guidance, and
+              <div class="section-title"><span class="section-icon">💬</span> <span data-i18n="chat-title">Vantiq
+                  Usecase Assistant</span></div>
+              <div class="section-subtitle" data-i18n="chat-subtitle">AI-powered chatbot for Vantiq use case ideation,
+                architecture guidance, and
                 best practices</div>
             </div>
             <button class="btn btn-regenerate" onclick="app.clearChat()">
-              🗑️ Clear Chat
+              🗑️ <span data-i18n="btn-clear-chat">Clear Chat</span>
             </button>
           </div>
           <div class="chat-container" id="chatContainer">
@@ -211,8 +214,8 @@
               </div>
             </div>
             <div class="chat-input-area">
-              <input type="text" class="chat-input" id="chatInput"
-                placeholder="Ask about Vantiq use cases, architecture, best practices..." autocomplete="off" />
+              <input type="text" class="chat-input" id="chatInput" data-i18n-placeholder="chat-placeholder"
+                autocomplete="off" />
               <button class="btn btn-primary chat-send-btn" id="chatSendBtn" onclick="app.sendChat()">
                 <span>➤</span>
               </button>
@@ -230,7 +233,7 @@
               </div>
             </div>
             <button class="btn-ghost" onclick="app.clearHistory()" style="font-size:13px;color:var(--text-tertiary)">
-              🧹 Clear All
+              🧹 <span data-i18n="btn-clear-all">Clear All</span>
             </button>
           </div>
           <div id="historyGrid" style="display:flex; flex-direction:column; gap:16px; margin-top:20px;">
@@ -254,7 +257,7 @@
                 <span>📝</span> <span data-i18n="problem-label">Problem Description</span>
               </div>
               <textarea class="problem-textarea" id="problemInput"
-                placeholder="Describe your real-time AI system problem...&#10;&#10;Example: Design a real-time wildfire detection system using drones and computer vision that can automatically alert emergency response teams."></textarea>
+                data-i18n-placeholder="problem-placeholder"></textarea>
               <div class="input-actions">
                 <button class="btn btn-primary" id="generateBtn" onclick="app.generate()">
                   <span>⚡</span> <span data-i18n="btn-generate">Generate Solution</span>
@@ -267,21 +270,27 @@
 
             <div class="input-card" style="margin-top:16px">
               <div class="input-label">
-                <span>🏆</span> Competitors to Compare <span
-                  style="font-size:11px;color:var(--text-tertiary);font-weight:400">(optional)</span>
+                <span>🏆</span> <span data-i18n="competitors-label">Competitors to Compare</span> <span
+                  style="font-size:11px;color:var(--text-tertiary);font-weight:400"
+                  data-i18n="optional-label">(optional)</span>
               </div>
               <input type="text" class="modal-input" id="competitorsInput"
-                placeholder="e.g. AWS IoT, Azure IoT, PTC ThingWorx, C3.ai, Siemens MindSphere (leave empty to auto-select 5)" />
+                data-i18n-placeholder="competitors-placeholder" />
             </div>
 
             <div class="examples-section">
               <div class="examples-label" data-i18n="examples-label">Try an example</div>
               <div class="example-chips">
-                <div class="example-chip" onclick="app.loadExample(0)">🔥 Wildfire Detection with Drones</div>
-                <div class="example-chip" onclick="app.loadExample(1)">🏥 Hospital Patient Deterioration</div>
-                <div class="example-chip" onclick="app.loadExample(2)">🏭 Industrial Equipment Monitoring</div>
-                <div class="example-chip" onclick="app.loadExample(3)">🚗 Smart Traffic Management</div>
-                <div class="example-chip" onclick="app.loadExample(4)">🏢 Smart Building Energy Optimization</div>
+                <div class="example-chip" onclick="app.loadExample(0)" data-i18n="example-wildfire">🔥 Wildfire
+                  Detection with Drones</div>
+                <div class="example-chip" onclick="app.loadExample(1)" data-i18n="example-hospital">🏥 Hospital Patient
+                  Deterioration</div>
+                <div class="example-chip" onclick="app.loadExample(2)" data-i18n="example-industrial">🏭 Industrial
+                  Equipment Monitoring</div>
+                <div class="example-chip" onclick="app.loadExample(3)" data-i18n="example-traffic">🚗 Smart Traffic
+                  Management</div>
+                <div class="example-chip" onclick="app.loadExample(4)" data-i18n="example-building">🏢 Smart Building
+                  Energy Optimization</div>
               </div>
             </div>
           </div>
@@ -291,14 +300,15 @@
         <div class="panel" id="panel-analysis">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🔍</span> Problem Analysis</div>
-              <div class="section-subtitle">Agent 1 — Problem Interpreter output</div>
+              <div class="section-title"><span class="section-icon">🔍</span> <span data-i18n="analysis-title">Problem
+                  Analysis</span></div>
+              <div class="section-subtitle" data-i18n="analysis-subtitle">Agent 1 — Problem Interpreter output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-interpreter" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-interpreter" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('interpreter')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('interpreter')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -309,14 +319,15 @@
         <div class="panel" id="panel-domain">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🧩</span> Domain Model</div>
-              <div class="section-subtitle">Agent 2 — Domain Model Generator output</div>
+              <div class="section-title"><span class="section-icon">🧩</span> <span data-i18n="domain-title">Domain
+                  Model</span></div>
+              <div class="section-subtitle" data-i18n="domain-subtitle">Agent 2 — Domain Model Generator output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-domain" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-domain" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('domain')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('domain')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -327,14 +338,16 @@
         <div class="panel" id="panel-architecture">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🏗️</span> System Architecture</div>
-              <div class="section-subtitle">Agent 3 — Architecture Generator output</div>
+              <div class="section-title"><span class="section-icon">🏗️</span> <span data-i18n="arch-title">System
+                  Architecture</span></div>
+              <div class="section-subtitle" data-i18n="arch-subtitle">Agent 3 — Architecture Generator output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-architecture" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-architecture" class="refine-input"
+                data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('architecture')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('architecture')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -347,14 +360,15 @@
         <div class="panel" id="panel-aimodels">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🤖</span> AI Model Recommendations</div>
-              <div class="section-subtitle">Agent 4 — AI Model Advisor output</div>
+              <div class="section-title"><span class="section-icon">🤖</span> <span data-i18n="aimodels-title">AI Model
+                  Recommendations</span></div>
+              <div class="section-subtitle" data-i18n="aimodels-subtitle">Agent 4 — AI Model Advisor output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-aimodel" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-aimodel" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('aimodel')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('aimodel')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -365,14 +379,15 @@
         <div class="panel" id="panel-agentic">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🧠</span> Agentic AI Guide</div>
-              <div class="section-subtitle">Agent 4b — Agentic AI Architect output</div>
+              <div class="section-title"><span class="section-icon">🧠</span> <span data-i18n="agentic-title">Agentic AI
+                  Guide</span></div>
+              <div class="section-subtitle" data-i18n="agentic-subtitle">Agent 4b — Agentic AI Architect output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-agentic" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-agentic" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('agentic')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('agentic')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -383,14 +398,15 @@
         <div class="panel" id="panel-events">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">⚡</span> Event System Design</div>
-              <div class="section-subtitle">Agent 5 — Event System Designer output</div>
+              <div class="section-title"><span class="section-icon">⚡</span> <span data-i18n="events-title">Event System
+                  Design</span></div>
+              <div class="section-subtitle" data-i18n="events-subtitle">Agent 5 — Event System Designer output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-events" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-events" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('events')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('events')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -401,14 +417,16 @@
         <div class="panel" id="panel-implementation">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🛠️</span> Implementation Scaffolding</div>
-              <div class="section-subtitle">Agent 6 — Implementation Generator output</div>
+              <div class="section-title"><span class="section-icon">🛠️</span> <span
+                  data-i18n="impl-title">Implementation Scaffolding</span></div>
+              <div class="section-subtitle" data-i18n="impl-subtitle">Agent 6 — Implementation Generator output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-implementation" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-implementation" class="refine-input"
+                data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('implementation')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('implementation')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -419,14 +437,15 @@
         <div class="panel" id="panel-diagrams">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">📊</span> Architecture Diagrams</div>
-              <div class="section-subtitle">Agent 7 — Architecture Visualizer output</div>
+              <div class="section-title"><span class="section-icon">📊</span> <span
+                  data-i18n="diagrams-title">Architecture Diagrams</span></div>
+              <div class="section-subtitle" data-i18n="diagrams-subtitle">Agent 7 — Architecture Visualizer output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-visualizer" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-visualizer" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('visualizer')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('visualizer')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -437,14 +456,15 @@
         <div class="panel" id="panel-demo">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🎬</span> Demo Scenarios</div>
-              <div class="section-subtitle">Agent 8 — Demo Scenario Generator output</div>
+              <div class="section-title"><span class="section-icon">🎬</span> <span data-i18n="demo-title">Demo
+                  Scenarios</span></div>
+              <div class="section-subtitle" data-i18n="demo-subtitle">Agent 8 — Demo Scenario Generator output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-demo" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-demo" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('demo')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('demo')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -455,14 +475,15 @@
         <div class="panel" id="panel-training">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🎓</span> Training Labs</div>
-              <div class="section-subtitle">Agent 9 — Training Lab Generator output</div>
+              <div class="section-title"><span class="section-icon">🎓</span> <span data-i18n="training-title">Training
+                  Labs</span></div>
+              <div class="section-subtitle" data-i18n="training-subtitle">Agent 9 — Training Lab Generator output</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-training" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-training" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('training')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('training')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -473,14 +494,16 @@
         <div class="panel" id="panel-competitive">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🏆</span> Competitive Analysis</div>
-              <div class="section-subtitle">Agent 10 — Competitive Intelligence output</div>
+              <div class="section-title"><span class="section-icon">🏆</span> <span
+                  data-i18n="competitive-title">Competitive Analysis</span></div>
+              <div class="section-subtitle" data-i18n="competitive-subtitle">Agent 10 — Competitive Intelligence output
+              </div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-competitive" class="refine-input" placeholder="Refine this phase..."
+              <input type="text" id="refine-competitive" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('competitive')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('competitive')">
-                ↻ Regenerate
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
             </div>
           </div>
@@ -492,8 +515,8 @@
       <div class="generating-overlay" id="generatingOverlay">
         <div class="generating-spinner"></div>
         <div class="generating-text-container">
-          <div class="generating-text">Generating Solution...</div>
-          <div class="generating-agent" id="generatingAgentName">Starting pipeline...</div>
+          <div class="generating-text" data-i18n="gen-main-status">Generating Solution...</div>
+          <div class="generating-agent" id="generatingAgentName" data-i18n="gen-starting">Starting pipeline...</div>
         </div>
       </div>
 
@@ -501,22 +524,24 @@
       <div class="modal-overlay" id="settingsModal">
         <div class="modal-card">
           <div class="modal-header">
-            <h2>⚙️ AI Engine Settings</h2>
+            <h2 data-i18n="settings-title">⚙️ AI Engine Settings</h2>
             <button class="btn-ghost" onclick="app.hideSettings()" style="font-size:18px">✕</button>
           </div>
           <div class="modal-body">
-            <div class="input-label">🔑 OpenAI API Key</div>
-            <input type="password" class="modal-input" id="apiKeyInput" placeholder="sk-..." autocomplete="off" />
-            <p style="font-size:11px;color:var(--text-tertiary);margin-top:6px">Your API key is stored only in this
+            <div class="input-label" data-i18n="settings-key">🔑 OpenAI API Key</div>
+            <input type="password" class="modal-input" id="apiKeyInput" data-i18n-placeholder="key-placeholder"
+              autocomplete="off" />
+            <p style="font-size:11px;color:var(--text-tertiary);margin-top:6px" data-i18n="settings-key-note">Your API
+              key is stored only in this
               browser session and never sent anywhere except api.openai.com.</p>
 
             <div class="input-label" style="margin-top:20px">🤖 <span data-i18n="settings-model">Model</span></div>
             <select class="modal-input" id="modelSelect">
-              <option value="gpt-4.1">GPT-4.1 (Recommended)</option>
-              <option value="gpt-4.1-mini">GPT-4.1 Mini (Faster)</option>
-              <option value="gpt-4.1-nano">GPT-4.1 Nano (Fastest)</option>
+              <option value="gpt-4.1" data-i18n="model-recommended">GPT-4.1 (Recommended)</option>
+              <option value="gpt-4.1-mini" data-i18n="model-mini">GPT-4.1 Mini (Faster)</option>
+              <option value="gpt-4.1-nano" data-i18n="model-nano">GPT-4.1 Nano (Fastest)</option>
               <option value="gpt-4o">GPT-4o</option>
-              <option value="gpt-5.4">GPT-5.4 (Most Capable)</option>
+              <option value="gpt-5.4" data-i18n="model-capable">GPT-5.4 (Most Capable)</option>
               <option value="gpt-5.2">GPT-5.2</option>
               <option value="o3-mini">o3-mini (Reasoning)</option>
             </select>
@@ -527,7 +552,7 @@
               <option value="en">English (Default)</option>
               <option value="ko">한국어 (Korean)</option>
               <option value="ja">日本語 (Japanese)</option>
-              <option value="ar">العربية (Arabic Standard Classical)</option>
+              <option value="ar">العربية (Arabic)</option>
             </select>
           </div>
           <div class="modal-footer">
