@@ -1,31 +1,27 @@
 window.PDFGenerator = {
-    generate: function (state) {
+    generate: async function (state) {
+        const lang = state.language || 'en';
+        const isArabic = lang === 'ar';
+        const translations = I18N[lang] || I18N.en;
+
         try {
             if (!state || !state.results || !state.results.analysis) {
                 console.error("No valid state to generate PDF");
                 return;
             }
 
-            const lang = state.language || 'en';
-            const isArabic = lang === 'ar';
-            const translations = I18N[lang] || I18N.en;
             const results = state.results;
             const untitledName = translations['untitled-project'] || "Vantiq AI Project";
             const projectName = results.domainModel?.projectName || untitledName;
             const dateStr = new Date().toLocaleDateString(lang);
 
             // 1. Configure Fonts for Global Character Support
-            // Note: CJK fonts are large; using .ttf versions for better pdfMake compatibility
             pdfMake.fonts = {
                 Roboto: {
                     normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
                     bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
                     italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
                     bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
-                },
-                NotoSans: {
-                    normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSans/NotoSans-Regular.ttf',
-                    bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSans/NotoSans-Bold.ttf'
                 },
                 NotoSansJP: {
                     normal: 'https://cdn.jsdelivr.net/npm/noto-sans-jp@52.0.0/fonts/NotoSansJP-Regular.ttf',
@@ -46,6 +42,26 @@ window.PDFGenerator = {
             if (lang === 'ko') primaryFont = 'NotoSansKR';
             else if (lang === 'ja') primaryFont = 'NotoSansJP';
             else if (lang === 'ar') primaryFont = 'NotoSansArabic';
+
+            // --- DEEP HARDENING: Font Preload Validation ---
+            const validateFonts = async (fontObj) => {
+                const urls = [];
+                if (fontObj[primaryFont]) {
+                    urls.push(fontObj[primaryFont].normal);
+                    urls.push(fontObj[primaryFont].bold);
+                }
+
+                for (const url of urls) {
+                    try {
+                        const res = await fetch(url, { method: 'HEAD' });
+                        if (!res.ok) throw new Error(`Font not accessible: ${url}`);
+                    } catch (e) {
+                        console.warn("Font preflight failed, attempting generation anyway...", e);
+                    }
+                }
+            };
+
+            await validateFonts(pdfMake.fonts);
 
             // 2. Initialize Document Definition
             const docDefinition = {
@@ -490,7 +506,8 @@ window.PDFGenerator = {
             pdfMake.createPdf(docDefinition).download(pdfName);
         } catch (error) {
             console.error("PDF Generation Error:", error);
-            alert("Failed to generate PDF. Please check the console for details.");
+            const errorMsg = translations['pdf-error'] || "Failed to generate PDF. Please check the console for details.";
+            alert(errorMsg);
         }
     }
 };

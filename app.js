@@ -1462,6 +1462,9 @@ function preprocessMermaid(code) {
     if (!code) return '';
     let cleaned = code.trim();
 
+    // 0. Remove Markdown blocks if the AI included them
+    cleaned = cleaned.replace(/```mermaid\n?|```/g, '').trim();
+
     // 1. Intelligent Diagram Type Detection
     const diagramTypes = ['graph ', 'flowchart ', 'sequenceDiagram', 'classDiagram', 'stateDiagram', 'erDiagram', 'pie', 'gantt', 'journey', 'gitGraph', 'C4Context'];
     const hasType = diagramTypes.some(type => cleaned.startsWith(type));
@@ -1470,34 +1473,64 @@ function preprocessMermaid(code) {
         cleaned = 'graph TD\n' + cleaned;
     }
 
-    // 2. Fix common LLM unquoted label errors (especially non-Latin chars)
-    // Matches patterns like: Agent[Some Text] or id1 -> id2[Label]
-    cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)\[([^"\]\n]+)\]/g, (match, id, label) => {
-        if (label.startsWith('"') && label.endsWith('"')) return match;
-        return `${id}["${label.trim()}"]`;
-    });
+    const isSequence = cleaned.startsWith('sequenceDiagram');
+    const idMap = new Map();
+    let idCounter = 0;
 
-    // 3. Fix circular nodes: id(Label)
-    cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)\(([^"\]\n]+)\)/g, (match, id, label) => {
-        if (label.startsWith('"') && label.endsWith('"')) return match;
-        return `${id}("${label.trim()}")`;
-    });
+    // Helper for safe IDs
+    const getSafeId = (id) => {
+        const trimmed = id.trim();
+        if (!trimmed || /^[a-zA-Z0-9_]+$/.test(trimmed)) return trimmed;
+        if (idMap.has(trimmed)) return idMap.get(trimmed);
+        const safe = `nodesafe_${idCounter++}`;
+        idMap.set(trimmed, safe);
+        return safe;
+    };
 
-    // 4. Fix labels in arrows: id1 -- Label --> id2
+    if (!isSequence) {
+        // Process Graph/Flowchart
+        // Pass 1: Identifiers with labels
+        cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)(\[|\(|\{\{|>)([^\]\)\}\n]+)(\]|\)|\}\}|\])/g, (match, id, open, label, close) => {
+            const safeId = getSafeId(id);
+            let safeLabel = label.trim();
+            if (!safeLabel.startsWith('"')) safeLabel = `"${safeLabel}"`;
+            return `${safeId}${open}${safeLabel}${close}`;
+        });
+
+        // Pass 2: Identification in connections
+        cleaned = cleaned.replace(/(^|[\s;])([a-zA-Z0-9_\u0080-\uFFFF]+)(?=($|[\s;]|--|->|==))/g, (match, prefix, id) => {
+            const keywords = ['graph', 'TD', 'LR', 'BT', 'RL', 'subgraph', 'end', 'click', 'style', 'classDescriptor', 'class'];
+            if (keywords.includes(id)) return match;
+            return prefix + getSafeId(id);
+        });
+    } else {
+        // Process Sequence Diagrams
+        cleaned = cleaned.replace(/participant\s+([^" \n]+)(\s+as\s+)?([^" \n]+)?/g, (match, name, asPart, id) => {
+            if (asPart) {
+                const safeId = getSafeId(id);
+                return `participant "${name.trim()}" as ${safeId}`;
+            } else {
+                const safeId = getSafeId(name);
+                return `participant "${name.trim()}" as ${safeId}`;
+            }
+        });
+
+        cleaned = cleaned.replace(/^(\s*)([^\s-:]+)(\s*-+>\s*)([^\s-:]+)(\s*:\s*)(.+)$/gm, (match, indent, from, arrow, to, colon, label) => {
+            const safeFrom = getSafeId(from);
+            const safeTo = getSafeId(to);
+            let safeLabel = label.trim();
+            if (!safeLabel.startsWith('"')) safeLabel = `"${safeLabel}"`;
+            return `${indent}${safeFrom}${arrow}${safeTo}${colon}${safeLabel}`;
+        });
+    }
+
+    // Final label safety
     cleaned = cleaned.replace(/--\s*([^"->\n]+?)\s*-->/g, (match, label) => {
-        if (label.trim().startsWith('"') && label.trim().endsWith('"')) return match;
+        if (label.trim().startsWith('"')) return match;
         return `-- "${label.trim()}" -->`;
     });
 
-    // 5. Fix sequence diagram participants: participant Label as id
-    cleaned = cleaned.replace(/participant\s+([^" \n]+)\s+as/g, (match, label) => {
-        if (label.startsWith('"') && label.endsWith('"')) return match;
-        return `participant "${label.trim()}" as`;
-    });
-
-    // 6. Remove any trailing semicolons (can break some versions)
     cleaned = cleaned.replace(/;\s*$/gm, '');
-
     return cleaned;
 }
 
