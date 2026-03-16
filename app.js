@@ -1462,20 +1462,28 @@ function preprocessMermaid(code) {
     if (!code) return '';
     let cleaned = code.trim();
 
-    // 1. Ensure basic graph declaration if missing (default to graph LR)
+    // 1. Ensure basic graph declaration if missing (default to graph TD for better vertical flow)
     if (!cleaned.startsWith('graph ') && !cleaned.startsWith('flowchart ')) {
-        cleaned = 'graph LR\n' + cleaned;
+        cleaned = 'graph TD\n' + cleaned;
     }
 
     // 2. Fix common LLM unquoted label errors (especially non-Latin chars)
     // Matches patterns like: Agent[Some Text] or id1 -> id2[Label]
-    // We wrap identifying text in double quotes if not already quoted.
-    cleaned = cleaned.replace(/(\w+)\[([^"\]\n]+)\]/g, (match, id, label) => {
+    // We use a broader range for the ID to support potential localized IDs (though not recommended)
+    cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)\[([^"\]\n]+)\]/g, (match, id, label) => {
+        if (label.startsWith('"') && label.endsWith('"')) return match;
         return `${id}["${label.trim()}"]`;
     });
 
-    // 3. Fix labels in arrows: id1 -- Label --> id2
+    // 3. Fix circular nodes: id(Label)
+    cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)\(([^"\]\n]+)\)/g, (match, id, label) => {
+        if (label.startsWith('"') && label.endsWith('"')) return match;
+        return `${id}("${label.trim()}")`;
+    });
+
+    // 4. Fix labels in arrows: id1 -- Label --> id2
     cleaned = cleaned.replace(/--\s*([^"->\n]+?)\s*-->/g, (match, label) => {
+        if (label.trim().startsWith('"') && label.trim().endsWith('"')) return match;
         return `-- "${label.trim()}" -->`;
     });
 
@@ -1486,7 +1494,7 @@ function preprocessMermaid(code) {
 }
 
 async function renderMermaidDiagrams() {
-    const mermaidEls = document.querySelectorAll('.panel.active .mermaid');
+    const mermaidEls = document.querySelectorAll('.mermaid');
     for (const el of mermaidEls) {
         if (el.dataset.rendered) continue;
         try {
