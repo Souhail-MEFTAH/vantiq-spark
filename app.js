@@ -1462,14 +1462,16 @@ function preprocessMermaid(code) {
     if (!code) return '';
     let cleaned = code.trim();
 
-    // 1. Ensure basic graph declaration if missing (default to graph TD for better vertical flow)
-    if (!cleaned.startsWith('graph ') && !cleaned.startsWith('flowchart ')) {
+    // 1. Intelligent Diagram Type Detection
+    const diagramTypes = ['graph ', 'flowchart ', 'sequenceDiagram', 'classDiagram', 'stateDiagram', 'erDiagram', 'pie', 'gantt', 'journey', 'gitGraph', 'C4Context'];
+    const hasType = diagramTypes.some(type => cleaned.startsWith(type));
+
+    if (!hasType) {
         cleaned = 'graph TD\n' + cleaned;
     }
 
     // 2. Fix common LLM unquoted label errors (especially non-Latin chars)
     // Matches patterns like: Agent[Some Text] or id1 -> id2[Label]
-    // We use a broader range for the ID to support potential localized IDs (though not recommended)
     cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)\[([^"\]\n]+)\]/g, (match, id, label) => {
         if (label.startsWith('"') && label.endsWith('"')) return match;
         return `${id}["${label.trim()}"]`;
@@ -1487,7 +1489,13 @@ function preprocessMermaid(code) {
         return `-- "${label.trim()}" -->`;
     });
 
-    // 4. Remove any trailing semicolons (can break some versions)
+    // 5. Fix sequence diagram participants: participant Label as id
+    cleaned = cleaned.replace(/participant\s+([^" \n]+)\s+as/g, (match, label) => {
+        if (label.startsWith('"') && label.endsWith('"')) return match;
+        return `participant "${label.trim()}" as`;
+    });
+
+    // 6. Remove any trailing semicolons (can break some versions)
     cleaned = cleaned.replace(/;\s*$/gm, '');
 
     return cleaned;

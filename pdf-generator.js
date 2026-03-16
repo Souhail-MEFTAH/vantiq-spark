@@ -28,12 +28,12 @@ window.PDFGenerator = {
                     bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSans/NotoSans-Bold.ttf'
                 },
                 NotoSansJP: {
-                    normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/SubsetOTF/JP/NotoSansCJKjp-Regular.otf',
-                    bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/SubsetOTF/JP/NotoSansCJKjp-Bold.otf'
+                    normal: 'https://cdn.jsdelivr.net/npm/noto-sans-jp@52.0.0/fonts/NotoSansJP-Regular.ttf',
+                    bold: 'https://cdn.jsdelivr.net/npm/noto-sans-jp@52.0.0/fonts/NotoSansJP-Bold.ttf'
                 },
                 NotoSansKR: {
-                    normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/SubsetOTF/KR/NotoSansCJKkr-Regular.otf',
-                    bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-cjk@main/Sans/SubsetOTF/KR/NotoSansCJKkr-Bold.otf'
+                    normal: 'https://cdn.jsdelivr.net/npm/noto-sans-kr-font@latest/dist/NotoSansKR-Regular.ttf',
+                    bold: 'https://cdn.jsdelivr.net/npm/noto-sans-kr-font@latest/dist/NotoSansKR-Bold.ttf'
                 },
                 NotoSansArabic: {
                     normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSansArabic/NotoSansArabic-Regular.ttf',
