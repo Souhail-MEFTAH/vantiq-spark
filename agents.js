@@ -223,7 +223,7 @@ RULES:
 - Be specific about how each agent integrates with the Vantiq platform (LLM Sources, Semantic Index for RAG, Types for memory).
 - HIGH PRIORITY TECHNICAL ACCURACY: Do not hallucinate Vantiq features. Ensure realistic use of Semantic Index (Vantiq's native Vector DB), standard Types (for structured data/memory), and Procedures.
 - If a requested feature/integration is not natively supported by Vantiq, explicitly state how it must be implemented via external REST/gRPC Sources or custom Service code.
-- MERMAID SYNTAX RULES (diagram): Quote all node labels containing special characters, parentheses, or brackets (e.g., id1["Label (Info)"]). No HTML tags.
+- MERMAID SYNTAX RULES (diagram): MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). This is critical for non-English characters. No HTML tags.
 
 You MUST respond with ONLY valid JSON:
 {
@@ -368,7 +368,7 @@ YOUR TASK: Generate 3 Mermaid diagrams: system architecture, component interacti
 
 RULES:
 - Use valid Mermaid graph syntax (graph LR, graph TB, or graph TD). No flowchart syntax.
-- MERMAID SYNTAX RULES: Quote all node labels containing special characters, parentheses, or brackets (e.g., id1["Label (Info)"]). No HTML tags.
+- MERMAID SYNTAX RULES: MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). This is critical for Arabic, Japanese, and Korean. No HTML tags.
 - Keep node labels SHORT (3-4 words max). Use <br/> for multi-line.
 - Use subgraphs with dark styling: style fill:#1a1a2e,stroke:#7c6bf5,color:#e8eaed.
 - Label Vantiq components clearly (VEH, Services, Sources, Types, Client Builder).

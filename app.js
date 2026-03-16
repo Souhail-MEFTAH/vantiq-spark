@@ -1454,13 +1454,49 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ── Mermaid Rendering ──
+/**
+ * Automatically cleans and hardens Mermaid syntax, specifically for localized content.
+ * Fixes unquoted labels, illegal ID characters, and balanced quotes.
+ */
+function preprocessMermaid(code) {
+    if (!code) return '';
+    let cleaned = code.trim();
+
+    // 1. Ensure basic graph declaration if missing (default to graph LR)
+    if (!cleaned.startsWith('graph ') && !cleaned.startsWith('flowchart ')) {
+        cleaned = 'graph LR\n' + cleaned;
+    }
+
+    // 2. Fix common LLM unquoted label errors (especially non-Latin chars)
+    // Matches patterns like: Agent[Some Text] or id1 -> id2[Label]
+    // We wrap identifying text in double quotes if not already quoted.
+    cleaned = cleaned.replace(/(\w+)\[([^"\]\n]+)\]/g, (match, id, label) => {
+        return `${id}["${label.trim()}"]`;
+    });
+
+    // 3. Fix labels in arrows: id1 -- Label --> id2
+    cleaned = cleaned.replace(/--\s*([^"->\n]+?)\s*-->/g, (match, label) => {
+        return `-- "${label.trim()}" -->`;
+    });
+
+    // 4. Remove any trailing semicolons (can break some versions)
+    cleaned = cleaned.replace(/;\s*$/gm, '');
+
+    return cleaned;
+}
+
 async function renderMermaidDiagrams() {
     const mermaidEls = document.querySelectorAll('.panel.active .mermaid');
     for (const el of mermaidEls) {
         if (el.dataset.rendered) continue;
         try {
             const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
-            const { svg } = await mermaid.render(id, el.textContent);
+            const hardenedCode = preprocessMermaid(el.textContent);
+
+            // Log for debugging localized syntax
+            console.log(`[Mermaid] Rendering ${id}:`, hardenedCode);
+
+            const { svg } = await mermaid.render(id, hardenedCode);
             el.innerHTML = svg;
             el.dataset.rendered = 'true';
         } catch (e) {
