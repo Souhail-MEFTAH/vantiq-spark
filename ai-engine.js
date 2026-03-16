@@ -54,6 +54,9 @@ class AIEngine {
                 frequency_penalty: 0.1
             };
 
+            // Log prompt size for debugging
+            console.log(`[${agentName}] Sending Request — Prompt Size: ${Math.round((systemPrompt.length + userMessage.length) / 1024)} KB`);
+
             // Removed 16k override to prevent runaway generation on newer models
             // max_tokens is kept at 8192 for all models to enforce conciseness
 
@@ -117,6 +120,16 @@ class AIEngine {
 
         } catch (err) {
             clearTimeout(timeoutId);
+
+            // Handle network errors/fetch failures with retries
+            const isNetworkError = err instanceof TypeError || err.name === 'TypeError' || err.message.includes('fetch');
+            if (isNetworkError && retryCount < this.maxRetries) {
+                const delay = Math.pow(2, retryCount + 1) * 1000;
+                console.warn(`[${agentName}] Network error: ${err.message}. Retrying in ${delay}ms... (Attempt ${retryCount + 1}/${this.maxRetries})`);
+                await this._sleep(delay);
+                return this.callAgent(agentName, systemPrompt, userMessage, retryCount + 1);
+            }
+
             if (err.name === 'AbortError') {
                 throw new Error(`[${agentName}] Request timed out after ${this.timeout / 1000}s`);
             }

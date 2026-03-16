@@ -1702,17 +1702,29 @@ async function generate() {
         console.error('Pipeline error:', e);
         document.getElementById('generatingOverlay').classList.remove('visible');
 
-        // Show user-friendly error
         const errorMsg = e.message || 'An unexpected error occurred';
-        if (errorMsg.includes('API key')) {
+        let technicalAdvice = 'The pipeline was halted. Please check your model selection or API key permissions in Settings.';
+
+        // Detailed error categorization
+        if (errorMsg.includes('API key') || errorMsg.includes('401')) {
             showSettings();
-        } else {
-            // Display the error in the analysis panel so it's visible
-            const el = document.getElementById('analysis-content'); if (el) el.innerHTML = `
+            return;
+        } else if (errorMsg.toLowerCase().includes('fetch') || errorMsg.includes('NetworkError')) {
+            technicalAdvice = 'A network error occurred while reaching OpenAI. Please check your internet connection or try again shortly.';
+        } else if (errorMsg.includes('timed out')) {
+            technicalAdvice = 'The request took too long. This can happen with large models like GPT-5.4. Try a faster model or try again.';
+        } else if (errorMsg.includes('429')) {
+            technicalAdvice = 'You have been rate limited by OpenAI. Please wait a few moments before trying again.';
+        }
+
+        // Display the localized error card with specific advice
+        const el = document.getElementById('analysis-content');
+        if (el) {
+            el.innerHTML = `
               <div class="glass-card accent-rose" style="margin-top: 20px;">
                 <div class="card-title"><span class="card-icon">⚠️</span> <span data-i18n="error-gen-failed">Generation Failed</span></div>
                 <p style="font-size:14px;color:var(--text-primary);margin:12px 0">${errorMsg}</p>
-                <p style="font-size:12px;color:var(--text-tertiary)" data-i18n="error-pipeline-halted">The pipeline was halted. Please check your model selection or API key permissions in Settings.</p>
+                <p style="font-size:12px;color:var(--text-tertiary)">${technicalAdvice}</p>
               </div>`;
             localizeUI();
             switchPanel('analysis');

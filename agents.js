@@ -547,6 +547,39 @@ You MUST respond with ONLY valid JSON:
 // Agent Context Builders
 // ══════════════════════════════════════════════
 
+/**
+ * Prunes upstream context to remove heavy/redundant fields before sending to the next agent.
+ * This prevents the prompt from growing too large and causing fetch failures.
+ */
+function pruneContext(context) {
+  if (!context) return null;
+  const pruned = JSON.parse(JSON.stringify(context)); // Deep clone
+
+  // Prune Analysis
+  if (pruned.summary) delete pruned.summary;
+  if (pruned.vantiqSuitability) delete pruned.vantiqSuitability;
+
+  // Prune Domain Model
+  if (pruned.domain && pruned.domain.length > 300) {
+    pruned.domain = pruned.domain.substring(0, 300) + "... (truncated)";
+  }
+
+  // Prune Architecture
+  if (pruned.description) delete pruned.description;
+  if (pruned.principles) delete pruned.principles;
+
+  // Prune AI Models
+  if (pruned.infrastructure) delete pruned.infrastructure;
+  if (pruned.models) {
+    pruned.models = pruned.models.map(m => ({
+      capability: m.capability,
+      recommendations: m.recommendations
+    }));
+  }
+
+  return pruned;
+}
+
 function buildUserMessage(problemText, upstreamContext = {}, refinement = "", previousOutput = null, language = "en") {
   let msg = `PROBLEM DESCRIPTION: \n${problemText} \n`;
 
@@ -555,32 +588,32 @@ function buildUserMessage(problemText, upstreamContext = {}, refinement = "", pr
     en: "English",
     ko: "Korean",
     ja: "Japanese",
-    ar: "Arabic (Standard Classical)"
+    ar: "Arabic"
   };
   const targetLang = langNames[language] || "English";
-  msg += `\nMANDATORY LANGUAGE INSTRUCTION: You MUST generate all human-readable descriptions, summaries, justifications, and name fields (including names for events, entities, actors, and services) in ${targetLang}. Technical JSON keys must remain in English as defined in the schema. \n`;
+  msg += `\nMANDATORY LANGUAGE INSTRUCTION: You MUST generate all human-readable content in ${targetLang}. Technical JSON keys must remain in English. \n`;
 
   if (upstreamContext.analysis) {
-    msg += `\nAGENT 1 OUTPUT(Problem Analysis): \n${JSON.stringify(upstreamContext.analysis)} \n`;
+    msg += `\nPHASE 1 (Analysis): \n${JSON.stringify(pruneContext(upstreamContext.analysis))} \n`;
   }
   if (upstreamContext.domainModel) {
-    msg += `\nAGENT 2 OUTPUT(Domain Model): \n${JSON.stringify(upstreamContext.domainModel)} \n`;
+    msg += `\nPHASE 2 (Domain): \n${JSON.stringify(pruneContext(upstreamContext.domainModel))} \n`;
   }
   if (upstreamContext.architecture) {
-    msg += `\nAGENT 3 OUTPUT(Architecture): \n${JSON.stringify(upstreamContext.architecture)} \n`;
+    msg += `\nPHASE 3 (Arch): \n${JSON.stringify(pruneContext(upstreamContext.architecture))} \n`;
   }
   if (upstreamContext.aiModels) {
-    msg += `\nAGENT 4 OUTPUT(AI Models): \n${JSON.stringify(upstreamContext.aiModels)} \n`;
+    msg += `\nPHASE 4 (AI): \n${JSON.stringify(pruneContext(upstreamContext.aiModels))} \n`;
   }
   if (upstreamContext.eventSystem) {
-    msg += `\nAGENT 5 OUTPUT(Event System): \n${JSON.stringify(upstreamContext.eventSystem)} \n`;
+    msg += `\nPHASE 5 (Events): \n${JSON.stringify(pruneContext(upstreamContext.eventSystem))} \n`;
   }
   if (upstreamContext.implementation) {
-    msg += `\nAGENT 6 OUTPUT(Implementation): \n${JSON.stringify(upstreamContext.implementation)} \n`;
+    msg += `\nPHASE 6 (Impl): \n${JSON.stringify(pruneContext(upstreamContext.implementation))} \n`;
   }
 
   if (previousOutput) {
-    msg += `\nPREVIOUS GENERATION (You must return a refined version of this based on the user's feedback):\n${JSON.stringify(previousOutput)}\n`;
+    msg += `\nPREVIOUS GENERATION (Refine this): \n${JSON.stringify(pruneContext(previousOutput))} \n`;
   }
 
   if (refinement && refinement.trim() !== "") {
