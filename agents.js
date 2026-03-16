@@ -146,6 +146,7 @@ RULES:
 - The Mermaid diagram must use valid Mermaid graph LR syntax with subgraphs.
 - MERMAID SYNTAX RULES: Quote all node labels containing special characters, parentheses, or brackets (e.g., id1["Label (Info)"]). No HTML tags.
 - Use dark theme styling: style nodes fill:#1a1a2e,stroke:#7c6bf5,color:#e8eaed.
+- TRANSLATION RULE: All node labels, system names, and technical categories (e.g., Service, Entity, Source) MUST be translated into the user's target language.
 
 You MUST respond with ONLY valid JSON:
 {
@@ -224,6 +225,7 @@ RULES:
 - HIGH PRIORITY TECHNICAL ACCURACY: Do not hallucinate Vantiq features. Ensure realistic use of Semantic Index (Vantiq's native Vector DB), standard Types (for structured data/memory), and Procedures.
 - If a requested feature/integration is not natively supported by Vantiq, explicitly state how it must be implemented via external REST/gRPC Sources or custom Service code.
 - MERMAID SYNTAX RULES (diagram): MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). This is critical for non-English characters. No HTML tags.
+- TRANSLATION RULE: All role names, agent names, and technical descriptors in the diagram MUST be translated into the user's target language.
 
 You MUST respond with ONLY valid JSON:
 {
@@ -288,6 +290,7 @@ RULES:
 - All event routing and processing happens through Visual Event Handlers (VEH) — NEVER Topics.
 - The sequence diagram must use valid Mermaid sequenceDiagram syntax.
 - MERMAID SYNTAX RULES: Quote all participant labels and message texts containing special characters or parentheses. No HTML tags.
+- TRANSLATION RULE: All participant names, system roles, and message flow descriptions MUST be translated into the user's target language.
 - IMPORTANT: Do NOT use the 'participant' keyword explicitly unless defining an alias. Let Mermaid infer the participants from the message flow (e.g. ComponentA->>ComponentB: message). Keep the sequence strictly connected without standalone nodes.
 - Use real orchestration patterns (Choreography, Saga, Event Sourcing).
 - Reference Vantiq Sources for external producers and Services for internal consumers.

@@ -43,26 +43,6 @@ window.PDFGenerator = {
             else if (lang === 'ja') primaryFont = 'NotoSansJP';
             else if (lang === 'ar') primaryFont = 'NotoSansArabic';
 
-            // --- DEEP HARDENING: Font Preload Validation ---
-            const validateFonts = async (fontObj) => {
-                const urls = [];
-                if (fontObj[primaryFont]) {
-                    urls.push(fontObj[primaryFont].normal);
-                    urls.push(fontObj[primaryFont].bold);
-                }
-
-                for (const url of urls) {
-                    try {
-                        const res = await fetch(url, { method: 'HEAD' });
-                        if (!res.ok) throw new Error(`Font not accessible: ${url}`);
-                    } catch (e) {
-                        console.warn("Font preflight failed, attempting generation anyway...", e);
-                    }
-                }
-            };
-
-            await validateFonts(pdfMake.fonts);
-
             // 2. Initialize Document Definition
             const docDefinition = {
                 info: {

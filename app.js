@@ -1489,8 +1489,8 @@ function preprocessMermaid(code) {
 
     if (!isSequence) {
         // Process Graph/Flowchart
-        // Pass 1: Identifiers with labels
-        cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)(\[|\(|\{\{|>)([^\]\)\}\n]+)(\]|\)|\}\}|\])/g, (match, id, open, label, close) => {
+        // Pass 1: Explicit Declarations with labels
+        cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)(\[|\(|\{\{|>|\(\()([^\]\)\}\n]+)(\]|\)|\}\}|\]|\)\))/g, (match, id, open, label, close) => {
             const safeId = getSafeId(id);
             let safeLabel = label.trim();
             if (!safeLabel.startsWith('"')) safeLabel = `"${safeLabel}"`;
@@ -1503,6 +1503,14 @@ function preprocessMermaid(code) {
             if (keywords.includes(id)) return match;
             return prefix + getSafeId(id);
         });
+
+        // Pass 3: DEEP-RENDER: Inject label definitions for all mapped IDs to ensure node visibility is 100% correct
+        let labelDefinitions = '\n';
+        idMap.forEach((safeId, originalText) => {
+            labelDefinitions += `${safeId}["${originalText}"]\n`;
+        });
+        cleaned += labelDefinitions;
+
     } else {
         // Process Sequence Diagrams
         cleaned = cleaned.replace(/participant\s+([^" \n]+)(\s+as\s+)?([^" \n]+)?/g, (match, name, asPart, id) => {
@@ -1524,7 +1532,7 @@ function preprocessMermaid(code) {
         });
     }
 
-    // Final label safety
+    // Final label safety for arrows
     cleaned = cleaned.replace(/--\s*([^"->\n]+?)\s*-->/g, (match, label) => {
         if (label.trim().startsWith('"')) return match;
         return `-- "${label.trim()}" -->`;
