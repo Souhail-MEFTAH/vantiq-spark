@@ -109,11 +109,13 @@ window.PDFGenerator = {
                 if (node.columns) { node.columns.forEach(c => applyArabicRTL(c)); }
                 if (node.stack) { node.stack.forEach(s => applyArabicRTL(s)); }
 
-                // Process text value
+                // Process text value — always force rtl:true on every text node in Arabic mode
+                // (pdfMake's defaultStyle.rtl doesn't reliably cascade; must be explicit)
                 if (typeof node.text === 'string' && node.text.trim()) {
                     const str = node.text;
-                    const hasArabic = /[^\x00-\x7F]/.test(str);
-                    const hasLatin = /[\x21-\x7E]/.test(str); // printable ASCII excl. spaces
+                    // Use Arabic Unicode block for detection
+                    const hasArabic = /[\u0600-\u06FF]/.test(str);
+                    const hasLatin = /[a-zA-Z0-9]/.test(str);
 
                     if (hasArabic && hasLatin) {
                         // Mixed: split into per-font inline runs
@@ -122,17 +124,18 @@ window.PDFGenerator = {
                             const isLatin = /^[\x00-\x7F]+$/.test(part);
                             return { text: part, font: isLatin ? 'Roboto' : 'NotoSansArabic' };
                         });
-                        node.rtl = true;
                     } else if (hasArabic) {
-                        node.rtl = true;
                         node.font = node.font || 'NotoSansArabic';
-                    } else if (hasLatin) {
+                    } else {
+                        // Latin/English content in Arabic doc — use Roboto but keep RTL paragraph direction
                         node.font = node.font || 'Roboto';
                     }
+                    // Always set RTL on every text node — required for Arabic document direction
+                    node.rtl = true;
                     node.alignment = node.alignment || 'right';
                 } else if (Array.isArray(node.text)) {
                     node.text.forEach(t => applyArabicRTL(t));
-                    node.rtl = node.rtl !== undefined ? node.rtl : true;
+                    node.rtl = true;
                 }
             };
 
