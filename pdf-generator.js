@@ -98,8 +98,14 @@ window.PDFGenerator = {
                 if (node.table && node.table.body) {
                     node.table.body.forEach(row => row.forEach(cell => applyArabicRTL(cell)));
                 }
-                if (node.ul) { node.ul.forEach(item => applyArabicRTL(item)); }
-                if (node.ol) { node.ol.forEach(item => applyArabicRTL(item)); }
+                if (node.ul) {
+                    node.rtl = true; // Flips list marker (bullets) to the right side
+                    node.ul.forEach(item => applyArabicRTL(item));
+                }
+                if (node.ol) {
+                    node.rtl = true; // Flips list marker (numbers) to the right side
+                    node.ol.forEach(item => applyArabicRTL(item));
+                }
                 if (node.columns) { node.columns.forEach(c => applyArabicRTL(c)); }
                 if (node.stack) { node.stack.forEach(s => applyArabicRTL(s)); }
 
@@ -127,10 +133,13 @@ window.PDFGenerator = {
                             const reversedTokens = tokens.reverse();
 
                             reversedTokens.forEach(token => {
-                                const isLatinPhrase = /[a-zA-Z0-9]/.test(token);
+                                // IMPORTANT: Only use NotoSansArabic if the token actually contains Arabic characters.
+                                // This ensures ALL punctuation, spaces, and special symbols (like em-dash '—' or curly quotes)
+                                // fall back to Roboto, completely eliminating any remaining squares.
+                                const hasArabicChars = /[\u0600-\u06FF]/.test(token);
                                 newTextRuns.push({
                                     text: token,
-                                    font: isLatinPhrase ? 'Roboto' : 'NotoSansArabic'
+                                    font: hasArabicChars ? 'NotoSansArabic' : 'Roboto'
                                 });
                             });
 
