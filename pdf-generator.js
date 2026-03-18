@@ -80,16 +80,10 @@ window.PDFGenerator = {
                 content: [] // Back to standard array for max compatibility
             };
 
-            // Add rtl:true to document-level defaultStyle for Arabic (needed for bidi shaping)
-            if (isArabic) {
-                docDefinition.defaultStyle.rtl = true;
-            }
-
-            // ── Arabic helper: recursive RTL + mixed-font content walker ──────────────
-            // Traverses every node in the doc tree and:
-            //   • Sets rtl:true on Arabic text items
-            //   • Splits mixed Latin/Arabic strings into font-specific runs:
-            //     Latin (ASCII) → Roboto  |  Arabic (non-ASCII) → NotoSansArabic
+            // ── Arabic helper: Manual Word Reordering for Visual RTL ──
+            // pdfMake's bidi engine fails at word reordering in mixed arrays.
+            // This physically tokenizes sentences and reverses token array order
+            // so LTR rendering yields perfect RTL visual sequence.
             const applyArabicRTL = (node) => {
                 if (!isArabic) return;
                 if (!node || typeof node !== 'object') return;
@@ -109,50 +103,57 @@ window.PDFGenerator = {
                 if (node.columns) { node.columns.forEach(c => applyArabicRTL(c)); }
                 if (node.stack) { node.stack.forEach(s => applyArabicRTL(s)); }
 
-                // Process text value — always force rtl:true on every text node in Arabic mode
-                // (pdfMake's defaultStyle.rtl doesn't reliably cascade; must be explicit)
+                // Process text value — manually reverse word order
                 if (typeof node.text === 'string' && node.text.trim()) {
                     const str = node.text;
-                    // Use Arabic Unicode block for detection
                     const hasArabic = /[\u0600-\u06FF]/.test(str);
-                    const hasLatin = /[a-zA-Z0-9]/.test(str);
 
-                    // RLE (U+202B) = Right-to-Left Embedding — forces word-order RTL
-                    // PDF (U+202C) = Pop Directional Formatting — closes the embedding
-                    // This fixes the pdfMake limitation where rtl:true handles shaping
-                    // but NOT paragraph word-order reversal
-                    const RLE = '\u202B';
-                    const PDFF = '\u202C';
+                    if (hasArabic) {
+                        const lines = str.split('\n');
+                        const newTextRuns = [];
 
-                    if (hasArabic && hasLatin) {
-                        // Mixed: split into per-font inline runs, wrap Arabic segments in RLE
-                        const parts = str.match(/([\x00-\x7F]+|[^\x00-\x7F]+)/g) || [str];
-                        node.text = parts.map(part => {
-                            const isLatin = /^[\x00-\x7F]+$/.test(part);
-                            if (isLatin) {
-                                return { text: part, font: 'Roboto' };
-                            } else {
-                                return { text: RLE + part + PDFF, font: 'NotoSansArabic' };
+                        lines.forEach((line, index) => {
+                            if (!line.trim()) {
+                                if (index < lines.length - 1) newTextRuns.push({ text: '\n' });
+                                return;
+                            }
+
+                            // Tokenize: 1. Latin phrases | 2. Spaces | 3. Punctuation | 4. Arabic words
+                            // Latin expressions containing spaces/punctuation stay grouped.
+                            const tokens = line.match(/([a-zA-Z0-9](?:[\x20-\x7E]*[a-zA-Z0-9])?)|(\s+)|([\x21-\x7E]+)|([^\x20-\x7E]+)/g) || [line];
+
+                            // Reverse the tokens array! PdfMake lays arrays out LTR, 
+                            // so reversing the array creates a visual RTL layout.
+                            const reversedTokens = tokens.reverse();
+
+                            reversedTokens.forEach(token => {
+                                const isLatinPhrase = /[a-zA-Z0-9]/.test(token);
+                                newTextRuns.push({
+                                    text: token,
+                                    font: isLatinPhrase ? 'Roboto' : 'NotoSansArabic'
+                                });
+                            });
+
+                            if (index < lines.length - 1) {
+                                newTextRuns.push({ text: '\n' });
                             }
                         });
-                    } else if (hasArabic) {
-                        // Pure Arabic — wrap entire string in RLE/PDF for correct word order
-                        node.text = RLE + str + PDFF;
-                        node.font = node.font || 'NotoSansArabic';
+
+                        node.text = newTextRuns;
+                        node.alignment = node.alignment || 'right';
                     } else {
-                        // Latin/English content in Arabic doc
+                        // Entirely Latin node in Arabic doc
                         node.font = node.font || 'Roboto';
+                        node.alignment = node.alignment || 'right';
                     }
-                    // Always set RTL on every text node — required for Arabic document direction
-                    node.rtl = true;
-                    node.alignment = node.alignment || 'right';
                 } else if (Array.isArray(node.text)) {
+                    // Pre-split text arrays: physically reverse the elements
+                    node.text.reverse();
                     node.text.forEach(t => applyArabicRTL(t));
-                    node.rtl = true;
                 }
             };
 
-            // Helper to add sections safely (applies Arabic walker when needed)
+            // Helper to add sections safely
             const addSection = (contentArray) => {
                 if (contentArray && Array.isArray(contentArray)) {
                     if (isArabic) contentArray.forEach(item => applyArabicRTL(item));
