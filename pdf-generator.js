@@ -117,17 +117,30 @@ window.PDFGenerator = {
                     const hasArabic = /[\u0600-\u06FF]/.test(str);
                     const hasLatin = /[a-zA-Z0-9]/.test(str);
 
+                    // RLE (U+202B) = Right-to-Left Embedding — forces word-order RTL
+                    // PDF (U+202C) = Pop Directional Formatting — closes the embedding
+                    // This fixes the pdfMake limitation where rtl:true handles shaping
+                    // but NOT paragraph word-order reversal
+                    const RLE = '\u202B';
+                    const PDFF = '\u202C';
+
                     if (hasArabic && hasLatin) {
-                        // Mixed: split into per-font inline runs
+                        // Mixed: split into per-font inline runs, wrap Arabic segments in RLE
                         const parts = str.match(/([\x00-\x7F]+|[^\x00-\x7F]+)/g) || [str];
                         node.text = parts.map(part => {
                             const isLatin = /^[\x00-\x7F]+$/.test(part);
-                            return { text: part, font: isLatin ? 'Roboto' : 'NotoSansArabic' };
+                            if (isLatin) {
+                                return { text: part, font: 'Roboto' };
+                            } else {
+                                return { text: RLE + part + PDFF, font: 'NotoSansArabic' };
+                            }
                         });
                     } else if (hasArabic) {
+                        // Pure Arabic — wrap entire string in RLE/PDF for correct word order
+                        node.text = RLE + str + PDFF;
                         node.font = node.font || 'NotoSansArabic';
                     } else {
-                        // Latin/English content in Arabic doc — use Roboto but keep RTL paragraph direction
+                        // Latin/English content in Arabic doc
                         node.font = node.font || 'Roboto';
                     }
                     // Always set RTL on every text node — required for Arabic document direction
