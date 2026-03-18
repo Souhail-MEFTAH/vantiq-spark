@@ -773,6 +773,22 @@ async function agentCompetitiveAnalysis(problemText, analysis, architecture, com
 }
 
 
+// ── Agent 11: Business Value Justifier ──
+async function agentBusinessValue(problemText, analysisResult, architectureResult, refinement = "", previousState = null, language = "English") {
+  let userMsg = buildUserMessage({
+    "Problem Statement": problemText,
+    "Analysis Context": analysisResult,
+    "Target Architecture": architectureResult
+  }, refinement, previousState, language);
+
+  return await aiEngine.callAgent(
+    'Business Value Justifier',
+    AGENT_PROMPTS.businessValue.system,
+    userMsg
+  );
+}
+
+
 // ══════════════════════════════════════════════
 // Export
 // ══════════════════════════════════════════════
