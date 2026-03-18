@@ -1639,6 +1639,12 @@ async function generate() {
         updatePipelineStep('domain', 'completed');
         enableNav('domain');
 
+        // Update browser tab title and history panel with AI-generated project name
+        if (state.results.domainModel?.projectName) {
+            document.title = `${state.results.domainModel.projectName} — Vantiq Spark`;
+            renderHistory(); // Refresh history cards to show the new title immediately
+        }
+
         state.results.aiModels = aiResult;
         Renderers.renderAIModels(state.results.aiModels, document.getElementById('aimodels-content'));
         updatePipelineStep('aimodel', 'completed');

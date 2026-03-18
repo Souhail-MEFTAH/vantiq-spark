@@ -112,6 +112,7 @@ RULES:
 
 You MUST respond with ONLY valid JSON:
 {
+  "projectName": "string — concise AI-generated project title (4-7 words) in the selected language, e.g. 'Real-Time Wildfire Detection Platform'",
   "entities": [
     { "name": "string", "type": "Actor|Entity", "properties": ["3-5 property names"] }
   ],
