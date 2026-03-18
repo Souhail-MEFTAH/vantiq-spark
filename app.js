@@ -66,6 +66,7 @@ const I18N = {
         "nav-demo": "Demo Scenarios",
         "nav-training": "Training Labs",
         "nav-strategy": "Strategy",
+        "nav-business": "Business Value",
         "nav-competitive": "Competitive Analysis",
         "status-configure": "Configure API Key",
         "welcome-description": "Describe your problem and our AI agents will generate a complete system architecture, implementation scaffolding, demo scenarios, and training labs — all in one workflow.",
@@ -97,6 +98,7 @@ const I18N = {
         "step-visualizer": "Diagrams",
         "step-demo": "Demo",
         "step-training": "Training",
+        "step-business": "Value",
         "step-competitive": "Compete",
         "chat-title": "Vantiq Usecase Assistant",
         "chat-subtitle": "AI-powered chatbot for Vantiq use case ideation, architecture guidance, and best practices",
@@ -136,6 +138,8 @@ const I18N = {
         "training-subtitle": "Agent 9 — Education & Workshop Guide",
         "linter-title": "Arch Linter",
         "linter-subtitle": "Agent 11 — Vantiq Best Practices Audit",
+        "business-title": "Business Value Justifier",
+        "business-subtitle": "Agent 11 — Expected ROI, Risks, and KPIs",
         "competitive-title": "Competitive Strategy",
         "competitive-subtitle": "Agent 10 — Market Analysis & Differentiators",
         "gen-main-status": "Generating Solution...",
@@ -354,6 +358,7 @@ const I18N = {
         "nav-demo": "데모 시나리오",
         "nav-training": "교육 랩",
         "nav-strategy": "전략",
+        "nav-business": "비즈니스 가치",
         "nav-competitive": "경쟁 분석",
         "status-configure": "API 키 설정",
         "welcome-description": "문제를 설명하면 AI 에이전트가 전체 시스템 아키텍처, 구현 스캐폴딩, 데모 시나리오 및 교육 랩을 하나의 워크플로우로 생성합니다.",
@@ -385,6 +390,7 @@ const I18N = {
         "step-visualizer": "다이어그램",
         "step-demo": "데모",
         "step-training": "교육",
+        "step-business": "가치",
         "step-competitive": "경쟁",
         "chat-title": "Vantiq 유스케이스 어시스턴트",
         "chat-subtitle": "유스케이스 아이디어 구상, 아키텍처 가이드 및 모범 사례를 위한 AI 기반 챗봇",
@@ -634,6 +640,7 @@ const I18N = {
         "nav-demo": "デモシナリオ",
         "nav-training": "トレーニングラボ",
         "nav-strategy": "戦略",
+        "nav-business": "ビジネス価値",
         "nav-competitive": "競合分析",
         "status-configure": "APIキーを設定",
         "welcome-description": "問題を説明すると、AIエージェントが完全なシステムアーキテクチャ、実装スキャフォールディング、デモシナリオ、トレーニングラボを1つのワークフローで生成します。",
@@ -667,6 +674,7 @@ const I18N = {
         "step-visualizer": "図面",
         "step-demo": "デモ",
         "step-training": "トレーニング",
+        "step-business": "価値",
         "step-competitive": "競合",
         "chat-title": "Vantiqユースケースアシスタント",
         "chat-subtitle": "Vantiqのユースケース、アーキテクチャ、ベストプラクティスに関するAIチャットボット",
@@ -913,6 +921,7 @@ const I18N = {
         "step-visualizer": "المخططات",
         "step-demo": "العرض",
         "step-training": "التدريب",
+        "step-business": "القيمة",
         "step-competitive": "المنافسة",
         "chat-title": "مساعد حالات استخدام فانتيك",
         "chat-subtitle": "روبوت دردشة ذكاء اصطناعي لأفكار حالات الاستخدام وإرشادات الهندسة المعمارية",
@@ -1728,15 +1737,27 @@ async function generate() {
         updatePipelineStep('training', 'completed');
         enableNav('training');
 
-        // ── Phase 6: Agent 10 (Competitive Analysis) ──
+        // ── Phase 6: Agent 10 & 11 (Competitive Analysis & Business Value in parallel) ──
         updatePipelineStep('competitive', 'active');
-        document.getElementById('generatingAgentName').textContent = '🏆 Agent 10 — Competitive Analysis';
+        updatePipelineStep('business', 'active');
+        document.getElementById('generatingAgentName').textContent = '🏆 Agent 10 & 💡 Agent 11 (parallel)';
         const competitorsInput = document.getElementById('competitorsInput');
         const competitorsText = competitorsInput ? competitorsInput.value.trim() : '';
-        state.results.competitive = await Agents.competitiveAnalysis(text, state.results.analysis, state.results.architecture, competitorsText, "", null, state.language);
+
+        const [compResult, busResult] = await Promise.all([
+            Agents.competitiveAnalysis(text, state.results.analysis, state.results.architecture, competitorsText, "", null, state.language),
+            Agents.businessValue(text, state.results.analysis, state.results.architecture, "", null, state.language)
+        ]);
+
+        state.results.competitive = compResult;
         Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
         updatePipelineStep('competitive', 'completed');
         enableNav('competitive');
+
+        state.results.businessValue = busResult;
+        Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
+        updatePipelineStep('business', 'completed');
+        enableNav('business');
 
         // Save the successful generation to history
         document.getElementById('generatingAgentName').textContent = '💾 Saving Project & Preparing PDF Export...';
@@ -1857,6 +1878,10 @@ async function regenerate(agentKey) {
             const competitorsText = competitorsInput ? competitorsInput.value.trim() : '';
             state.results.competitive = await Agents.competitiveAnalysis(state.problemText, state.results.analysis, state.results.architecture, competitorsText, refinement, state.results.competitive, state.language);
             Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
+        },
+        business: async () => {
+            state.results.businessValue = await Agents.businessValue(state.problemText, state.results.analysis, state.results.architecture, refinement, state.results.businessValue, state.language);
+            Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
         }
     };
 
@@ -1878,7 +1903,8 @@ async function regenerate(agentKey) {
             demo: 'demo-content',
             training: 'training-content',
             linter: 'linter-content',
-            competitive: 'competitive-content'
+            competitive: 'competitive-content',
+            business: 'business-content'
         };
         showAgentError(contentMap[agentKey], agentKey, e);
     }

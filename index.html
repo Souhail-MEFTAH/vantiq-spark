@@ -99,6 +99,10 @@
 
 
         <div class="nav-section-label" data-i18n="nav-strategy">Strategy</div>
+        <div class="nav-item disabled" data-panel="business" id="nav-business">
+          <span class="nav-icon">💡</span>
+          <span class="nav-text" data-i18n="nav-business">Business Value</span>
+        </div>
         <div class="nav-item disabled" data-panel="competitive" id="nav-competitive">
           <span class="nav-icon">🏆</span>
           <span class="nav-text" data-i18n="nav-competitive">Competitive Analysis</span>
@@ -174,6 +178,10 @@
           <span data-i18n="step-training">Training</span>
         </div>
         <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="business" id="step-business">
+          <div class="step-indicator"></div>
+          <span data-i18n="step-business">Value</span>
+        </div>
         <div class="pipeline-step" data-agent="competitive" id="step-competitive">
           <span class="step-icon">🏆</span>
           <span data-i18n="step-competitive">Compete</span>
@@ -488,6 +496,26 @@
             </div>
           </div>
           <div id="training-content"></div>
+        </div>
+
+        <!-- ── Business Value Panel ── -->
+        <div class="panel" id="panel-business">
+          <div class="section-header">
+            <div>
+              <div class="section-title"><span class="section-icon">💡</span> <span data-i18n="business-title">Business
+                  Value Justifier</span></div>
+              <div class="section-subtitle" data-i18n="business-subtitle">Agent 11 — ROI, Risks, and KPIs
+              </div>
+            </div>
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+              <input type="text" id="refine-business" class="refine-input" data-i18n-placeholder="refine-placeholder"
+                onkeydown="if(event.key==='Enter') app.regenerate('business')" />
+              <button class="btn btn-regenerate" onclick="app.regenerate('business')">
+                ↻ <span data-i18n="btn-regenerate">Regenerate</span>
+              </button>
+            </div>
+          </div>
+          <div id="business-content"></div>
         </div>
 
         <!-- ── Competitive Analysis Panel ── -->

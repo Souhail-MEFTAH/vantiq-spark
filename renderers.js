@@ -623,6 +623,64 @@ window.Renderers = {
 
     if (container) container.innerHTML = html;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
+  },
+
+  // ── 11. Business Value Justifier ──
+  renderBusinessValue: function (data, container) {
+    if (!data) return;
+    let html = '';
+
+    if (data.summary) {
+      html += `
+        <div class="glass-card accent-cyan" style="margin-bottom:20px">
+          <div class="card-title"><span class="card-icon">🎯</span> Executive Summary</div>
+          <p style="font-size:14px;color:var(--text-primary);line-height:1.6">${escapeHtml(data.summary)}</p>
+        </div>`;
+    }
+
+    if (data.valueDrivers && data.valueDrivers.length) {
+      const driversHTML = data.valueDrivers.map(d => `
+        <div class="glass-card" style="padding:14px;margin-bottom:8px">
+          <div style="font-weight:600;font-size:14px;color:var(--brand-success);margin-bottom:4px">📈 ${escapeHtml(d.category)}</div>
+          <p style="font-size:13px;color:var(--text-primary);margin:0">${escapeHtml(d.impact)}</p>
+        </div>`).join('');
+      html += `
+        <div class="glass-card accent-green" style="margin-bottom:20px">
+          <div class="card-title"><span class="card-icon">💎</span> Value Drivers</div>
+          ${driversHTML}
+        </div>`;
+    }
+
+    if (data.riskMitigations && data.riskMitigations.length) {
+      const risksHTML = data.riskMitigations.map(r => `
+        <div class="glass-card" style="padding:14px;margin-bottom:8px">
+          <div style="font-weight:600;font-size:13px;color:var(--brand-danger);margin-bottom:6px">⚠️ ${escapeHtml(r.risk)}</div>
+          <div style="font-size:13px;color:var(--text-primary);padding-left:12px;border-left:2px solid var(--brand-success)">🛡️ <strong>Solution:</strong> ${escapeHtml(r.solution)}</div>
+        </div>`).join('');
+      html += `
+        <div class="glass-card accent-rose" style="margin-bottom:20px">
+          <div class="card-title"><span class="card-icon">🛡️</span> Risk Mitigations</div>
+          ${risksHTML}
+        </div>`;
+    }
+
+    if (data.kpis && data.kpis.length) {
+      const kpisHTML = data.kpis.map(k => `
+        <div class="glass-card" style="padding:14px;flex:1;min-width:200px">
+          <div style="font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${escapeHtml(k.metric)}</div>
+          <div style="font-weight:700;font-size:16px;color:var(--brand-primary)">${escapeHtml(k.target)}</div>
+        </div>`).join('');
+      html += `
+        <div class="glass-card accent-warm">
+          <div class="card-title"><span class="card-icon">📊</span> Success KPIs</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            ${kpisHTML}
+          </div>
+        </div>`;
+    }
+
+    if (container) container.innerHTML = html;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
   }
 };
 

@@ -487,6 +487,46 @@ You MUST respond with ONLY valid JSON:
   },
 
   // ══════════════════════════════════════════════
+  // Agent 11: Business Value Justifier
+  // ══════════════════════════════════════════════
+  businessValue: {
+    system: `You are Agent 11 — Business Value Consultant, an expert in finding ROI, enterprise value drivers, and risk mitigation for real-time event-driven architectures.
+
+${VANTIQ_CONTEXT}
+
+YOUR TASK: Analyze the problem statement and generated architecture to identify concrete business value, expected ROI areas, and KPIs that justify building this system on Vantiq.
+
+RULES:
+- Be highly specific to the provided use-case (e.g., if it's predictive maintenance, focus on downtime reduction).
+- Define 3-4 clear Value Drivers (e.g., Revenue Increase, Cost Savings, Efficiency).
+- Define 2-3 Risk Mitigations (what happens if they do NOT build this).
+- Define 3 Measurable KPIs to track success.
+
+You MUST respond with ONLY valid JSON:
+{
+  "summary": "string — 1-2 sentence executive summary of the business case",
+  "valueDrivers": [
+    {
+      "category": "string — e.g. Cost Reduction, Operational Efficiency, Revenue Growth",
+      "impact": "string — specific description of the impact"
+    }
+  ],
+  "riskMitigations": [
+    {
+      "risk": "string — risk of doing nothing or using legacy systems",
+      "solution": "string — how this real-time architecture mitigates it"
+    }
+  ],
+  "kpis": [
+    {
+      "metric": "string — e.g. Mean Time to Resolution (MTTR)",
+      "target": "string — e.g. Reduce by 40%"
+    }
+  ]
+}`
+  },
+
+  // ══════════════════════════════════════════════
   // Agent 10: Competitive Analysis
   // ══════════════════════════════════════════════
   competitiveAnalysis: {
@@ -749,5 +789,6 @@ window.Agents = {
   demoScenarioGenerator: agentDemoScenarioGenerator,
   trainingLabGenerator: agentTrainingLabGenerator,
   vantiqLinter: agentVantiqLinter,
+  businessValue: agentBusinessValue,
   competitiveAnalysis: agentCompetitiveAnalysis
 };

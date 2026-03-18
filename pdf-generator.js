@@ -498,6 +498,67 @@ window.PDFGenerator = {
             // ==========================================
             // AGENT 10: COMPETITIVE ANALYSIS
             // ==========================================
+            // AGENT 11: BUSINESS VALUE
+            // ==========================================
+            if (results.businessValue) {
+                addSection([{ text: translations['business-title'] || '7. Business Value Justifier', style: 'sectionHeader', pageBreak: 'before' }]);
+
+                if (results.businessValue.summary) {
+                    addSection([{ text: results.businessValue.summary, style: 'bodyText', italics: true, margin: [0, 0, 0, 15] }]);
+                }
+
+                if (results.businessValue.valueDrivers && results.businessValue.valueDrivers.length > 0) {
+                    addSection([{ text: 'Value Drivers:', style: 'subsectionHeader' }]);
+                    const drivers = results.businessValue.valueDrivers.map(d => ({
+                        text: [
+                            { text: `${d.category || ''}: `, bold: true },
+                            d.impact || ''
+                        ],
+                        style: 'bodyText'
+                    }));
+                    addSection([{ ul: drivers, style: 'list' }]);
+                }
+
+                if (results.businessValue.riskMitigations && results.businessValue.riskMitigations.length > 0) {
+                    addSection([{ text: 'Risk Mitigations:', style: 'subsectionHeader' }]);
+                    const risks = results.businessValue.riskMitigations.map(r => ({
+                        text: [
+                            { text: `${r.risk || 'Risk'}: `, bold: true },
+                            r.solution || ''
+                        ],
+                        style: 'bodyText'
+                    }));
+                    addSection([{ ul: risks, style: 'list' }]);
+                }
+
+                if (results.businessValue.kpis && results.businessValue.kpis.length > 0) {
+                    addSection([{ text: 'Success KPIs:', style: 'subsectionHeader' }]);
+                    const kpiBody = [
+                        [
+                            { text: 'Metric', style: 'tableHeader' },
+                            { text: 'Target', style: 'tableHeader' }
+                        ]
+                    ];
+                    results.businessValue.kpis.forEach(k => {
+                        kpiBody.push([
+                            { text: k.metric || '', style: 'tableCell' },
+                            { text: k.target || '', style: 'tableCell', bold: true }
+                        ]);
+                    });
+
+                    addSection([{
+                        table: {
+                            headerRows: 1,
+                            widths: ['50%', '50%'],
+                            body: kpiBody
+                        },
+                        layout: 'lightHorizontalLines',
+                        margin: [0, 5, 0, 15]
+                    }]);
+                }
+            }
+
+            // ==========================================
             if (results.competitive) {
                 addSection([{ text: translations['pdf-sec-compete'] || '7. Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }]);
 
