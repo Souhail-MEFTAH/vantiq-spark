@@ -25,22 +25,25 @@ window.PDFGenerator = {
                     bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-MediumItalic.ttf'
                 },
                 NotoSansArabic: {
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf'
+                    // Use 'all' subset: covers Latin + Arabic — avoids squares on English terms
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-700-normal.ttf'
                 },
                 NotoSansJP: {
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf'
+                    // Use 'all' subset: covers Latin + Japanese
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-700-normal.ttf'
                 },
                 NotoSansKR: {
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf'
+                    // Use 'all' subset: covers Latin + Korean
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-700-normal.ttf'
                 }
             };
 
@@ -65,7 +68,10 @@ window.PDFGenerator = {
                     fontSize: 10,
                     color: '#333333',
                     lineHeight: 1.3,
-                    alignment: isArabic ? 'right' : 'left'
+                    alignment: isArabic ? 'right' : 'left',
+                    // rtl:true enables proper bidirectional Arabic text shaping in pdfMake
+                    // Without this, Arabic characters are rendered LTR (unreadable)
+                    rtl: isArabic ? true : false
                 },
                 styles: {
                     title: { fontSize: 24, bold: true, color: '#00c389', margin: [0, 0, 0, 10] },
@@ -86,6 +92,8 @@ window.PDFGenerator = {
                     contentArray.forEach(item => {
                         if (isArabic) {
                             item.alignment = item.alignment || 'right';
+                            // Propagate RTL to all content items individually
+                            if (item.text !== undefined) item.rtl = true;
                         }
                     });
                     docDefinition.content.push(...contentArray);
