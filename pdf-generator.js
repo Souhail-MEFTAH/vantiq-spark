@@ -1,5 +1,5 @@
 window.PDFGenerator = {
-    generate: async function (state) {
+    generate: function (state) {
         const lang = state.language || 'en';
         const isArabic = lang === 'ar';
         const translations = I18N[lang] || I18N.en;
@@ -15,33 +15,40 @@ window.PDFGenerator = {
             const projectName = results.domainModel?.projectName || untitledName;
             const dateStr = new Date().toLocaleDateString(lang);
 
-            // 1. Configure Fonts for Global Character Support
+            // 1. Configure Fonts — use verified fontsource CDN paths
+            // Arabic, Japanese, Korean fonts are served from cdn.jsdelivr.net/fontsource/fonts/
             pdfMake.fonts = {
                 Roboto: {
-                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Regular.ttf',
-                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Medium.ttf',
-                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-Italic.ttf',
-                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.66/fonts/Roboto/Roboto-MediumItalic.ttf'
-                },
-                NotoSansJP: {
-                    normal: 'https://cdn.jsdelivr.net/npm/noto-sans-jp@52.0.0/fonts/NotoSansJP-Regular.ttf',
-                    bold: 'https://cdn.jsdelivr.net/npm/noto-sans-jp@52.0.0/fonts/NotoSansJP-Bold.ttf'
-                },
-                NotoSansKR: {
-                    normal: 'https://cdn.jsdelivr.net/npm/noto-sans-kr-font@latest/dist/NotoSansKR-Regular.ttf',
-                    bold: 'https://cdn.jsdelivr.net/npm/noto-sans-kr-font@latest/dist/NotoSansKR-Bold.ttf'
+                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Regular.ttf',
+                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Medium.ttf',
+                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Italic.ttf',
+                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-MediumItalic.ttf'
                 },
                 NotoSansArabic: {
-                    normal: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSansArabic/NotoSansArabic-Regular.ttf',
-                    bold: 'https://cdn.jsdelivr.net/gh/googlefonts/noto-fonts@master/hinted/ttf/NotoSansArabic/NotoSansArabic-Bold.ttf'
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf'
+                },
+                NotoSansJP: {
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf'
+                },
+                NotoSansKR: {
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf'
                 }
             };
 
             // Select primary font based on language
             let primaryFont = 'Roboto';
-            if (lang === 'ko') primaryFont = 'NotoSansKR';
+            if (lang === 'ar') primaryFont = 'NotoSansArabic';
             else if (lang === 'ja') primaryFont = 'NotoSansJP';
-            else if (lang === 'ar') primaryFont = 'NotoSansArabic';
+            else if (lang === 'ko') primaryFont = 'NotoSansKR';
 
             // 2. Initialize Document Definition
             const docDefinition = {

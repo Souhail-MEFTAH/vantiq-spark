@@ -1349,12 +1349,13 @@ function exportToPDF() {
     document.getElementById('generatingAgentName').textContent = translations['status-generating-pdf'] || 'Generating PDF...';
     document.getElementById('generatingOverlay').classList.add('visible');
 
-    setTimeout(() => {
+    // Use setTimeout to let the overlay paint, then await the async generator
+    setTimeout(async () => {
         try {
-            PDFGenerator.generate(state);
+            await PDFGenerator.generate(state);
         } catch (e) {
             console.error("PDF Generation failed:", e);
-            alert("Failed to generate PDF. Check console for details.");
+            alert(translations['pdf-error'] || "Failed to generate PDF. Check console for details.");
         } finally {
             document.getElementById('generatingOverlay').classList.remove('visible');
             document.getElementById('generatingAgentName').setAttribute('data-i18n', 'gen-starting');
@@ -1462,83 +1463,32 @@ function preprocessMermaid(code) {
     if (!code) return '';
     let cleaned = code.trim();
 
-    // 0. Remove Markdown blocks if the AI included them
-    cleaned = cleaned.replace(/```mermaid\n?|```/g, '').trim();
+    // 0. Strip markdown fences if AI included them
+    cleaned = cleaned.replace(/```mermaid\s*\n?/g, '').replace(/```\s*$/g, '').trim();
 
-    // 1. Intelligent Diagram Type Detection
-    const diagramTypes = ['graph ', 'flowchart ', 'sequenceDiagram', 'classDiagram', 'stateDiagram', 'erDiagram', 'pie', 'gantt', 'journey', 'gitGraph', 'C4Context'];
-    const hasType = diagramTypes.some(type => cleaned.startsWith(type));
-
+    // 1. Detect diagram type — only default to graph TD if no type header found
+    const knownTypes = ['graph ', 'flowchart ', 'sequenceDiagram', 'classDiagram',
+        'stateDiagram', 'erDiagram', 'pie', 'gantt', 'journey', 'gitGraph', 'C4Context'];
+    const hasType = knownTypes.some(t => cleaned.startsWith(t));
     if (!hasType) {
         cleaned = 'graph TD\n' + cleaned;
     }
 
-    const isSequence = cleaned.startsWith('sequenceDiagram');
-    const idMap = new Map();
-    let idCounter = 0;
-
-    // Helper for safe IDs
-    const getSafeId = (id) => {
-        const trimmed = id.trim();
-        if (!trimmed || /^[a-zA-Z0-9_]+$/.test(trimmed)) return trimmed;
-        if (idMap.has(trimmed)) return idMap.get(trimmed);
-        const safe = `nodesafe_${idCounter++}`;
-        idMap.set(trimmed, safe);
-        return safe;
-    };
-
-    if (!isSequence) {
-        // Process Graph/Flowchart
-        // Pass 1: Explicit Declarations with labels
-        cleaned = cleaned.replace(/([^\s\[\]\(\);-]+)(\[|\(|\{\{|>|\(\()([^\]\)\}\n]+)(\]|\)|\}\}|\]|\)\))/g, (match, id, open, label, close) => {
-            const safeId = getSafeId(id);
-            let safeLabel = label.trim();
-            if (!safeLabel.startsWith('"')) safeLabel = `"${safeLabel}"`;
-            return `${safeId}${open}${safeLabel}${close}`;
+    // 2. For graph/flowchart only: ensure labels inside [] are quoted
+    if (!cleaned.startsWith('sequenceDiagram')) {
+        // Quote labels in square brackets: id[Label Text] → id["Label Text"]
+        cleaned = cleaned.replace(/(\w+)\[([^\]"]+)\]/g, (m, id, label) => {
+            return `${id}["${label.trim()}"]`;
         });
-
-        // Pass 2: Identification in connections
-        cleaned = cleaned.replace(/(^|[\s;])([a-zA-Z0-9_\u0080-\uFFFF]+)(?=($|[\s;]|--|->|==))/g, (match, prefix, id) => {
-            const keywords = ['graph', 'TD', 'LR', 'BT', 'RL', 'subgraph', 'end', 'click', 'style', 'classDescriptor', 'class'];
-            if (keywords.includes(id)) return match;
-            return prefix + getSafeId(id);
-        });
-
-        // Pass 3: DEEP-RENDER: Inject label definitions for all mapped IDs to ensure node visibility is 100% correct
-        let labelDefinitions = '\n';
-        idMap.forEach((safeId, originalText) => {
-            labelDefinitions += `${safeId}["${originalText}"]\n`;
-        });
-        cleaned += labelDefinitions;
-
-    } else {
-        // Process Sequence Diagrams
-        cleaned = cleaned.replace(/participant\s+([^" \n]+)(\s+as\s+)?([^" \n]+)?/g, (match, name, asPart, id) => {
-            if (asPart) {
-                const safeId = getSafeId(id);
-                return `participant "${name.trim()}" as ${safeId}`;
-            } else {
-                const safeId = getSafeId(name);
-                return `participant "${name.trim()}" as ${safeId}`;
-            }
-        });
-
-        cleaned = cleaned.replace(/^(\s*)([^\s-:]+)(\s*-+>\s*)([^\s-:]+)(\s*:\s*)(.+)$/gm, (match, indent, from, arrow, to, colon, label) => {
-            const safeFrom = getSafeId(from);
-            const safeTo = getSafeId(to);
-            let safeLabel = label.trim();
-            if (!safeLabel.startsWith('"')) safeLabel = `"${safeLabel}"`;
-            return `${indent}${safeFrom}${arrow}${safeTo}${colon}${safeLabel}`;
+        // Quote labels in round brackets: id(Label Text) → id("Label Text")
+        cleaned = cleaned.replace(/(\w+)\(([^)"]+)\)/g, (m, id, label) => {
+            return `${id}("${label.trim()}")`;
         });
     }
 
-    // Final label safety for arrows
-    cleaned = cleaned.replace(/--\s*([^"->\n]+?)\s*-->/g, (match, label) => {
-        if (label.trim().startsWith('"')) return match;
-        return `-- "${label.trim()}" -->`;
-    });
-
+    // 3. Remove trailing semicolons (can break some Mermaid versions)
     cleaned = cleaned.replace(/;\s*$/gm, '');
+
     return cleaned;
 }
 
