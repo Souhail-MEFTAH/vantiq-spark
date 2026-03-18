@@ -80,42 +80,66 @@ window.PDFGenerator = {
                 content: [] // Back to standard array for max compatibility
             };
 
-            // Helper: split Arabic+Latin mixed text into font-specific inline runs
-            // This fixes "squares" on English technical terms in Arabic PDFs
-            const mixedText = (str, fontSize) => {
-                if (!isArabic || typeof str !== 'string') return str;
-                // If string is entirely ASCII/Latin, use Roboto
-                if (/^[\x00-\x7F\s]+$/.test(str)) return { text: str, font: 'Roboto', fontSize: fontSize };
-                // If no Latin at all, just return with Arabic font (RTL)
-                if (!/[\x00-\x7F]/.test(str)) return { text: str, font: 'NotoSansArabic', rtl: true, fontSize: fontSize };
+            // Add rtl:true to document-level defaultStyle for Arabic (needed for bidi shaping)
+            if (isArabic) {
+                docDefinition.defaultStyle.rtl = true;
+            }
 
-                // Mixed: split on Latin/Non-Latin boundaries
-                const parts = str.match(/([\x00-\x7F]+|[^\x00-\x7F]+)/g) || [str];
-                return {
-                    text: parts.map(part => {
-                        const isLatin = /^[\x00-\x7F\s]+$/.test(part);
-                        return { text: part, font: isLatin ? 'Roboto' : 'NotoSansArabic', rtl: !isLatin };
-                    })
-                };
+            // ── Arabic helper: recursive RTL + mixed-font content walker ──────────────
+            // Traverses every node in the doc tree and:
+            //   • Sets rtl:true on Arabic text items
+            //   • Splits mixed Latin/Arabic strings into font-specific runs:
+            //     Latin (ASCII) → Roboto  |  Arabic (non-ASCII) → NotoSansArabic
+            const applyArabicRTL = (node) => {
+                if (!isArabic) return;
+                if (!node || typeof node !== 'object') return;
+
+                // Process array of nodes
+                if (Array.isArray(node)) {
+                    node.forEach(n => applyArabicRTL(n));
+                    return;
+                }
+
+                // Recursively walk known container properties
+                if (node.table && node.table.body) {
+                    node.table.body.forEach(row => row.forEach(cell => applyArabicRTL(cell)));
+                }
+                if (node.ul) { node.ul.forEach(item => applyArabicRTL(item)); }
+                if (node.ol) { node.ol.forEach(item => applyArabicRTL(item)); }
+                if (node.columns) { node.columns.forEach(c => applyArabicRTL(c)); }
+                if (node.stack) { node.stack.forEach(s => applyArabicRTL(s)); }
+
+                // Process text value
+                if (typeof node.text === 'string' && node.text.trim()) {
+                    const str = node.text;
+                    const hasArabic = /[^\x00-\x7F]/.test(str);
+                    const hasLatin = /[\x21-\x7E]/.test(str); // printable ASCII excl. spaces
+
+                    if (hasArabic && hasLatin) {
+                        // Mixed: split into per-font inline runs
+                        const parts = str.match(/([\x00-\x7F]+|[^\x00-\x7F]+)/g) || [str];
+                        node.text = parts.map(part => {
+                            const isLatin = /^[\x00-\x7F]+$/.test(part);
+                            return { text: part, font: isLatin ? 'Roboto' : 'NotoSansArabic' };
+                        });
+                        node.rtl = true;
+                    } else if (hasArabic) {
+                        node.rtl = true;
+                        node.font = node.font || 'NotoSansArabic';
+                    } else if (hasLatin) {
+                        node.font = node.font || 'Roboto';
+                    }
+                    node.alignment = node.alignment || 'right';
+                } else if (Array.isArray(node.text)) {
+                    node.text.forEach(t => applyArabicRTL(t));
+                    node.rtl = node.rtl !== undefined ? node.rtl : true;
+                }
             };
 
-            // Helper to add sections safely
+            // Helper to add sections safely (applies Arabic walker when needed)
             const addSection = (contentArray) => {
                 if (contentArray && Array.isArray(contentArray)) {
-                    contentArray.forEach(item => {
-                        if (isArabic) {
-                            item.alignment = item.alignment || 'right';
-                            // Apply RTL to text items
-                            if (item.text !== undefined && typeof item.text === 'string' && item.text.trim()) {
-                                const mixed = mixedText(item.text, item.fontSize);
-                                if (typeof mixed === 'object' && mixed.text !== undefined) {
-                                    item.text = mixed.text;
-                                    if (mixed.font) item.font = mixed.font;
-                                    if (mixed.rtl) item.rtl = true;
-                                }
-                            }
-                        }
-                    });
+                    if (isArabic) contentArray.forEach(item => applyArabicRTL(item));
                     docDefinition.content.push(...contentArray);
                 }
             };
