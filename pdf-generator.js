@@ -25,25 +25,22 @@ window.PDFGenerator = {
                     bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-MediumItalic.ttf'
                 },
                 NotoSansArabic: {
-                    // Use 'all' subset: covers Latin + Arabic — avoids squares on English terms
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/all-700-normal.ttf'
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf'
                 },
                 NotoSansJP: {
-                    // Use 'all' subset: covers Latin + Japanese
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/all-700-normal.ttf'
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf'
                 },
                 NotoSansKR: {
-                    // Use 'all' subset: covers Latin + Korean
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/all-700-normal.ttf'
+                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
+                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf',
+                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
+                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf'
                 }
             };
 
@@ -68,10 +65,7 @@ window.PDFGenerator = {
                     fontSize: 10,
                     color: '#333333',
                     lineHeight: 1.3,
-                    alignment: isArabic ? 'right' : 'left',
-                    // rtl:true enables proper bidirectional Arabic text shaping in pdfMake
-                    // Without this, Arabic characters are rendered LTR (unreadable)
-                    rtl: isArabic ? true : false
+                    alignment: isArabic ? 'right' : 'left'
                 },
                 styles: {
                     title: { fontSize: 24, bold: true, color: '#00c389', margin: [0, 0, 0, 10] },
@@ -86,14 +80,40 @@ window.PDFGenerator = {
                 content: [] // Back to standard array for max compatibility
             };
 
+            // Helper: split Arabic+Latin mixed text into font-specific inline runs
+            // This fixes "squares" on English technical terms in Arabic PDFs
+            const mixedText = (str, fontSize) => {
+                if (!isArabic || typeof str !== 'string') return str;
+                // If string is entirely ASCII/Latin, use Roboto
+                if (/^[\x00-\x7F\s]+$/.test(str)) return { text: str, font: 'Roboto', fontSize: fontSize };
+                // If no Latin at all, just return with Arabic font (RTL)
+                if (!/[\x00-\x7F]/.test(str)) return { text: str, font: 'NotoSansArabic', rtl: true, fontSize: fontSize };
+
+                // Mixed: split on Latin/Non-Latin boundaries
+                const parts = str.match(/([\x00-\x7F]+|[^\x00-\x7F]+)/g) || [str];
+                return {
+                    text: parts.map(part => {
+                        const isLatin = /^[\x00-\x7F\s]+$/.test(part);
+                        return { text: part, font: isLatin ? 'Roboto' : 'NotoSansArabic', rtl: !isLatin };
+                    })
+                };
+            };
+
             // Helper to add sections safely
             const addSection = (contentArray) => {
                 if (contentArray && Array.isArray(contentArray)) {
                     contentArray.forEach(item => {
                         if (isArabic) {
                             item.alignment = item.alignment || 'right';
-                            // Propagate RTL to all content items individually
-                            if (item.text !== undefined) item.rtl = true;
+                            // Apply RTL to text items
+                            if (item.text !== undefined && typeof item.text === 'string' && item.text.trim()) {
+                                const mixed = mixedText(item.text, item.fontSize);
+                                if (typeof mixed === 'object' && mixed.text !== undefined) {
+                                    item.text = mixed.text;
+                                    if (mixed.font) item.font = mixed.font;
+                                    if (mixed.rtl) item.rtl = true;
+                                }
+                            }
                         }
                     });
                     docDefinition.content.push(...contentArray);
