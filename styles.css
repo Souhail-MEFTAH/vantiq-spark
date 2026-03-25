@@ -1706,6 +1706,29 @@ select.modal-input option {
   transform: translateX(0);
 }
 
+/* Resize Handle */
+.coach-resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 101;
+  transition: background var(--transition-fast);
+}
+
+.coach-resize-handle:hover,
+.coach-resize-handle.active {
+  background: var(--brand-primary);
+  opacity: 0.5;
+}
+
+.ai-coach-drawer.resizing {
+  transition: none !important;
+  user-select: none;
+}
+
 /* Drawer Header */
 .coach-header {
   display: flex;

@@ -2118,18 +2118,18 @@ const coachHistory = {}; // per-panel conversation history
 let coachCurrentPanel = null;
 
 const COACH_PANEL_MAP = {
-    analysis:       { contextKey: 'analysis',       label: 'Problem Analysis',          suggestions: ['What is the core problem being solved here?', 'Why is Vantiq a good fit for this use case?', 'Explain the AI tasks identified'] },
-    domain:         { contextKey: 'domainModel',    label: 'Domain Model',              suggestions: ['What are domain entities and why do they matter?', 'How do these entities relate to each other?', 'What is a bounded context?'] },
-    architecture:   { contextKey: 'architecture',   label: 'System Architecture',       suggestions: ['Walk me through this architecture step by step', 'What makes this event-driven?', 'How does data flow through the system?'] },
-    aimodels:       { contextKey: 'aiModels',       label: 'AI Model Recommendations',  suggestions: ['Why were these specific AI models chosen?', 'What is the difference between these model types?', 'How would these models run in production?'] },
-    agentic:        { contextKey: 'agentic',        label: 'Agentic AI Guide',          suggestions: ['What is an AI agent and how is it different from a model?', 'How do these agents coordinate with each other?', 'What tools do the agents use?'] },
-    events:         { contextKey: 'events',         label: 'Event System Design',       suggestions: ['What is event-driven architecture?', 'Explain the event flow in simple terms', 'What are Visual Event Handlers?'] },
-    implementation: { contextKey: 'implementation',  label: 'Implementation Plan',       suggestions: ['What should we build first?', 'What Vantiq tools are needed for each phase?', 'How long would this take to implement?'] },
-    diagrams:       { contextKey: 'diagrams',       label: 'Architecture Diagrams',     suggestions: ['Walk me through this diagram', 'What do the arrows represent?', 'How do the components connect?'] },
-    demo:           { contextKey: 'demo',           label: 'Demo Scenarios',            suggestions: ['How would I demo this to a customer?', 'What are the key wow moments?', 'What data do I need for the demo?'] },
-    training:       { contextKey: 'training',       label: 'Training Labs',             suggestions: ['What skills will participants learn?', 'What prerequisites are needed?', 'How long should each lab take?'] },
-    business:       { contextKey: 'businessValue',  label: 'Business Value Justifier',  suggestions: ['Explain the ROI in simple terms', 'How do I present this to executives?', 'What KPIs should we track?'] },
-    competitive:    { contextKey: 'competitive',    label: 'Competitive Analysis',      suggestions: ['Why choose Vantiq over competitor X?', 'What are Vantiq\'s unique strengths?', 'How do I handle pricing objections?'] }
+    analysis: { contextKey: 'analysis', label: 'Problem Analysis', suggestions: ['What is the core problem being solved here?', 'Why is Vantiq a good fit for this use case?', 'Explain the AI tasks identified'] },
+    domain: { contextKey: 'domainModel', label: 'Domain Model', suggestions: ['What are domain entities and why do they matter?', 'How do these entities relate to each other?', 'What is a bounded context?'] },
+    architecture: { contextKey: 'architecture', label: 'System Architecture', suggestions: ['Walk me through this architecture step by step', 'What makes this event-driven?', 'How does data flow through the system?'] },
+    aimodels: { contextKey: 'aiModels', label: 'AI Model Recommendations', suggestions: ['Why were these specific AI models chosen?', 'What is the difference between these model types?', 'How would these models run in production?'] },
+    agentic: { contextKey: 'agentic', label: 'Agentic AI Guide', suggestions: ['What is an AI agent and how is it different from a model?', 'How do these agents coordinate with each other?', 'What tools do the agents use?'] },
+    events: { contextKey: 'events', label: 'Event System Design', suggestions: ['What is event-driven architecture?', 'Explain the event flow in simple terms', 'What are Visual Event Handlers?'] },
+    implementation: { contextKey: 'implementation', label: 'Implementation Plan', suggestions: ['What should we build first?', 'What Vantiq tools are needed for each phase?', 'How long would this take to implement?'] },
+    diagrams: { contextKey: 'diagrams', label: 'Architecture Diagrams', suggestions: ['Walk me through this diagram', 'What do the arrows represent?', 'How do the components connect?'] },
+    demo: { contextKey: 'demo', label: 'Demo Scenarios', suggestions: ['How would I demo this to a customer?', 'What are the key wow moments?', 'What data do I need for the demo?'] },
+    training: { contextKey: 'training', label: 'Training Labs', suggestions: ['What skills will participants learn?', 'What prerequisites are needed?', 'How long should each lab take?'] },
+    business: { contextKey: 'businessValue', label: 'Business Value Justifier', suggestions: ['Explain the ROI in simple terms', 'How do I present this to executives?', 'What KPIs should we track?'] },
+    competitive: { contextKey: 'competitive', label: 'Competitive Analysis', suggestions: ['Why choose Vantiq over competitor X?', 'What are Vantiq\'s unique strengths?', 'How do I handle pricing objections?'] }
 };
 
 function openCoach(panelKey) {
@@ -2171,7 +2171,7 @@ function openCoach(panelKey) {
 
     // Open drawer
     drawer.classList.add('open');
-    
+
     // Focus input  
     setTimeout(() => document.getElementById('coachInput').focus(), 400);
 }
@@ -2183,7 +2183,7 @@ function closeCoach() {
 function appendCoachMessage(role, content, save = true) {
     const messagesEl = document.getElementById('coachMessages');
     const avatar = role === 'assistant' ? '🎓' : '👤';
-    
+
     const msgDiv = document.createElement('div');
     msgDiv.className = `coach-msg ${role}`;
     msgDiv.innerHTML = `
@@ -2192,11 +2192,11 @@ function appendCoachMessage(role, content, save = true) {
     `;
     messagesEl.appendChild(msgDiv);
     messagesEl.scrollTop = messagesEl.scrollHeight;
-    
+
     if (save && coachCurrentPanel) {
         coachHistory[coachCurrentPanel].push({ role, content });
     }
-    
+
     return msgDiv;
 }
 
@@ -2211,7 +2211,7 @@ function formatCoachMarkdown(text) {
 
 function escapeHtml(str) {
     if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 async function sendCoachMessage() {
@@ -2247,7 +2247,7 @@ async function sendCoachMessage() {
     try {
         const mapping = COACH_PANEL_MAP[coachCurrentPanel];
         const contextData = state.results[mapping.contextKey];
-        
+
         // Build context string (truncated to prevent token overflow)
         let contextStr = '';
         if (contextData) {
@@ -2278,7 +2278,7 @@ RULES:
         const messages = [
             { role: 'system', content: systemPrompt }
         ];
-        
+
         // Add conversation history (last 10 exchanges to keep prompt size manageable)
         const history = coachHistory[coachCurrentPanel] || [];
         const recentHistory = history.slice(-20); // last 10 pairs
@@ -2325,13 +2325,52 @@ RULES:
         console.error('Coach error:', error);
         const typing = document.getElementById('coachTyping');
         if (typing) typing.remove();
-        
+
         appendCoachMessage('assistant', `⚠️ **Error:** ${error.message}\n\nPlease check your API key and try again.`);
     }
 
     sendBtn.disabled = false;
     input.focus();
 }
+
+// ── Coach Drawer Resize ──
+(function initCoachResize() {
+    const handle = document.getElementById('coachResizeHandle');
+    const drawer = document.getElementById('aiCoachDrawer');
+    if (!handle || !drawer) return;
+
+    let isResizing = false;
+    let startX = 0;
+    let startWidth = 0;
+
+    handle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startX = e.clientX;
+        startWidth = drawer.offsetWidth;
+        drawer.classList.add('resizing');
+        handle.classList.add('active');
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isResizing) return;
+        const isRTL = document.documentElement.dir === 'rtl';
+        const delta = isRTL ? (e.clientX - startX) : (startX - e.clientX);
+        const newWidth = Math.min(800, Math.max(320, startWidth + delta));
+        drawer.style.width = newWidth + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (!isResizing) return;
+        isResizing = false;
+        drawer.classList.remove('resizing');
+        handle.classList.remove('active');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+    });
+})();
 
 
 function askCoachSuggestion(text) {
