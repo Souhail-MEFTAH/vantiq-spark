@@ -1710,18 +1710,18 @@ select.modal-input option {
 .coach-resize-handle {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 6px;
+  left: -4px;
+  width: 10px;
   height: 100%;
   cursor: col-resize;
-  z-index: 101;
+  z-index: 102;
   transition: background var(--transition-fast);
 }
 
 .coach-resize-handle:hover,
 .coach-resize-handle.active {
   background: var(--brand-primary);
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .ai-coach-drawer.resizing {

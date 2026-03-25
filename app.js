@@ -2338,6 +2338,7 @@ function openCoach(panelKey) {
 
     // Open drawer
     drawer.classList.add('open');
+    initCoachResize();
 
     // Focus input  
     setTimeout(() => document.getElementById('coachInput').focus(), 400);
@@ -2501,31 +2502,38 @@ RULES:
 }
 
 // ── Coach Drawer Resize ──
-(function initCoachResize() {
+let coachResizeInitialized = false;
+
+function initCoachResize() {
+    if (coachResizeInitialized) return;
     const handle = document.getElementById('coachResizeHandle');
     const drawer = document.getElementById('aiCoachDrawer');
     if (!handle || !drawer) return;
+    coachResizeInitialized = true;
 
     let isResizing = false;
-    let startX = 0;
-    let startWidth = 0;
 
     handle.addEventListener('mousedown', (e) => {
         isResizing = true;
-        startX = e.clientX;
-        startWidth = drawer.offsetWidth;
         drawer.classList.add('resizing');
         handle.classList.add('active');
         document.body.style.cursor = 'col-resize';
         document.body.style.userSelect = 'none';
         e.preventDefault();
+        e.stopPropagation();
     });
 
     document.addEventListener('mousemove', (e) => {
         if (!isResizing) return;
+        e.preventDefault();
         const isRTL = document.documentElement.dir === 'rtl';
-        const delta = isRTL ? (e.clientX - startX) : (startX - e.clientX);
-        const newWidth = Math.min(800, Math.max(320, startWidth + delta));
+        let newWidth;
+        if (isRTL) {
+            newWidth = e.clientX;
+        } else {
+            newWidth = window.innerWidth - e.clientX;
+        }
+        newWidth = Math.min(800, Math.max(320, newWidth));
         drawer.style.width = newWidth + 'px';
     });
 
@@ -2537,7 +2545,7 @@ RULES:
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
     });
-})();
+}
 
 
 function askCoachSuggestion(text) {
