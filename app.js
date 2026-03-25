@@ -2288,7 +2288,7 @@ const coachHistory = {}; // per-panel conversation history
 let coachCurrentPanel = null;
 
 function getCoachPanelMap() {
-    const lang = window.currentLang || 'en';
+    const lang = state.language || 'en';
     const maps = {
         en: {
             analysis: { contextKey: 'analysis', label: 'Problem Analysis', welcome: "Welcome! I'm your AI Coach for the", sub: "I can help you understand what was generated here, explain technical concepts, and answer any questions you have. Just ask me anything!", hint: 'Try: "Explain this section in simple terms" or "What are the key takeaways?"', suggestions: ["What is the core problem being solved here?", "Why is Vantiq a good fit for this use case?", "Explain the AI tasks identified"] },
@@ -2394,7 +2394,7 @@ function openCoach(panelKey) {
         }
 
         // Show welcome message
-        const isRtl = (window.currentLang === 'ar') ? 'dir="rtl" style="text-align:right"' : '';
+        const isRtl = (state.language === 'ar') ? 'dir="rtl" style="text-align:right"' : '';
         const welcomeHtml = `<div class="coach-msg assistant" ${isRtl}>
             <div class="coach-msg-avatar">🎓</div>
             <div class="coach-msg-bubble">
@@ -2517,7 +2517,7 @@ RULES:
 - Use markdown formatting (bold for emphasis, bullet points for lists).
 - If the user asks about content from other tabs, politely suggest they open the AI Coach on that specific tab for the most accurate context.
 - Never fabricate information that isn't in the context above.
-- You MUST respond in ${window.currentLang === 'ko' ? 'Korean' : window.currentLang === 'ja' ? 'Japanese' : window.currentLang === 'ar' ? 'Arabic' : 'English'}, regardless of the language the user uses.`;
+- You MUST respond in ${state.language === 'ko' ? 'Korean' : state.language === 'ja' ? 'Japanese' : state.language === 'ar' ? 'Arabic' : 'English'}, regardless of the language the user uses.`;
 
         // Build conversation messages
         const messages = [
