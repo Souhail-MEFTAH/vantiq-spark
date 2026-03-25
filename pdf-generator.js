@@ -80,10 +80,9 @@ window.PDFGenerator = {
                 content: [] // Back to standard array for max compatibility
             };
 
-            // ── Arabic helper: Manual Word Reordering for Visual RTL ──
-            // pdfMake's bidi engine fails at word reordering in mixed arrays.
-            // This physically tokenizes sentences and reverses token array order
-            // so LTR rendering yields perfect RTL visual sequence.
+            // ── Arabic helper: Comprehensive RTL Processing ──
+            // Handles: word reordering, list markers, table column reversal,
+            // margin flipping, and directional symbol replacement.
             const applyArabicRTL = (node) => {
                 if (!isArabic) return;
                 if (!node || typeof node !== 'object') return;
@@ -94,23 +93,69 @@ window.PDFGenerator = {
                     return;
                 }
 
-                // Recursively walk known container properties
+                // ── 1. Convert ul/ol to manual RTL stacks ──
+                // pdfMake's built-in list RTL is unreliable. We convert each list
+                // into a stack of {columns} rows with the marker on the RIGHT side.
+                if (node.ul || node.ol) {
+                    const items = node.ul || node.ol;
+                    const isOrdered = !!node.ol;
+                    const stackItems = [];
+
+                    items.forEach((item, idx) => {
+                        const marker = isOrdered ? `.${idx + 1}` : '•';
+
+                        // Recursively process the item first
+                        applyArabicRTL(item);
+
+                        // Build columns: [text content ← marker] for RTL visual order
+                        stackItems.push({
+                            columns: [
+                                typeof item === 'string'
+                                    ? { text: item, alignment: 'right', width: '*' }
+                                    : Object.assign({}, item, { alignment: 'right', width: '*' }),
+                                { text: marker, width: 20, alignment: 'right', font: 'Roboto', color: '#555555', fontSize: 10 }
+                            ],
+                            columnGap: 6,
+                            margin: [0, 2, 0, 2]
+                        });
+                    });
+
+                    // Replace the ul/ol with a stack
+                    delete node.ul;
+                    delete node.ol;
+                    node.stack = stackItems;
+                    node.margin = node.margin || [0, 0, 0, 10];
+                    return;
+                }
+
+                // ── 2. Reverse table columns for RTL ──
                 if (node.table && node.table.body) {
-                    node.table.body.forEach(row => row.forEach(cell => applyArabicRTL(cell)));
+                    node.table.body.forEach(row => {
+                        if (Array.isArray(row)) {
+                            row.reverse();
+                            row.forEach(cell => applyArabicRTL(cell));
+                        }
+                    });
+                    if (node.table.widths && Array.isArray(node.table.widths)) {
+                        node.table.widths.reverse();
+                    }
                 }
-                if (node.ul) {
-                    node.rtl = true; // Flips list marker (bullets) to the right side
-                    node.ul.forEach(item => applyArabicRTL(item));
-                }
-                if (node.ol) {
-                    node.rtl = true; // Flips list marker (numbers) to the right side
-                    node.ol.forEach(item => applyArabicRTL(item));
-                }
+
+                // ── 3. Process child containers ──
                 if (node.columns) { node.columns.forEach(c => applyArabicRTL(c)); }
                 if (node.stack) { node.stack.forEach(s => applyArabicRTL(s)); }
 
-                // Process text value — manually reverse word order
+                // ── 4. Flip left/right margins ──
+                if (Array.isArray(node.margin) && node.margin.length === 4) {
+                    const [left, top, right, bottom] = node.margin;
+                    node.margin = [right, top, left, bottom];
+                }
+
+                // ── 5. Process text — reverse words and fix directional symbols ──
                 if (typeof node.text === 'string' && node.text.trim()) {
+                    // Replace directional arrows for RTL
+                    node.text = node.text.replace(/\u2192/g, '\u2190').replace(/->/g, '<-');
+
                     const str = node.text;
                     const hasArabic = /[\u0600-\u06FF]/.test(str);
 
@@ -124,19 +169,14 @@ window.PDFGenerator = {
                                 return;
                             }
 
-                            // Tokenize: 1. Latin phrases | 2. Spaces | 3. Punctuation | 4. Arabic words
-                            // Latin expressions containing spaces/punctuation stay grouped.
-                            const tokens = line.match(/([a-zA-Z0-9](?:[\x20-\x7E]*[a-zA-Z0-9])?)|(\s+)|([\x21-\x7E]+)|([^\x20-\x7E]+)/g) || [line];
+                            // Tokenize: Latin phrases | Arabic words | spaces | punctuation
+                            const tokens = line.match(/([a-zA-Z0-9](?:[\x20-\x7E]*[a-zA-Z0-9])?)|([\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]+)|(\s+)|([\x21-\x7E]+)|([^\x00-\x7F]+)/g) || [line];
 
-                            // Reverse the tokens array! PdfMake lays arrays out LTR, 
-                            // so reversing the array creates a visual RTL layout.
+                            // Reverse tokens for visual RTL
                             const reversedTokens = tokens.reverse();
 
                             reversedTokens.forEach(token => {
-                                // IMPORTANT: Only use NotoSansArabic if the token actually contains Arabic characters.
-                                // This ensures ALL punctuation, spaces, and special symbols (like em-dash '—' or curly quotes)
-                                // fall back to Roboto, completely eliminating any remaining squares.
-                                const hasArabicChars = /[\u0600-\u06FF]/.test(token);
+                                const hasArabicChars = /[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(token);
                                 newTextRuns.push({
                                     text: token,
                                     font: hasArabicChars ? 'NotoSansArabic' : 'Roboto'
@@ -151,14 +191,17 @@ window.PDFGenerator = {
                         node.text = newTextRuns;
                         node.alignment = node.alignment || 'right';
                     } else {
-                        // Entirely Latin node in Arabic doc
                         node.font = node.font || 'Roboto';
                         node.alignment = node.alignment || 'right';
                     }
                 } else if (Array.isArray(node.text)) {
-                    // Pre-split text arrays: physically reverse the elements
                     node.text.reverse();
                     node.text.forEach(t => applyArabicRTL(t));
+                }
+
+                // ── 6. Ensure alignment is always right ──
+                if (!node.alignment && (node.text || node.stack)) {
+                    node.alignment = 'right';
                 }
             };
 
