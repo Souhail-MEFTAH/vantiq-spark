@@ -1474,61 +1474,228 @@ document.addEventListener('keydown', (e) => {
 
 // ── Mermaid Rendering ──
 /**
- * Automatically cleans and hardens Mermaid syntax, specifically for localized content.
- * Fixes unquoted labels, illegal ID characters, and balanced quotes.
+ * Aggressively cleans and hardens LLM-generated Mermaid syntax.
+ * Handles localized content, special characters, and common AI generation mistakes.
  */
 function preprocessMermaid(code) {
     if (!code) return '';
     let cleaned = code.trim();
 
     // 0. Strip markdown fences if AI included them
-    cleaned = cleaned.replace(/```mermaid\s*\n?/g, '').replace(/```\s*$/g, '').trim();
+    cleaned = cleaned.replace(/```(?:mermaid)?\s*\n?/g, '').replace(/```\s*$/g, '').trim();
 
-    // 1. Detect diagram type — only default to graph TD if no type header found
+    // 1. Detect diagram type — default to graph TD if none
     const knownTypes = ['graph ', 'flowchart ', 'sequenceDiagram', 'classDiagram',
-        'stateDiagram', 'erDiagram', 'pie', 'gantt', 'journey', 'gitGraph', 'C4Context'];
+        'stateDiagram', 'erDiagram', 'pie ', 'pie\n', 'gantt', 'journey', 'gitGraph', 'C4Context'];
     const hasType = knownTypes.some(t => cleaned.startsWith(t));
     if (!hasType) {
         cleaned = 'graph TD\n' + cleaned;
     }
 
-    // 2. For graph/flowchart only: ensure labels inside [] are quoted
-    if (!cleaned.startsWith('sequenceDiagram')) {
-        // Quote labels in square brackets: id[Label Text] → id["Label Text"]
-        cleaned = cleaned.replace(/(\w+)\[([^\]"]+)\]/g, (m, id, label) => {
-            return `${id}["${label.trim()}"]`;
+    // 2. Decode HTML entities that LLMs sometimes inject
+    cleaned = cleaned.replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&nbsp;/g, ' ');
+
+    // 3. Remove HTML tags that LLMs sometimes include
+    cleaned = cleaned.replace(/<br\s*\/?>/gi, ' ')
+        .replace(/<\/?[a-z][^>]*>/gi, '');
+
+    // 4. Strip comments (Mermaid doesn't support all comment styles)
+    cleaned = cleaned.replace(/^\s*%%.*$/gm, '');
+
+    // 5. Fix arrow syntax issues
+    // Normalize weird arrow variants: ==> → -->  ,  -> → -->  , ==> → -->
+    cleaned = cleaned.replace(/\s*==+>\s*/g, ' --> ');
+    // Fix arrows without spaces: A-->B → A --> B
+    cleaned = cleaned.replace(/(\w)(-->)(\w)/g, '$1 --> $3');
+    cleaned = cleaned.replace(/(\w)(--)(\w)/g, '$1 -- $3');
+    // Fix dotted arrows without spaces
+    cleaned = cleaned.replace(/(\w)(-.->)(\w)/g, '$1 -.-> $3');
+    // Remove arrows pointing to nothing
+    cleaned = cleaned.replace(/-->\s*$/gm, '');
+
+    // 6. For graph/flowchart: sanitize node labels
+    const isSequence = cleaned.startsWith('sequenceDiagram');
+    const isER = cleaned.startsWith('erDiagram');
+    const isPie = cleaned.startsWith('pie');
+
+    if (!isSequence && !isER && !isPie) {
+        // Process line by line to handle labels carefully
+        const lines = cleaned.split('\n');
+        const processedLines = lines.map((line, idx) => {
+            // Skip the diagram type declaration line
+            if (idx === 0 && hasType) return line;
+
+            // Skip subgraph end
+            if (line.trim() === 'end') return line;
+
+            // Handle subgraph labels: subgraph Title → subgraph "Title"
+            const subgraphMatch = line.match(/^(\s*subgraph\s+)(.+)$/);
+            if (subgraphMatch) {
+                const label = subgraphMatch[2].trim();
+                if (!label.startsWith('"') && !label.startsWith("'")) {
+                    return `${subgraphMatch[1]}"${sanitizeMermaidLabel(label)}"`;
+                }
+                return line;
+            }
+
+            // Quote labels in square brackets: id[Label Text] → id["Label Text"]
+            line = line.replace(/(\w[\w\d_]*)?\[([^\]"]+)\]/g, (m, id, label) => {
+                if (!id) return m; // Skip if no ID prefix
+                return `${id}["${sanitizeMermaidLabel(label)}"]`;
+            });
+
+            // Quote labels in curly braces (rhombus): id{Label} → id{"Label"}
+            line = line.replace(/(\w[\w\d_]*)\{([^}"]+)\}/g, (m, id, label) => {
+                return `${id}{"${sanitizeMermaidLabel(label)}"}`;
+            });
+
+            // Quote labels in double round brackets (stadium): id((Label)) → id(("Label"))
+            line = line.replace(/(\w[\w\d_]*)\(\(([^)"]+)\)\)/g, (m, id, label) => {
+                return `${id}(("${sanitizeMermaidLabel(label)}"))`;
+            });
+
+            // Quote labels in round brackets: id(Label Text) → id("Label Text")
+            // Must come after (( )) handling
+            line = line.replace(/(\w[\w\d_]*)\(([^)"(]+)\)/g, (m, id, label) => {
+                return `${id}("${sanitizeMermaidLabel(label)}")`;
+            });
+
+            return line;
         });
-        // Quote labels in round brackets: id(Label Text) → id("Label Text")
-        cleaned = cleaned.replace(/(\w+)\(([^)"]+)\)/g, (m, id, label) => {
-            return `${id}("${label.trim()}")`;
+        cleaned = processedLines.join('\n');
+    }
+
+    // 7. Sequence diagram hardening
+    if (isSequence) {
+        // Quote participant names that contain spaces
+        cleaned = cleaned.replace(/participant\s+([^"\n]+?)(?:\s+as\s+)/g, (m, name) => {
+            if (name.includes(' ') && !name.startsWith('"')) {
+                return `participant "${name.trim()}" as `;
+            }
+            return m;
         });
     }
 
-    // 3. Remove trailing semicolons (can break some Mermaid versions)
+    // 8. Remove trailing semicolons
     cleaned = cleaned.replace(/;\s*$/gm, '');
 
+    // 9. Remove empty lines between nodes (can confuse parser)
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+
+    // 10. Remove duplicate edges (same line appearing multiple times)
+    const lineSet = new Set();
+    const deduped = [];
+    for (const line of cleaned.split('\n')) {
+        const trimmed = line.trim();
+        // Only deduplicate edge lines (contain -->), keep all other lines
+        if (trimmed.includes('-->') || trimmed.includes('-.-') || trimmed.includes('==>')) {
+            if (!lineSet.has(trimmed)) {
+                lineSet.add(trimmed);
+                deduped.push(line);
+            }
+        } else {
+            deduped.push(line);
+        }
+    }
+    cleaned = deduped.join('\n');
+
+    // 11. Final safety: remove any remaining unbalanced quotes
+    // Count quotes per line and add closing quote if odd
+    cleaned = cleaned.split('\n').map(line => {
+        const quoteCount = (line.match(/"/g) || []).length;
+        if (quoteCount % 2 !== 0) {
+            line += '"';
+        }
+        return line;
+    }).join('\n');
+
     return cleaned;
+}
+
+/**
+ * Sanitize a label string for Mermaid (strip dangerous chars).
+ */
+function sanitizeMermaidLabel(label) {
+    if (!label) return '';
+    return label.trim()
+        .replace(/"/g, "'")  // Escape inner quotes
+        .replace(/[#;]/g, '')    // Remove hash and semicolons
+        .replace(/[\r\n]/g, ' ');  // No newlines inside labels
 }
 
 async function renderMermaidDiagrams() {
     const mermaidEls = document.querySelectorAll('.mermaid');
     for (const el of mermaidEls) {
         if (el.dataset.rendered) continue;
+        const rawCode = el.textContent;
         try {
             const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
-            const hardenedCode = preprocessMermaid(el.textContent);
+            const hardenedCode = preprocessMermaid(rawCode);
 
-            // Log for debugging localized syntax
-            console.log(`[Mermaid] Rendering ${id}:`, hardenedCode);
+            console.log(`[Mermaid] Rendering ${id}:`, hardenedCode.substring(0, 200) + '...');
 
             const { svg } = await mermaid.render(id, hardenedCode);
             el.innerHTML = svg;
             el.dataset.rendered = 'true';
         } catch (e) {
-            console.warn('Mermaid render error:', e);
-            el.innerHTML = '<div style="color:var(--text-tertiary);font-size:12px;padding:20px">Diagram could not be rendered. The AI may have generated invalid Mermaid syntax.</div>';
+            console.warn('[Mermaid] First render failed, attempting simplified fallback:', e.message);
+
+            // Retry with aggressive simplification
+            try {
+                const id2 = 'mermaid-retry-' + Math.random().toString(36).substr(2, 9);
+                const simplified = simplifyMermaid(rawCode);
+                const { svg } = await mermaid.render(id2, simplified);
+                el.innerHTML = svg;
+                el.dataset.rendered = 'true';
+                console.log(`[Mermaid] Fallback render succeeded for ${id2}`);
+            } catch (e2) {
+                console.warn('[Mermaid] Fallback also failed:', e2.message);
+                // Show raw code so the user at least sees something useful
+                const escaped = (rawCode || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                el.innerHTML = `
+                    <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
+                        <div style="color:var(--brand-warning);margin-bottom:8px;font-weight:600">⚠️ Diagram could not be rendered</div>
+                        <div style="color:var(--text-tertiary);margin-bottom:12px;font-size:11px">The AI generated Mermaid syntax that could not be parsed. You can copy the code below and test it at <a href="https://mermaid.live" target="_blank" style="color:var(--brand-primary)">mermaid.live</a></div>
+                        <pre style="background:var(--bg-primary);padding:12px;border-radius:var(--radius-md);color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap">${escaped}</pre>
+                    </div>`;
+            }
         }
     }
+}
+
+/**
+ * Aggressively simplify Mermaid code by stripping all styling, 
+ * reducing to basic node→node connections.
+ */
+function simplifyMermaid(code) {
+    if (!code) return 'graph TD\nA["No diagram"]';
+    let cleaned = preprocessMermaid(code);
+
+    // Strip all style/class declarations
+    cleaned = cleaned.replace(/^\s*style\s+.*$/gm, '');
+    cleaned = cleaned.replace(/^\s*classDef\s+.*$/gm, '');
+    cleaned = cleaned.replace(/^\s*class\s+.*$/gm, '');
+    cleaned = cleaned.replace(/:::[\w]+/g, '');
+
+    // Strip click handlers
+    cleaned = cleaned.replace(/^\s*click\s+.*$/gm, '');
+
+    // Strip linkStyle
+    cleaned = cleaned.replace(/^\s*linkStyle\s+.*$/gm, '');
+
+    // Remove subgraph wrappers but keep inner content
+    cleaned = cleaned.replace(/^\s*subgraph\s+.*$/gm, '');
+    cleaned = cleaned.replace(/^\s*end\s*$/gm, '');
+
+    // Remove empty lines
+    cleaned = cleaned.replace(/\n{2,}/g, '\n').trim();
+
+    return cleaned;
 }
 
 // ── Pipeline Progress ──
