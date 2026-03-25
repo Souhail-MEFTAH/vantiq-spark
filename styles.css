@@ -1915,6 +1915,30 @@ select.modal-input option {
   transform: none;
 }
 
+/* Suggested Prompt Buttons */
+.coach-suggestion-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  line-height: 1.4;
+}
+
+.coach-suggestion-btn:hover {
+  color: var(--brand-primary);
+  border-color: var(--border-brand);
+  background: rgba(0, 195, 137, 0.06);
+  transform: translateX(4px);
+}
+
 /* RTL Support */
 [dir="rtl"] .ai-coach-drawer {
   right: auto;

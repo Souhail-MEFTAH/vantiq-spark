@@ -2118,18 +2118,18 @@ const coachHistory = {}; // per-panel conversation history
 let coachCurrentPanel = null;
 
 const COACH_PANEL_MAP = {
-    analysis:       { contextKey: 'analysis',       label: 'Problem Analysis' },
-    domain:         { contextKey: 'domainModel',    label: 'Domain Model' },
-    architecture:   { contextKey: 'architecture',   label: 'System Architecture' },
-    aimodels:       { contextKey: 'aiModels',       label: 'AI Model Recommendations' },
-    agentic:        { contextKey: 'agentic',        label: 'Agentic AI Guide' },
-    events:         { contextKey: 'events',         label: 'Event System Design' },
-    implementation: { contextKey: 'implementation',  label: 'Implementation Plan' },
-    diagrams:       { contextKey: 'diagrams',       label: 'Architecture Diagrams' },
-    demo:           { contextKey: 'demo',           label: 'Demo Scenarios' },
-    training:       { contextKey: 'training',       label: 'Training Labs' },
-    business:       { contextKey: 'businessValue',  label: 'Business Value Justifier' },
-    competitive:    { contextKey: 'competitive',    label: 'Competitive Analysis' }
+    analysis:       { contextKey: 'analysis',       label: 'Problem Analysis',          suggestions: ['What is the core problem being solved here?', 'Why is Vantiq a good fit for this use case?', 'Explain the AI tasks identified'] },
+    domain:         { contextKey: 'domainModel',    label: 'Domain Model',              suggestions: ['What are domain entities and why do they matter?', 'How do these entities relate to each other?', 'What is a bounded context?'] },
+    architecture:   { contextKey: 'architecture',   label: 'System Architecture',       suggestions: ['Walk me through this architecture step by step', 'What makes this event-driven?', 'How does data flow through the system?'] },
+    aimodels:       { contextKey: 'aiModels',       label: 'AI Model Recommendations',  suggestions: ['Why were these specific AI models chosen?', 'What is the difference between these model types?', 'How would these models run in production?'] },
+    agentic:        { contextKey: 'agentic',        label: 'Agentic AI Guide',          suggestions: ['What is an AI agent and how is it different from a model?', 'How do these agents coordinate with each other?', 'What tools do the agents use?'] },
+    events:         { contextKey: 'events',         label: 'Event System Design',       suggestions: ['What is event-driven architecture?', 'Explain the event flow in simple terms', 'What are Visual Event Handlers?'] },
+    implementation: { contextKey: 'implementation',  label: 'Implementation Plan',       suggestions: ['What should we build first?', 'What Vantiq tools are needed for each phase?', 'How long would this take to implement?'] },
+    diagrams:       { contextKey: 'diagrams',       label: 'Architecture Diagrams',     suggestions: ['Walk me through this diagram', 'What do the arrows represent?', 'How do the components connect?'] },
+    demo:           { contextKey: 'demo',           label: 'Demo Scenarios',            suggestions: ['How would I demo this to a customer?', 'What are the key wow moments?', 'What data do I need for the demo?'] },
+    training:       { contextKey: 'training',       label: 'Training Labs',             suggestions: ['What skills will participants learn?', 'What prerequisites are needed?', 'How long should each lab take?'] },
+    business:       { contextKey: 'businessValue',  label: 'Business Value Justifier',  suggestions: ['Explain the ROI in simple terms', 'How do I present this to executives?', 'What KPIs should we track?'] },
+    competitive:    { contextKey: 'competitive',    label: 'Competitive Analysis',      suggestions: ['Why choose Vantiq over competitor X?', 'What are Vantiq\'s unique strengths?', 'How do I handle pricing objections?'] }
 };
 
 function openCoach(panelKey) {
@@ -2333,6 +2333,15 @@ RULES:
     input.focus();
 }
 
+
+function askCoachSuggestion(text) {
+    const input = document.getElementById('coachInput');
+    if (input) {
+        input.value = text;
+        sendCoachMessage();
+    }
+}
+
 // ── Public API ──
 window.app = {
     generate,
@@ -2349,5 +2358,9 @@ window.app = {
     clearHistory,
     showHistory,
     renameSession,
-    exportToPDF
+    exportToPDF,
+    openCoach,
+    closeCoach,
+    sendCoachMessage,
+    askCoachSuggestion
 };
