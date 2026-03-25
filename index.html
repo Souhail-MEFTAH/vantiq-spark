@@ -312,14 +312,14 @@
                   Analysis</span></div>
               <div class="section-subtitle" data-i18n="analysis-subtitle">Agent 1 — Problem Interpreter output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('analysis')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-interpreter" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('interpreter')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('interpreter')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('analysis')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="analysis-content"></div>
         </div>
@@ -332,14 +332,14 @@
                   Model</span></div>
               <div class="section-subtitle" data-i18n="domain-subtitle">Agent 2 — Domain Model Generator output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('domain')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-domain" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('domain')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('domain')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('domain')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="domain-content"></div>
         </div>
@@ -352,15 +352,15 @@
                   Architecture</span></div>
               <div class="section-subtitle" data-i18n="arch-subtitle">Agent 3 — Architecture Generator output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('architecture')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-architecture" class="refine-input"
                 data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('architecture')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('architecture')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('architecture')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="architecture-content"></div>
           <!-- Inject Linter Review natively at the bottom of the Architecture page -->
@@ -375,14 +375,14 @@
                   Recommendations</span></div>
               <div class="section-subtitle" data-i18n="aimodels-subtitle">Agent 4 — AI Model Advisor output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('aimodels')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-aimodel" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('aimodel')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('aimodel')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('aimodels')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="aimodels-content"></div>
         </div>
@@ -395,14 +395,14 @@
                   Guide</span></div>
               <div class="section-subtitle" data-i18n="agentic-subtitle">Agent 4b — Agentic AI Architect output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('agentic')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-agentic" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('agentic')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('agentic')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('agentic')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="agentic-content"></div>
         </div>
@@ -415,14 +415,14 @@
                   Design</span></div>
               <div class="section-subtitle" data-i18n="events-subtitle">Agent 5 — Event System Designer output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('events')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-events" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('events')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('events')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('events')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="events-content"></div>
         </div>
@@ -435,15 +435,15 @@
                   data-i18n="impl-title">Implementation Scaffolding</span></div>
               <div class="section-subtitle" data-i18n="impl-subtitle">Agent 6 — Implementation Generator output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('implementation')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-implementation" class="refine-input"
                 data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('implementation')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('implementation')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('implementation')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="implementation-content"></div>
         </div>
@@ -456,14 +456,14 @@
                   data-i18n="diagrams-title">Architecture Diagrams</span></div>
               <div class="section-subtitle" data-i18n="diagrams-subtitle">Agent 7 — Architecture Visualizer output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('diagrams')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-visualizer" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('visualizer')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('visualizer')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('diagrams')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="diagrams-content"></div>
         </div>
@@ -476,14 +476,14 @@
                   Scenarios</span></div>
               <div class="section-subtitle" data-i18n="demo-subtitle">Agent 8 — Demo Scenario Generator output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('demo')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-demo" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('demo')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('demo')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('demo')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="demo-content"></div>
         </div>
@@ -496,14 +496,14 @@
                   Labs</span></div>
               <div class="section-subtitle" data-i18n="training-subtitle">Agent 9 — Training Lab Generator output</div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('training')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-training" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('training')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('training')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('training')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="training-content"></div>
         </div>
@@ -517,14 +517,14 @@
               <div class="section-subtitle" data-i18n="business-subtitle">Agent 11 — ROI, Risks, and KPIs
               </div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('business')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-business" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('business')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('business')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('business')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="business-content"></div>
         </div>
@@ -538,14 +538,14 @@
               <div class="section-subtitle" data-i18n="competitive-subtitle">Agent 10 — Competitive Intelligence output
               </div>
             </div>
-            <button class="coach-toggle-btn" onclick="app.openCoach('competitive')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button>
-              <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
+            <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-competitive" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('competitive')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('competitive')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-            </div>
+            
+              <button class="coach-toggle-btn" onclick="app.openCoach('competitive')"><span class="coach-icon">🎓</span> <span data-i18n="coach-btn">AI Coach</span></button></div>
           </div>
           <div id="competitive-content"></div>
         </div>
