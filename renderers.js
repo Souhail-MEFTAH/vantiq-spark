@@ -199,20 +199,6 @@ window.Renderers = {
   renderAgenticGuide(data, container) {
     if (!data || !container) return;
 
-    // Deterministic Components (Green)
-    const deterministicHTML = (data.deterministicAndMLCore || []).map(c => `
-      <div class="glass-card accent-green">
-        <div class="card-title"><span class="card-icon">⚡</span> ${c.name}</div>
-        <p style="font-size:13px;color:var(--text-secondary);margin:6px 0">${c.responsibility}</p>
-        <div class="tag-list" style="margin:8px 0">
-          <span class="tag tag-green">${c.vantiqComponent}</span>
-        </div>
-        <div style="margin-top:10px">
-          <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px" data-i18n="label-why-not-ai">Why Traditional Logic?</div>
-          <p style="font-size:12px;color:var(--text-primary);margin-top:4px">${c.whyNotAgent || c.whyNotAI || ''}</p>
-        </div>
-      </div>`).join('');
-
     // AI Agents (Purple)
     const agentsHTML = (data.llmAgents || data.aiAgents || []).map(a => `
       <div class="glass-card accent-purple">
@@ -262,9 +248,6 @@ window.Renderers = {
         <div class="card-title"><span class="card-icon">💡</span> <span data-i18n="label-solution-strategy">Hybrid Alternative Strategy</span></div>
         <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.hybridAlternativeStrategy || data.solutionStrategy || ''}</p>
       </div>
-      
-      <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-deterministic-core">⚡ Traditional AI & Logic</span> (Low Cost)</h3>
-      <div class="card-grid">${deterministicHTML}</div>
 
       <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-ai-agents">🧠 LLM Agents</span> (High Value Augmentation)</h3>
       <div class="card-grid">${agentsHTML}</div>

@@ -227,7 +227,8 @@ RULES:
 - Agents on Vantiq are implemented as Services with LLM Source connections. Deterministic/Traditional AI components are standard Services/State Types.
 - Agent coordination and routing happens through Visual Event Handlers (VEH) — NEVER Topics.
 - Recommend real LLMs for the necessary AI agents (GPT-4o, Claude 3.5 Sonnet, Gemini 2.5 Pro, Llama 3, Mistral Large).
-- MAXIMUMS to ensure fast generation: Max 3 LLM Agents, Max 3 Traditional AI/Deterministic core components, Max 4 artifacts. Be concise!
+- You MUST generate at least 2 LLM Agents (e.g. one for Reasoning/Routing, one for Generative Tasks), up to a maximum of 3.
+- MAXIMUMS to ensure fast generation: Max 3 LLM Agents, Max 4 artifacts. Be concise!
 - Address safety: guardrails, human-in-the-loop, output validation.
 - Be specific about Vantiq features: Use Semantic Index for RAG, Types for memory, and Procedures for complex deterministic loops.
 - HIGH PRIORITY TECHNICAL ACCURACY: Do not hallucinate Vantiq features. Ensure realistic use of Semantic Index (Vantiq's native Vector DB), standard Types (for structured data/memory), and Procedures.
@@ -239,20 +240,13 @@ RULES:
   * Do NOT include click handlers or linkStyle directives.
   * Every subgraph MUST have a matching 'end' keyword.
   * No HTML tags inside labels.
-  * VISUAL DISTINCTION: Use different shapes. For example, LLM Agents as circles ((Agent)) and Deterministic/Traditional AI as rectangles [Logic]. If you use colors, you MUST use 'classDef' at the top (e.g. 'classDef ai fill:#2d1b4e,stroke:#7c6bf5;') and apply via 'class NodeID ai' at the bottom. Do NOT use inline 'style' commands.
+  * VISUAL DISTINCTION: Use different shapes. For example, LLM Agents as circles ((Agent)) and other logic as rectangles [Logic]. Do NOT use `classDef`, `style`, or colors. Keep the diagram extremely simple and structurally sound.
+  * EVERY element MUST be connected. Do not output standalone nodes.
 - TRANSLATION RULE: All role names, component names, and descriptions MUST be translated into the user's target language.
 
 You MUST respond with ONLY valid JSON:
 {
-  "hybridAlternativeStrategy": "string — 2-3 sentences explaining how LLM Agents sharply augment the deterministic and Traditional AI core, rather than replacing it",
-  "deterministicAndMLCore": [
-    {
-      "name": "string — component name",
-      "responsibility": "string — what this component does",
-      "whyNotAgent": "string — brief justification of why deterministic or Traditional ML is better/cheaper than an LLM Agent here",
-      "vantiqComponent": "string — Vantiq concept (e.g. Service, Rule, ML Model)"
-    }
-  ],
+  "hybridAlternativeStrategy": "string — 2-3 sentences explaining how multiple LLM Agents sharply augment the system",
   "llmAgents": [
     {
       "name": "string — agent name",

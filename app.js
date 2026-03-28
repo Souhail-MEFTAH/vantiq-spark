@@ -1713,17 +1713,6 @@ async function renderMermaidDiagrams() {
             const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
             const hardenedCode = preprocessMermaid(rawCode);
 
-            // Skip if preprocessing resulted in truly trivial content (< 1 meaningful line)
-            const meaningfulLines = hardenedCode.split('\n').filter(l => l.trim() && !/^\s*(graph|flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|pie|gantt|journey|gitGraph)/.test(l.trim())).length;
-            if (meaningfulLines < 1) {
-                el.innerHTML = `
-                    <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
-                        <div style="color:var(--text-tertiary)">Diagram contained insufficient connected elements.</div>
-                    </div>`;
-                el.dataset.rendered = 'true';
-                continue;
-            }
-
             console.log(`[Mermaid] Rendering ${id}:`, hardenedCode.substring(0, 200) + '...');
 
             const { svg } = await mermaid.render(id, hardenedCode);
