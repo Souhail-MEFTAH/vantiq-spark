@@ -6,16 +6,17 @@ window.Renderers = {
 
   // ── Problem Analysis (Agent 1) ──
   renderAnalysis(data, container) {
-    if (container) container.innerHTML = `
+    if (!data || !container) return;
+    container.innerHTML = `
       <div class="card-grid">
         <div class="glass-card accent-purple" style="animation-delay:0s">
-          <div class="card-title"><span class="card-icon">${data.domainIcon}</span> <span data-i18n="label-domain">Domain</span></div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin:8px 0">${data.domain}</div>
-          <p style="font-size:13px;color:var(--text-secondary)">${data.summary}</p>
+          <div class="card-title"><span class="card-icon">${data.domainIcon || '🏢'}</span> <span data-i18n="label-domain">Domain</span></div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin:8px 0">${data.domain || ''}</div>
+          <p style="font-size:13px;color:var(--text-secondary)">${data.summary || ''}</p>
         </div>
         <div class="glass-card accent-rose" style="animation-delay:0.04s; grid-column: span 2">
           <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-core-problem">Core Problem</span></div>
-          <p style="font-size:14px;color:var(--text-primary);margin-top:8px">${data.coreProblem}</p>
+          <p style="font-size:14px;color:var(--text-primary);margin-top:8px">${data.coreProblem || ''}</p>
         </div>
         <div class="glass-card accent-cyan" style="animation-delay:0.08s">
           <div class="card-title"><span class="card-icon">👥</span> <span data-i18n="label-actors">Actors</span></div>
@@ -31,7 +32,7 @@ window.Renderers = {
         </div>
         <div class="glass-card accent-rose" style="animation-delay:0.32s">
           <div class="card-title"><span class="card-icon">🧠</span> <span data-i18n="label-ai-tasks">AI Tasks</span></div>
-          <ul class="data-list">${(data.aiTasks || []).map(t => `<li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">${t.task}</strong><br/><span style="font-size:11px"><span data-i18n="type-${t.type.toLowerCase()}">${t.type}</span> — ${t.models.join(', ')}</span></div></li>`).join('')}</ul>
+          <ul class="data-list">${(data.aiTasks || []).map(t => `<li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">${t.task || ''}</strong><br/><span style="font-size:11px"><span data-i18n="type-${(t.type || 'unknown').toLowerCase()}">${t.type || ''}</span> — ${(t.models || []).join(', ')}</span></div></li>`).join('')}</ul>
         </div>
         <div class="glass-card accent-purple" style="animation-delay:0.4s">
           <div class="card-title"><span class="card-icon">🧩</span> <span data-i18n="label-entities">Entities</span></div>
@@ -39,7 +40,7 @@ window.Renderers = {
         </div>
         <div class="glass-card accent-green" style="animation-delay:0.48s; grid-column: span 3">
           <div class="card-title"><span class="card-icon">🚀</span> <span data-i18n="label-why-vantiq">Why Vantiq?</span></div>
-          <p style="font-size:14px;color:var(--text-primary);margin-top:8px; line-height: 1.5">${data.vantiqSuitability}</p>
+          <p style="font-size:14px;color:var(--text-primary);margin-top:8px; line-height: 1.5">${data.vantiqSuitability || ''}</p>
         </div>
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
@@ -47,6 +48,7 @@ window.Renderers = {
 
   // ── Domain Model (Agent 2) ──
   renderDomainModel(data, container) {
+    if (!data || !container) return;
     const entitiesHTML = (data.entities || []).map(e => `
       <div class="entity-card">
         <div class="entity-type">${e.type}</div>
@@ -60,16 +62,16 @@ window.Renderers = {
           <div>
             <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-primary)">${e.name}</span>
           </div>
-          <span class="tag tag-${e.type === 'Alert' ? 'rose' : e.type === 'Detection' ? 'warm' : e.type === 'Command' ? 'purple' : 'cyan'}" data-i18n="type-${e.type.toLowerCase()}">${e.type}</span>
+          <span class="tag tag-${(e.type || '') === 'Alert' ? 'rose' : (e.type || '') === 'Detection' ? 'warm' : (e.type || '') === 'Command' ? 'purple' : 'cyan'}" data-i18n="type-${(e.type || 'event').toLowerCase()}">${e.type || 'Event'}</span>
         </div>
       </div>`).join('');
 
     const servicesHTML = (data.services || []).map(s => `
       <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">${s.name}</strong><br/><span style="font-size:12px">${s.responsibility}</span></div></li>`).join('');
 
-    const commandsHTML = (data.commands || []).map(c => `<span class="tag tag-green">${c.name} → ${c.target}</span>`).join('');
+    const commandsHTML = (data.commands || []).map(c => `<span class="tag tag-green">${c.name || ''} → ${c.target || ''}</span>`).join('');
 
-    if (container) container.innerHTML = `
+    container.innerHTML = `
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">📦</span> <span data-i18n="label-entities">Entities</span></div>
         <div class="entity-grid" style="margin-top:12px">${entitiesHTML}</div>
@@ -93,6 +95,7 @@ window.Renderers = {
 
   // ── Architecture (Agent 3) ──
   renderArchitecture(data, container) {
+    if (!data || !container) return;
     const componentsHTML = (data.components || []).map(c => `
       <div class="glass-card" style="padding:16px">
         <div class="card-title"><span class="card-icon">${c.icon}</span> ${c.name}</div>
@@ -109,12 +112,12 @@ window.Renderers = {
         <td>${ig.description}</td>
       </tr>`).join('');
 
-    if (container) container.innerHTML = `
+    container.innerHTML = `
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">📝</span> <span data-i18n="label-arch-overview">Architecture Overview</span></div>
-        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.description}</p>
+        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.description || ''}</p>
         <div style="margin-top:12px">
-          <div class="code-block" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-accent)">${data.dataFlow}</div>
+          <div class="code-block" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-accent)">${data.dataFlow || ''}</div>
         </div>
         <div class="tag-list" style="margin-top:12px">${(data.principles || []).map(p => `<span class="tag tag-green">${p}</span>`).join('')}</div>
       </div>
@@ -131,13 +134,14 @@ window.Renderers = {
       </div>
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-arch-diagram">Architecture Diagram</span></div>
-        <div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>
+        ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── AI Models (Agent 4) ──
   renderAIModels(data, container) {
+    if (!data || !container) return;
     const recsHTML = (data.recommendations || []).map(rec => {
       const modelsHTML = (rec.models || []).map(m => `
         <div class="glass-card" style="padding:12px 16px;margin-bottom:8px;${m.isPrimary ? 'border-left:3px solid var(--brand-success)' : ''}">
@@ -156,8 +160,8 @@ window.Renderers = {
             <div class="model-info">
               <div class="model-name">${rec.task}</div>
               <div class="model-meta">
-                <span class="tag tag-purple" data-i18n="type-${rec.type.toLowerCase()}">${rec.type}</span>
-                <span class="tag tag-cyan" data-i18n="label-${rec.deployment.strategy.toLowerCase()}">${rec.deployment.strategy}</span>
+                <span class="tag tag-purple" data-i18n="type-${(rec.type || 'unknown').toLowerCase()}">${rec.type || ''}</span>
+                <span class="tag tag-cyan" data-i18n="label-${((rec.deployment || {}).strategy || 'unknown').toLowerCase()}">${(rec.deployment || {}).strategy || ''}</span>
               </div>
             </div>
           </div>
@@ -165,27 +169,27 @@ window.Renderers = {
           <div style="margin-top:16px">
             <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px" data-i18n="label-deployment">Deployment</div>
             <div class="card-grid">
-              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--text-accent)" data-i18n="label-edge">Edge</strong>: ${rec.deployment.edge}</div>
-              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--brand-secondary)" data-i18n="label-cloud">Cloud</strong>: ${rec.deployment.cloud}</div>
+              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--text-accent)" data-i18n="label-edge">Edge</strong>: ${(rec.deployment || {}).edge || 'N/A'}</div>
+              <div style="font-size:12px;color:var(--text-secondary)"><strong style="color:var(--brand-secondary)" data-i18n="label-cloud">Cloud</strong>: ${(rec.deployment || {}).cloud || 'N/A'}</div>
             </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">⏱️ <span data-i18n="label-latency">Latency</span>: <strong style="color:var(--brand-success)">${rec.deployment.latency}</strong></div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:8px">⏱️ <span data-i18n="label-latency">Latency</span>: <strong style="color:var(--brand-success)">${(rec.deployment || {}).latency || 'N/A'}</strong></div>
           </div>
           <div style="margin-top:16px">
             <div style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;margin-bottom:8px" data-i18n="label-hardware">Hardware</div>
             <div class="tag-list">
-              <span class="tag tag-warm"><span data-i18n="label-edge">Edge</span>: ${rec.hardware.edge}</span>
-              <span class="tag tag-cyan"><span data-i18n="label-cloud">Cloud</span>: ${rec.hardware.cloud}</span>
-              <span class="tag tag-purple"><span data-i18n="label-ram">RAM</span>: ${rec.hardware.memory}</span>
+              <span class="tag tag-warm"><span data-i18n="label-edge">Edge</span>: ${(rec.hardware || {}).edge || 'N/A'}</span>
+              <span class="tag tag-cyan"><span data-i18n="label-cloud">Cloud</span>: ${(rec.hardware || {}).cloud || 'N/A'}</span>
+              <span class="tag tag-purple"><span data-i18n="label-ram">RAM</span>: ${(rec.hardware || {}).memory || 'N/A'}</span>
             </div>
           </div>
         </div>`;
     }).join('');
 
-    if (container) container.innerHTML = `
+    container.innerHTML = `
       <div class="glass-card accent-cyan">
         <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-overall-strategy">Overall Strategy</span></div>
-        <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${data.overallStrategy}</p>
-        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)" data-i18n="label-vantiq-int">Vantiq Integration:</strong> ${data.vantiqIntegration}</p>
+        <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${data.overallStrategy || ''}</p>
+        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)" data-i18n="label-vantiq-int">Vantiq Integration:</strong> ${data.vantiqIntegration || ''}</p>
       </div>
       ${recsHTML}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
@@ -193,11 +197,13 @@ window.Renderers = {
 
   // ── Agentic AI Guide (Agent 4b) ──
   renderAgenticGuide(data, container) {
+    if (!data || !container) return;
+    const orch = data.orchestrationPattern || {};
     const orchHTML = `
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="label-orchestration">Orchestration</span>: ${data.orchestrationPattern.name}</div>
-        <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${data.orchestrationPattern.description}</p>
-        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)">Vantiq:</strong> ${data.orchestrationPattern.vantiqImplementation}</p>
+        <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="label-orchestration">Orchestration</span>: ${orch.name || ''}</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${orch.description || ''}</p>
+        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)">Vantiq:</strong> ${orch.vantiqImplementation || ''}</p>
       </div>`;
 
     const agentsHTML = (data.agents || []).map(a => `
@@ -206,7 +212,7 @@ window.Renderers = {
         <p style="font-size:13px;color:var(--text-secondary);margin:6px 0">${a.role}</p>
         <div class="tag-list" style="margin:8px 0">
           <span class="tag tag-purple"><span data-i18n="label-llm">LLM</span>: ${a.llm}</span>
-          <span class="tag tag-cyan" data-i18n="label-${a.memoryType.toLowerCase()}">${a.memoryType}</span>
+          <span class="tag tag-cyan" data-i18n="label-${(a.memoryType || 'unknown').toLowerCase()}">${a.memoryType || ''}</span>
           <span class="tag tag-green">${a.vantiqComponent}</span>
         </div>
         <div style="margin-top:10px">
@@ -231,7 +237,7 @@ window.Renderers = {
           <td><span class="tag tag-purple">${m.provider}</span></td>
           <td>${m.bestFor}</td>
           <td>${m.contextWindow}</td>
-          <td><span class="tag tag-${m.costTier === 'Low' ? 'green' : m.costTier === 'Medium' ? 'warm' : 'rose'}" data-i18n="cost-${m.costTier.toLowerCase()}">${m.costTier}</span></td>
+          <td><span class="tag tag-${(m.costTier || '') === 'Low' ? 'green' : (m.costTier || '') === 'Medium' ? 'warm' : 'rose'}" data-i18n="cost-${(m.costTier || 'unknown').toLowerCase()}">${m.costTier || ''}</span></td>
           <td style="font-size:12px;color:var(--text-tertiary)">${m.vantiqSource}</td>
         </tr>`).join('');
 
@@ -243,10 +249,10 @@ window.Renderers = {
           <td style="font-size:12px;color:var(--text-tertiary)">${a.vantiqResource}</td>
         </tr>`).join('');
 
-    if (container) container.innerHTML = `
+    container.innerHTML = `
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">🧠</span> <span data-i18n="label-arch-overview">Architecture Overview</span></div>
-        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.architectureOverview}</p>
+        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.architectureOverview || ''}</p>
       </div>
       ${orchHTML}
       <div class="card-grid">${agentsHTML}</div>
@@ -267,26 +273,27 @@ window.Renderers = {
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">🛡️</span> <span data-i18n="label-safety">Safety & Guardrails</span></div>
         <ul class="data-list">
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-input-val">Input Validation</strong><br/>${data.guardrails.inputValidation}</div></li>
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-output-val">Output Validation</strong><br/>${data.guardrails.outputValidation}</div></li>
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-hitl">Human-in-the-Loop</strong><br/>${data.guardrails.humanInTheLoop}</div></li>
-          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-fallback">Fallback Strategy</strong><br/>${data.guardrails.fallbackStrategy}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-input-val">Input Validation</strong><br/>${(data.guardrails || {}).inputValidation || ''}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-output-val">Output Validation</strong><br/>${(data.guardrails || {}).outputValidation || ''}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-hitl">Human-in-the-Loop</strong><br/>${(data.guardrails || {}).humanInTheLoop || ''}</div></li>
+          <li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)" data-i18n="li-fallback">Fallback Strategy</strong><br/>${(data.guardrails || {}).fallbackStrategy || ''}</div></li>
         </ul>
       </div>
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-interaction-diagram">Agent Interaction Diagram</span></div>
-        <div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>
+        ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Event System (Agent 5) ──
   renderEventSystem(data, container) {
+    if (!data || !container) return;
     const schemasHTML = (data.schemas || []).map(s => `
       <div class="glass-card" style="padding:14px;margin-bottom:8px">
         <div style="display:flex;align-items:center;justify-content:space-between">
           <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text-primary)">${s.name}</span>
-          <span class="tag tag-${s.type === 'Alert' ? 'rose' : s.type === 'Detection' ? 'warm' : 'cyan'}" data-i18n="type-${s.type.toLowerCase()}">${s.type}</span>
+          <span class="tag tag-${(s.type || '') === 'Alert' ? 'rose' : (s.type || '') === 'Detection' ? 'warm' : 'cyan'}" data-i18n="type-${(s.type || 'event').toLowerCase()}">${s.type || 'Event'}</span>
         </div>
         <div class="code-block" style="margin-top:8px;font-size:11px">${JSON.stringify(s.schema, null, 2)}</div>
       </div>`).join('');
@@ -306,12 +313,13 @@ window.Renderers = {
         <td>${c.action}</td>
       </tr>`).join('');
 
-    if (container) container.innerHTML = `
+    const eventOrch = data.orchestration || {};
+    container.innerHTML = `
       <div class="glass-card accent-cyan">
         <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="label-orchestration">Orchestration Pattern</span></div>
-        <p style="font-size:14px;font-weight:600;color:var(--text-primary);margin:8px 0">${data.orchestration.pattern}</p>
-        <p style="font-size:13px;color:var(--text-secondary)">${data.orchestration.description}</p>
-        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px">🛡️ ${data.orchestration.errorHandling}</p>
+        <p style="font-size:14px;font-weight:600;color:var(--text-primary);margin:8px 0">${eventOrch.pattern || ''}</p>
+        <p style="font-size:13px;color:var(--text-secondary)">${eventOrch.description || ''}</p>
+        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px">🛡️ ${eventOrch.errorHandling || ''}</p>
       </div>
       <div class="glass-card accent-warm">
         <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-event-schemas">Event Schemas</span></div>
@@ -329,13 +337,14 @@ window.Renderers = {
       </div>
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-event-flow">Event Flow Diagram</span></div>
-        <div class="diagram-container"><pre class="mermaid">${data.flowDiagram}</pre></div>
+        ${data.flowDiagram ? `<div class="diagram-container"><pre class="mermaid">${data.flowDiagram}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Implementation (Agent 6) ──
   renderImplementation(data, container) {
+    if (!data || !container) return;
     const servicesHTML = (data.services || []).map(s => {
       const stepsHTML = (s.pseudoSteps || []).map(step => `
                 <li>
@@ -348,8 +357,8 @@ window.Renderers = {
         <div class="card-title"><span class="card-icon">⚙️</span> ${s.name}</div>
         <p style="font-size:12px;color:var(--text-secondary);margin:6px 0">${s.description}</p>
         <div class="tag-list" style="margin:8px 0">
-          <span class="tag tag-cyan"><span data-i18n="label-input">Input</span>: ${s.inputEvent}</span>
-          <span class="tag tag-green"><span data-i18n="label-output">Output</span>: ${s.outputEvent}</span>
+          <span class="tag tag-cyan"><span data-i18n="label-input">Input</span>: ${s.inputEvent || 'N/A'}</span>
+          <span class="tag tag-green"><span data-i18n="label-output">Output</span>: ${s.outputEvent || 'N/A'}</span>
         </div>
         <div class="pseudo-code-block">
           <div class="pseudo-title"><span data-i18n="label-pseudo-code">Pseudo-Code</span> — ${s.name}</div>
@@ -381,7 +390,7 @@ window.Renderers = {
     const structureHTML = (data.projectStructure || []).map(d => `
       <li><span class="list-icon">📁</span><div><strong style="color:var(--text-primary)">${d.path}</strong><br/><span style="font-size:11px;font-family:'JetBrains Mono',monospace">${d.files.join(', ')}</span></div></li>`).join('');
 
-    if (container) container.innerHTML = `
+    container.innerHTML = `
       <div class="glass-card accent-cyan">
         <div class="card-title"><span class="card-icon">📂</span> <span data-i18n="label-project-struct">Project Structure</span></div>
         <ul class="data-list">${structureHTML}</ul>
@@ -396,17 +405,19 @@ window.Renderers = {
 
   // ── Diagrams (Agent 7) ──
   renderDiagrams(data, container) {
+    if (!data || !container) return;
     const diagramsHTML = (data.diagrams || []).map((d, i) => `
       <div class="glass-card accent-${['purple', 'cyan', 'green'][i % 3]}">
         <div class="card-title"><span class="card-icon">${d.type === 'architecture' ? '🏗️' : d.type === 'component' ? '🧩' : '☁️'}</span> ${d.title}</div>
         <p style="font-size:12px;color:var(--text-secondary);margin:6px 0 16px">${d.description}</p>
-        <div class="diagram-container"><pre class="mermaid">${d.mermaid}</pre></div>
+        ${d.mermaid ? `<div class="diagram-container"><pre class="mermaid">${d.mermaid}</pre></div>` : '<p style="color:var(--text-tertiary)">No diagram data generated.</p>'}
       </div>`).join('');
-    if (container) container.innerHTML = diagramsHTML;
+    container.innerHTML = diagramsHTML || '<p style="color:var(--text-tertiary)">No diagrams generated.</p>';
   },
 
   // ── Demo Scenarios (Agent 8) ──
   renderDemo(data, container) {
+    if (!data || !container) return;
     const scenariosHTML = (data.scenarios || []).map(sc => {
       const stepsHTML = (sc.steps || []).map(st => `
         <li><div class="step-content"><strong>${st.title}</strong>${st.description}<br/><span style="font-size:11px;color:var(--brand-success)">✓ <span data-i18n="label-expected">Expected</span>: ${st.expected}</span></div></li>`).join('');
@@ -438,12 +449,13 @@ window.Renderers = {
           ${eventsHTML}
         </div>`;
     }).join('');
-    if (container) container.innerHTML = scenariosHTML;
+    container.innerHTML = scenariosHTML || '<p style="color:var(--text-tertiary)">No demo scenarios generated.</p>';
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
   // ── Training Labs (Agent 9) ──
   renderTraining(data, container) {
+    if (!data || !container) return;
     const labsHTML = (data.labs || []).map((lab, li) => {
       const stepsHTML = (lab.steps || []).map(st => `
         <li><div class="step-content"><strong>${st.instruction}</strong>${st.detail}<br/><span style="font-size:11px;color:var(--brand-warning)">💡 <span data-i18n="label-hint">Hint</span>: ${st.hint}</span></div></li>`).join('');
@@ -456,7 +468,7 @@ window.Renderers = {
             <h3>📚 ${lab.title}</h3>
             <p>${lab.description}</p>
             <div class="tag-list" style="margin-top:8px">
-              <span class="tag tag-${lab.difficulty === 'Beginner' ? 'green' : lab.difficulty === 'Intermediate' ? 'warm' : 'rose'}" data-i18n="diff-${lab.difficulty.toLowerCase()}">${lab.difficulty}</span>
+              <span class="tag tag-${(lab.difficulty || '') === 'Beginner' ? 'green' : (lab.difficulty || '') === 'Intermediate' ? 'warm' : 'rose'}" data-i18n="diff-${(lab.difficulty || 'unknown').toLowerCase()}">${lab.difficulty || ''}</span>
               <span class="tag tag-cyan">⏱️ ${lab.duration}</span>
             </div>
           </div>
@@ -474,7 +486,7 @@ window.Renderers = {
           </div>
         </div>`;
     }).join('');
-    if (container) container.innerHTML = labsHTML;
+    container.innerHTML = labsHTML || '<p style="color:var(--text-tertiary)">No training labs generated.</p>';
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 

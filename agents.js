@@ -145,7 +145,13 @@ RULES:
 - Integration protocols must be real: MQTT, AMQP, Kafka, REST, gRPC, WebSocket.
 - Include edge-to-cloud data flow patterns.
 - The Mermaid diagram must use valid Mermaid graph LR syntax with subgraphs.
-- MERMAID SYNTAX RULES: Quote all node labels containing special characters, parentheses, or brackets (e.g., id1["Label (Info)"]). No HTML tags.
+- STRICT MERMAID SYNTAX RULES:
+  * Double-quote ALL node labels (e.g., id1["Label Text"]).
+  * Every node MUST be connected with at least one edge (-->, -.->, ==>). No orphan/standalone nodes.
+  * Do NOT use ::: style classes.
+  * Do NOT include click handlers or linkStyle directives.
+  * Every subgraph MUST have a matching 'end' keyword.
+  * No HTML tags inside labels.
 - Use dark theme styling: style nodes fill:#1a1a2e,stroke:#7c6bf5,color:#e8eaed.
 - TRANSLATION RULE: All node labels, system names, and technical categories (e.g., Service, Entity, Source) MUST be translated into the user's target language.
 
@@ -225,7 +231,13 @@ RULES:
 - Be specific about how each agent integrates with the Vantiq platform (LLM Sources, Semantic Index for RAG, Types for memory).
 - HIGH PRIORITY TECHNICAL ACCURACY: Do not hallucinate Vantiq features. Ensure realistic use of Semantic Index (Vantiq's native Vector DB), standard Types (for structured data/memory), and Procedures.
 - If a requested feature/integration is not natively supported by Vantiq, explicitly state how it must be implemented via external REST/gRPC Sources or custom Service code.
-- MERMAID SYNTAX RULES (diagram): MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). This is critical for non-English characters. No HTML tags.
+- STRICT MERMAID SYNTAX RULES (diagram):
+  * MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). Critical for non-English characters.
+  * Every node MUST be connected with at least one edge (-->, -.->, ==>). No orphan/standalone nodes.
+  * Do NOT use ::: style classes.
+  * Do NOT include click handlers or linkStyle directives.
+  * Every subgraph MUST have a matching 'end' keyword.
+  * No HTML tags inside labels.
 - TRANSLATION RULE: All role names, agent names, and technical descriptors in the diagram MUST be translated into the user's target language.
 
 You MUST respond with ONLY valid JSON:
@@ -290,7 +302,11 @@ RULES:
 - Event schemas must be realistic with proper field types.
 - All event routing and processing happens through Visual Event Handlers (VEH) — NEVER Topics.
 - The sequence diagram must use valid Mermaid sequenceDiagram syntax.
-- MERMAID SYNTAX RULES: Quote all participant labels and message texts containing special characters or parentheses. No HTML tags.
+- STRICT MERMAID SYNTAX RULES:
+  * Quote all participant labels and message texts containing special characters or parentheses.
+  * Every participant MUST appear in at least one message arrow. No orphan participants.
+  * Do NOT use ::: style classes or click handlers.
+  * No HTML tags inside labels.
 - TRANSLATION RULE: All participant names, system roles, and message flow descriptions MUST be translated into the user's target language.
 - IMPORTANT: Do NOT use the 'participant' keyword explicitly unless defining an alias. Let Mermaid infer the participants from the message flow (e.g. ComponentA->>ComponentB: message). Keep the sequence strictly connected without standalone nodes.
 - Use real orchestration patterns (Choreography, Saga, Event Sourcing).
@@ -372,8 +388,13 @@ YOUR TASK: Generate 3 Mermaid diagrams: system architecture, component interacti
 
 RULES:
 - Use valid Mermaid graph syntax (graph LR, graph TB, or graph TD). No flowchart syntax.
-- MERMAID SYNTAX RULES: MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). This is critical for Arabic, Japanese, and Korean. No HTML tags.
-- Keep node labels SHORT (3-4 words max). Use <br/> for multi-line.
+- STRICT MERMAID SYNTAX RULES:
+  * MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). Critical for non-English.
+  * Every node MUST be connected with at least one edge (-->). No orphan/standalone nodes.
+  * Do NOT use ::: style classes, click handlers, or linkStyle directives.
+  * Every subgraph MUST have a matching 'end' keyword.
+  * No HTML tags. No <br/> in labels.
+- Keep node labels SHORT (3-4 words max).
 - Use subgraphs with dark styling: style fill:#1a1a2e,stroke:#7c6bf5,color:#e8eaed.
 - Label Vantiq components clearly (VEH, Services, Sources, Types, Client Builder).
 - NEVER show "Topics" — use "VEH" or "Event Handler" instead.

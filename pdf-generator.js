@@ -83,13 +83,14 @@ window.PDFGenerator = {
             // ── Arabic helper: Comprehensive RTL Processing ──
             // Handles: word reordering, list markers, table column reversal,
             // margin flipping, and directional symbol replacement.
-            const applyArabicRTL = (node) => {
+            const applyArabicRTL = (node, depth = 0) => {
                 if (!isArabic) return;
                 if (!node || typeof node !== 'object') return;
+                if (depth > 50) return; // Recursion guard
 
                 // Process array of nodes
                 if (Array.isArray(node)) {
-                    node.forEach(n => applyArabicRTL(n));
+                    node.forEach(n => applyArabicRTL(n, depth + 1));
                     return;
                 }
 
@@ -105,7 +106,7 @@ window.PDFGenerator = {
                         const marker = isOrdered ? `.${idx + 1}` : '•';
 
                         // Recursively process the item first
-                        applyArabicRTL(item);
+                        applyArabicRTL(item, depth + 1);
 
                         // Build columns: [text content ← marker] for RTL visual order
                         stackItems.push({
@@ -133,7 +134,7 @@ window.PDFGenerator = {
                     node.table.body.forEach(row => {
                         if (Array.isArray(row)) {
                             row.reverse();
-                            row.forEach(cell => applyArabicRTL(cell));
+                            row.forEach(cell => applyArabicRTL(cell, depth + 1));
                         }
                     });
                     if (node.table.widths && Array.isArray(node.table.widths)) {
@@ -142,8 +143,8 @@ window.PDFGenerator = {
                 }
 
                 // ── 3. Process child containers ──
-                if (node.columns) { node.columns.forEach(c => applyArabicRTL(c)); }
-                if (node.stack) { node.stack.forEach(s => applyArabicRTL(s)); }
+                if (node.columns) { node.columns.forEach(c => applyArabicRTL(c, depth + 1)); }
+                if (node.stack) { node.stack.forEach(s => applyArabicRTL(s, depth + 1)); }
 
                 // ── 4. Flip left/right margins ──
                 if (Array.isArray(node.margin) && node.margin.length === 4) {
@@ -196,7 +197,7 @@ window.PDFGenerator = {
                     }
                 } else if (Array.isArray(node.text)) {
                     node.text.reverse();
-                    node.text.forEach(t => applyArabicRTL(t));
+                    node.text.forEach(t => applyArabicRTL(t, depth + 1));
                 }
 
                 // ── 6. Ensure alignment is always right ──
@@ -208,7 +209,7 @@ window.PDFGenerator = {
             // Helper to add sections safely
             const addSection = (contentArray) => {
                 if (contentArray && Array.isArray(contentArray)) {
-                    if (isArabic) contentArray.forEach(item => applyArabicRTL(item));
+                    if (isArabic) contentArray.forEach(item => applyArabicRTL(item, 0));
                     docDefinition.content.push(...contentArray);
                 }
             };

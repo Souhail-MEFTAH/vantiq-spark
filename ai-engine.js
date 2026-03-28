@@ -39,6 +39,14 @@ class AIEngine {
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+        const startTime = Date.now();
+        // Log elapsed time for long-running requests
+        const elapsedTimer = setInterval(() => {
+            const elapsed = Math.round((Date.now() - startTime) / 1000);
+            if (elapsed > 0 && elapsed % 30 === 0) {
+                console.log(`[${agentName}] Still waiting... ${elapsed}s elapsed`);
+            }
+        }, 5000);
 
         try {
             const requestBody = {
@@ -71,6 +79,7 @@ class AIEngine {
             });
 
             clearTimeout(timeoutId);
+            clearInterval(elapsedTimer);
 
             if (!response.ok) {
                 const errorBody = await response.text();
@@ -92,8 +101,8 @@ class AIEngine {
             const data = await response.json();
             const content = data.choices?.[0]?.message?.content;
 
-            if (!content) {
-                throw new Error(`[${agentName}] Empty response from API`);
+            if (!content || !data.choices || data.choices.length === 0) {
+                throw new Error(`[${agentName}] Empty response from API (no choices returned)`);
             }
 
             // Log usage info
@@ -109,7 +118,35 @@ class AIEngine {
                 // Try to extract JSON from markdown code fences
                 const jsonMatch = content.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
                 if (jsonMatch) {
-                    return JSON.parse(jsonMatch[1]);
+                    try {
+                        return JSON.parse(jsonMatch[1]);
+                    } catch (e) { /* fall through to truncation recovery */ }
+                }
+                // Attempt truncation recovery: auto-close unclosed braces/brackets
+                try {
+                    let truncated = content.trim();
+                    let openBraces = 0, openBrackets = 0;
+                    let inString = false, escape = false;
+                    for (const ch of truncated) {
+                        if (escape) { escape = false; continue; }
+                        if (ch === '\\') { escape = true; continue; }
+                        if (ch === '"') { inString = !inString; continue; }
+                        if (!inString) {
+                            if (ch === '{') openBraces++;
+                            else if (ch === '}') openBraces--;
+                            else if (ch === '[') openBrackets++;
+                            else if (ch === ']') openBrackets--;
+                        }
+                    }
+                    // Remove trailing comma before closing
+                    truncated = truncated.replace(/,\s*$/, '');
+                    for (let i = 0; i < openBrackets; i++) truncated += ']';
+                    for (let i = 0; i < openBraces; i++) truncated += '}';
+                    const recovered = JSON.parse(truncated);
+                    console.warn(`[${agentName}] Recovered truncated JSON (closed ${openBraces} braces, ${openBrackets} brackets)`);
+                    return recovered;
+                } catch (recoveryErr) {
+                    // Recovery failed
                 }
                 if (retryCount < this.maxRetries) {
                     console.warn(`[${agentName}] JSON parse failed, retrying...`);
@@ -120,6 +157,7 @@ class AIEngine {
 
         } catch (err) {
             clearTimeout(timeoutId);
+            clearInterval(elapsedTimer);
 
             // Handle network errors/fetch failures with retries
             const isNetworkError = err instanceof TypeError || err.name === 'TypeError' || err.message.includes('fetch');

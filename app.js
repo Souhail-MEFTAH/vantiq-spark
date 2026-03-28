@@ -1617,6 +1617,68 @@ function preprocessMermaid(code) {
         return line;
     }).join('\n');
 
+    // 12. Strip zero-width/invisible Unicode characters that LLMs sometimes emit
+    cleaned = cleaned.replace(/[\u200B\u200C\u200D\uFEFF\u00AD]/g, '');
+
+    // 13. Strip :::className style classes (many models emit these but Mermaid often chokes)
+    cleaned = cleaned.replace(/:::[\w-]+/g, '');
+
+    // 14. Remove click handler lines
+    cleaned = cleaned.replace(/^\s*click\s+\S+.*$/gm, '');
+
+    // 15. Remove linkStyle lines
+    cleaned = cleaned.replace(/^\s*linkStyle\s+.*$/gm, '');
+
+    // 16. Fix pipe-label syntax on edges: A -->|text| B
+    // Ensure pipes are balanced
+    cleaned = cleaned.replace(/-->(\|[^|]*)(\s)/g, (m, label, sp) => {
+        if (!label.endsWith('|')) return `-->${label}|${sp}`;
+        return m;
+    });
+
+    // 17. Handle stray 'direction' keyword mid-diagram for flowcharts
+    if (!isSequence && !isER && !isPie) {
+        cleaned = cleaned.replace(/^\s*direction\s+(TB|BT|LR|RL)\s*$/gm, '');
+    }
+
+    // 18. Auto-balance subgraph/end blocks
+    const subgraphOpens = (cleaned.match(/^\s*subgraph\s/gm) || []).length;
+    const subgraphEnds = (cleaned.match(/^\s*end\s*$/gm) || []).length;
+    if (subgraphOpens > subgraphEnds) {
+        for (let i = 0; i < subgraphOpens - subgraphEnds; i++) {
+            cleaned += '\nend';
+        }
+    }
+
+    // 19. Remove orphan nodes (defined but not connected to any edge)
+    if (!isSequence && !isER && !isPie) {
+        const edgeLines = cleaned.split('\n').filter(l => /-->|-\.->|==>/.test(l));
+        const connectedIds = new Set();
+        for (const edgeLine of edgeLines) {
+            const ids = edgeLine.match(/\b([a-zA-Z_][\w]*)/g);
+            if (ids) ids.forEach(id => connectedIds.add(id));
+        }
+        // Remove standalone node definition lines where the node ID is not in any edge
+        const reservedWords = new Set(['graph', 'flowchart', 'subgraph', 'end', 'style', 'classDef', 'class', 'click', 'linkStyle', 'direction']);
+        cleaned = cleaned.split('\n').filter(line => {
+            const trimmed = line.trim();
+            if (!trimmed) return true;
+            // Keep diagram declaration, subgraph, end, style lines, edge lines
+            if (/-->|-\.->|==>|^\s*(graph|flowchart|subgraph|end|style|classDef|class)\s/i.test(trimmed)) return true;
+            if (trimmed === 'end') return true;
+            // Check if this is a standalone node definition
+            const nodeIdMatch = trimmed.match(/^([a-zA-Z_][\w]*)/);
+            if (nodeIdMatch && !reservedWords.has(nodeIdMatch[1])) {
+                // If this node ID is not in any edge, it's orphan — remove it
+                if (!connectedIds.has(nodeIdMatch[1])) {
+                    console.warn(`[Mermaid] Removing orphan node: ${nodeIdMatch[1]}`);
+                    return false;
+                }
+            }
+            return true;
+        }).join('\n');
+    }
+
     return cleaned;
 }
 
@@ -1636,13 +1698,43 @@ async function renderMermaidDiagrams() {
     for (const el of mermaidEls) {
         if (el.dataset.rendered) continue;
         const rawCode = el.textContent;
+
+        // Skip empty/trivial diagram data
+        if (!rawCode || rawCode.trim().length < 20) {
+            el.innerHTML = `
+                <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
+                    <div style="color:var(--text-tertiary)">Insufficient diagram data.</div>
+                </div>`;
+            el.dataset.rendered = 'true';
+            continue;
+        }
+
         try {
             const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
             const hardenedCode = preprocessMermaid(rawCode);
 
+            // Skip if preprocessing resulted in trivial content (< 3 meaningful lines)
+            const meaningfulLines = hardenedCode.split('\n').filter(l => l.trim() && !/^\s*(graph|flowchart|sequenceDiagram)/.test(l.trim())).length;
+            if (meaningfulLines < 2) {
+                el.innerHTML = `
+                    <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
+                        <div style="color:var(--text-tertiary)">Diagram contained insufficient connected elements.</div>
+                    </div>`;
+                el.dataset.rendered = 'true';
+                continue;
+            }
+
             console.log(`[Mermaid] Rendering ${id}:`, hardenedCode.substring(0, 200) + '...');
 
             const { svg } = await mermaid.render(id, hardenedCode);
+
+            // Validate SVG output — reject empty/trivial renders
+            const hasVisibleNodes = (svg.match(/<g[^>]*class="[^"]*node[^"]*"/g) || []).length;
+            if (!svg || svg.length < 200 || hasVisibleNodes < 1) {
+                console.warn(`[Mermaid] SVG appears empty (${svg?.length || 0} chars, ${hasVisibleNodes} nodes). Retrying...`);
+                throw new Error('Empty SVG output');
+            }
+
             el.innerHTML = svg;
             el.dataset.rendered = 'true';
         } catch (e) {
@@ -1653,6 +1745,13 @@ async function renderMermaidDiagrams() {
                 const id2 = 'mermaid-retry-' + Math.random().toString(36).substr(2, 9);
                 const simplified = simplifyMermaid(rawCode);
                 const { svg } = await mermaid.render(id2, simplified);
+
+                // Validate simplified SVG too
+                const hasNodes = (svg.match(/<g[^>]*class="[^"]*node[^"]*"/g) || []).length;
+                if (!svg || svg.length < 200 || hasNodes < 1) {
+                    throw new Error('Simplified SVG also empty');
+                }
+
                 el.innerHTML = svg;
                 el.dataset.rendered = 'true';
                 console.log(`[Mermaid] Fallback render succeeded for ${id2}`);
@@ -1666,6 +1765,7 @@ async function renderMermaidDiagrams() {
                         <div style="color:var(--text-tertiary);margin-bottom:12px;font-size:11px">The AI generated Mermaid syntax that could not be parsed. You can copy the code below and test it at <a href="https://mermaid.live" target="_blank" style="color:var(--brand-primary)">mermaid.live</a></div>
                         <pre style="background:var(--bg-primary);padding:12px;border-radius:var(--radius-md);color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap">${escaped}</pre>
                     </div>`;
+                el.dataset.rendered = 'true';
             }
         }
     }
@@ -1860,33 +1960,52 @@ async function generate() {
         enableNav('events');
 
         // ── Phase 4A: Agent 4b (Sequential) ──
-        updatePipelineStep('agentic', 'active');
-        document.getElementById('generatingAgentName').textContent = '🧠 Agent 4b — Agentic AI Pattern Guide';
+        // Wrapped in fault-isolation: failure here should not block later agents
+        try {
+            updatePipelineStep('agentic', 'active');
+            document.getElementById('generatingAgentName').textContent = '🧠 Agent 4b — Agentic AI Pattern Guide';
 
-        const agenticResult = await Agents.agenticGuide(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
-        state.results.agenticGuide = agenticResult;
-        Renderers.renderAgenticGuide(state.results.agenticGuide, document.getElementById('agentic-content'));
-        setTimeout(() => renderMermaidDiagrams(), 100);
-        updatePipelineStep('agentic', 'completed');
+            const agenticResult = await Agents.agenticGuide(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
+            state.results.agenticGuide = agenticResult;
+            Renderers.renderAgenticGuide(state.results.agenticGuide, document.getElementById('agentic-content'));
+            setTimeout(() => renderMermaidDiagrams(), 100);
+            updatePipelineStep('agentic', 'completed');
+        } catch (e4a) {
+            console.error('[Pipeline] Agent 4b failed:', e4a.message);
+            showAgentError('Agentic AI Guide', e4a, document.getElementById('agentic-content'));
+            updatePipelineStep('agentic', 'completed');
+        }
         enableNav('agentic');
 
         // ── Phase 4B: Agent 6 (Sequential) ──
-        updatePipelineStep('implementation', 'active');
-        document.getElementById('generatingAgentName').textContent = '🛠️ Agent 6 — Implementation Generator';
+        try {
+            updatePipelineStep('implementation', 'active');
+            document.getElementById('generatingAgentName').textContent = '🛠️ Agent 6 — Implementation Generator';
 
-        const implResult = await Agents.implementationGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
-        state.results.implementation = implResult;
-        Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
-        updatePipelineStep('implementation', 'completed');
+            const implResult = await Agents.implementationGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
+            state.results.implementation = implResult;
+            Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
+            updatePipelineStep('implementation', 'completed');
+        } catch (e4b) {
+            console.error('[Pipeline] Agent 6 failed:', e4b.message);
+            showAgentError('Implementation Generator', e4b, document.getElementById('implementation-content'));
+            updatePipelineStep('implementation', 'completed');
+        }
         enableNav('implementation');
 
         // ── Phase 4C: Agent 11 (Architecture Linter) ──
-        updatePipelineStep('linter', 'active');
-        document.getElementById('generatingAgentName').textContent = '🛑 Agent 11 — Architecture Linter';
+        try {
+            updatePipelineStep('linter', 'active');
+            document.getElementById('generatingAgentName').textContent = '🛑 Agent 11 — Architecture Linter';
 
-        state.results.linter = await Agents.vantiqLinter(text, state.results.analysis, state.results.architecture, state.results.eventSystem, state.results.implementation, "", null, state.language);
-        Renderers.renderVantiqLinter(state.results.linter, document.getElementById('linter-content'));
-        updatePipelineStep('linter', 'completed');
+            state.results.linter = await Agents.vantiqLinter(text, state.results.analysis, state.results.architecture, state.results.eventSystem, state.results.implementation, "", null, state.language);
+            Renderers.renderVantiqLinter(state.results.linter, document.getElementById('linter-content'));
+            updatePipelineStep('linter', 'completed');
+        } catch (e4c) {
+            console.error('[Pipeline] Agent 11 failed:', e4c.message);
+            showAgentError('Architecture Linter', e4c, document.getElementById('linter-content'));
+            updatePipelineStep('linter', 'completed');
+        }
         enableNav('linter');
 
         // ── Phase 4D: Agent 7 + Agent 8 in parallel ──
@@ -1894,26 +2013,42 @@ async function generate() {
         updatePipelineStep('demo', 'active');
         document.getElementById('generatingAgentName').textContent = '📊 Agent 7 + 🎬 Agent 8 (parallel)';
 
-        const [diagResult, demoResult] = await Promise.all([
+        const [diagResult, demoResult] = await Promise.allSettled([
             Agents.architectureVisualizer(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language),
             Agents.demoScenarioGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language)
         ]);
 
-        state.results.diagrams = diagResult;
-        Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
+        if (diagResult.status === 'fulfilled') {
+            state.results.diagrams = diagResult.value;
+            Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
+        } else {
+            console.error('[Pipeline] Agent 7 failed:', diagResult.reason?.message);
+            showAgentError('Architecture Visualizer', diagResult.reason, document.getElementById('diagrams-content'));
+        }
         updatePipelineStep('visualizer', 'completed');
         enableNav('diagrams');
 
-        state.results.demo = demoResult;
-        Renderers.renderDemo(state.results.demo, document.getElementById('demo-content'));
+        if (demoResult.status === 'fulfilled') {
+            state.results.demo = demoResult.value;
+            Renderers.renderDemo(state.results.demo, document.getElementById('demo-content'));
+        } else {
+            console.error('[Pipeline] Agent 8 failed:', demoResult.reason?.message);
+            showAgentError('Demo Scenario Generator', demoResult.reason, document.getElementById('demo-content'));
+        }
         updatePipelineStep('demo', 'completed');
         enableNav('demo');
 
         // ── Phase 5: Agent 9 (needs implementation from Agent 6) ──
-        updatePipelineStep('training', 'active');
-        state.results.training = await Agents.trainingLabGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation, "", null, state.language);
-        Renderers.renderTraining(state.results.training, document.getElementById('training-content'));
-        updatePipelineStep('training', 'completed');
+        try {
+            updatePipelineStep('training', 'active');
+            state.results.training = await Agents.trainingLabGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation, "", null, state.language);
+            Renderers.renderTraining(state.results.training, document.getElementById('training-content'));
+            updatePipelineStep('training', 'completed');
+        } catch (e5) {
+            console.error('[Pipeline] Agent 9 failed:', e5.message);
+            showAgentError('Training Lab Generator', e5, document.getElementById('training-content'));
+            updatePipelineStep('training', 'completed');
+        }
         enableNav('training');
 
         // ── Phase 6: Agent 10 & 11 (Competitive Analysis & Business Value in parallel) ──
@@ -1923,18 +2058,28 @@ async function generate() {
         const competitorsInput = document.getElementById('competitorsInput');
         const competitorsText = competitorsInput ? competitorsInput.value.trim() : '';
 
-        const [compResult, busResult] = await Promise.all([
+        const [compResult, busResult] = await Promise.allSettled([
             Agents.competitiveAnalysis(text, state.results.analysis, state.results.architecture, competitorsText, "", null, state.language),
             Agents.businessValue(text, state.results.analysis, state.results.architecture, "", null, state.language)
         ]);
 
-        state.results.competitive = compResult;
-        Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
+        if (compResult.status === 'fulfilled') {
+            state.results.competitive = compResult.value;
+            Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
+        } else {
+            console.error('[Pipeline] Agent 10 failed:', compResult.reason?.message);
+            showAgentError('Competitive Analysis', compResult.reason, document.getElementById('competitive-content'));
+        }
         updatePipelineStep('competitive', 'completed');
         enableNav('competitive');
 
-        state.results.businessValue = busResult;
-        Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
+        if (busResult.status === 'fulfilled') {
+            state.results.businessValue = busResult.value;
+            Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
+        } else {
+            console.error('[Pipeline] Business Value Agent failed:', busResult.reason?.message);
+            showAgentError('Business Value', busResult.reason, document.getElementById('business-content'));
+        }
         updatePipelineStep('business', 'completed');
         enableNav('business');
 
