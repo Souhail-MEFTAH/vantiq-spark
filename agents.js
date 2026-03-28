@@ -235,11 +235,11 @@ RULES:
 - STRICT MERMAID SYNTAX RULES (diagram):
   * MANDATORY double quotes around ALL node labels (e.g., id1["Localized Label"]). Critical for non-English characters.
   * Every node MUST be connected with at least one edge (-->, -.->, ==>). No orphan/standalone nodes.
-  * Do NOT use ::: style classes.
+  * Do NOT use ::: style classes inline.
   * Do NOT include click handlers or linkStyle directives.
   * Every subgraph MUST have a matching 'end' keyword.
   * No HTML tags inside labels.
-  * VISUAL DISTINCTION: Use different styles. For example, LLM Agents as circles ((Agent)) and Deterministic/Traditional AI as rectangles [Logic]. Style Agents with purple (fill:#2d1b4e,stroke:#7c6bf5) and Deterministic/ML nodes with teal/green (fill:#112a2a,stroke:#20c997).
+  * VISUAL DISTINCTION: Use different shapes. For example, LLM Agents as circles ((Agent)) and Deterministic/Traditional AI as rectangles [Logic]. If you use colors, you MUST use 'classDef' at the top (e.g. 'classDef ai fill:#2d1b4e,stroke:#7c6bf5;') and apply via 'class NodeID ai' at the bottom. Do NOT use inline 'style' commands.
 - TRANSLATION RULE: All role names, component names, and descriptions MUST be translated into the user's target language.
 
 You MUST respond with ONLY valid JSON:
@@ -311,12 +311,12 @@ RULES:
 - All event routing and processing happens through Visual Event Handlers (VEH) — NEVER Topics.
 - The sequence diagram must use valid Mermaid sequenceDiagram syntax.
 - STRICT MERMAID SYNTAX RULES:
-  * Quote all participant labels and message texts containing special characters or parentheses.
+  * Quote all participant aliases and message texts containing special characters or parentheses.
   * Every participant MUST appear in at least one message arrow. No orphan participants.
   * Do NOT use ::: style classes or click handlers.
   * No HTML tags inside labels.
+  * IMPORTANT: ALWAYS define participants explicitly with short IDs and aliases if the name has spaces (e.g. 'participant C as "My Component"'), and only use the short ID in arrows ('C->>D: message').
 - TRANSLATION RULE: All participant names, system roles, and message flow descriptions MUST be translated into the user's target language.
-- IMPORTANT: Do NOT use the 'participant' keyword explicitly unless defining an alias. Let Mermaid infer the participants from the message flow (e.g. ComponentA->>ComponentB: message). Keep the sequence strictly connected without standalone nodes.
 - Use real orchestration patterns (Choreography, Saga, Event Sourcing).
 - Reference Vantiq Sources for external producers and Services for internal consumers.
 
