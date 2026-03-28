@@ -200,7 +200,7 @@ window.Renderers = {
     if (!data || !container) return;
 
     // Deterministic Components (Green)
-    const deterministicHTML = (data.deterministicComponents || []).map(c => `
+    const deterministicHTML = (data.deterministicAndMLCore || []).map(c => `
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">⚡</span> ${c.name}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin:6px 0">${c.responsibility}</p>
@@ -208,13 +208,13 @@ window.Renderers = {
           <span class="tag tag-green">${c.vantiqComponent}</span>
         </div>
         <div style="margin-top:10px">
-          <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px" data-i18n="label-why-not-ai">Why Deterministic?</div>
-          <p style="font-size:12px;color:var(--text-primary);margin-top:4px">${c.whyNotAI}</p>
+          <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px" data-i18n="label-why-not-ai">Why Traditional Logic?</div>
+          <p style="font-size:12px;color:var(--text-primary);margin-top:4px">${c.whyNotAgent || c.whyNotAI || ''}</p>
         </div>
       </div>`).join('');
 
     // AI Agents (Purple)
-    const agentsHTML = (data.aiAgents || []).map(a => `
+    const agentsHTML = (data.llmAgents || data.aiAgents || []).map(a => `
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">🧠</span> ${a.name}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin:6px 0">${a.role}</p>
@@ -259,14 +259,14 @@ window.Renderers = {
 
     container.innerHTML = `
       <div class="glass-card accent-cyan">
-        <div class="card-title"><span class="card-icon">💡</span> <span data-i18n="label-solution-strategy">Solution Strategy</span></div>
-        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.solutionStrategy || ''}</p>
+        <div class="card-title"><span class="card-icon">💡</span> <span data-i18n="label-solution-strategy">Hybrid Alternative Strategy</span></div>
+        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.hybridAlternativeStrategy || data.solutionStrategy || ''}</p>
       </div>
       
-      <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-deterministic-core">⚡ Deterministic Core</span> (Low Cost)</h3>
+      <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-deterministic-core">⚡ Traditional AI & Logic</span> (Low Cost)</h3>
       <div class="card-grid">${deterministicHTML}</div>
 
-      <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-ai-agents">🧠 AI Agents</span> (High Value)</h3>
+      <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-ai-agents">🧠 LLM Agents</span> (High Value Augmentation)</h3>
       <div class="card-grid">${agentsHTML}</div>
       
       <div class="glass-card accent-yellow" style="margin-top:24px">
