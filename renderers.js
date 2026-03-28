@@ -195,41 +195,49 @@ window.Renderers = {
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
-  // ── Agentic AI Guide (Agent 4b) ──
+  // ── Solution Architecture Guide (formerly Agentic AI, Phase 4b) ──
   renderAgenticGuide(data, container) {
     if (!data || !container) return;
-    const orch = data.orchestrationPattern || {};
-    const orchHTML = `
-      <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="label-orchestration">Orchestration</span>: ${orch.name || ''}</div>
-        <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${orch.description || ''}</p>
-        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px"><strong style="color:var(--text-accent)">Vantiq:</strong> ${orch.vantiqImplementation || ''}</p>
-      </div>`;
 
-    const agentsHTML = (data.agents || []).map(a => `
-      <div class="glass-card accent-cyan">
-        <div class="card-title"><span class="card-icon">🤖</span> ${a.name}</div>
+    // Deterministic Components (Green)
+    const deterministicHTML = (data.deterministicComponents || []).map(c => `
+      <div class="glass-card accent-green">
+        <div class="card-title"><span class="card-icon">⚡</span> ${c.name}</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin:6px 0">${c.responsibility}</p>
+        <div class="tag-list" style="margin:8px 0">
+          <span class="tag tag-green">${c.vantiqComponent}</span>
+        </div>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px" data-i18n="label-why-not-ai">Why Deterministic?</div>
+          <p style="font-size:12px;color:var(--text-primary);margin-top:4px">${c.whyNotAI}</p>
+        </div>
+      </div>`).join('');
+
+    // AI Agents (Purple)
+    const agentsHTML = (data.aiAgents || []).map(a => `
+      <div class="glass-card accent-purple">
+        <div class="card-title"><span class="card-icon">🧠</span> ${a.name}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin:6px 0">${a.role}</p>
         <div class="tag-list" style="margin:8px 0">
           <span class="tag tag-purple"><span data-i18n="label-llm">LLM</span>: ${a.llm}</span>
           <span class="tag tag-cyan" data-i18n="label-${(a.memoryType || 'unknown').toLowerCase()}">${a.memoryType || ''}</span>
-          <span class="tag tag-green">${a.vantiqComponent}</span>
+        </div>
+        <div style="margin-top:10px">
+          <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px" data-i18n="label-justification">Agent Justification</div>
+          <p style="font-size:12px;color:var(--text-primary);margin-top:4px">${a.justification}</p>
         </div>
         <div style="margin-top:10px">
           <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px" data-i18n="label-tools">Tools</div>
           <div class="tag-list" style="margin-top:4px">${(a.tools || []).map(t => '<span class="tag tag-warm">' + t + '</span>').join('')}</div>
         </div>
-        <div style="margin-top:10px;display:flex;gap:16px;flex-wrap:wrap">
-          <div>
-            <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase" data-i18n="label-inputs">Inputs</div>
-            <div class="tag-list" style="margin-top:4px">${(a.inputs || []).map(i => '<span class="tag tag-cyan">' + i + '</span>').join('')}</div>
-          </div>
-          <div>
-            <div style="font-size:11px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase" data-i18n="label-outputs">Outputs</div>
-            <div class="tag-list" style="margin-top:4px">${(a.outputs || []).map(o => '<span class="tag tag-green">' + o + '</span>').join('')}</div>
-          </div>
-        </div>
       </div>`).join('');
+
+    // Cost Optimization
+    const costRows = (data.costOptimization || []).map(c => `
+      <tr>
+        <td style="color:var(--text-primary);font-weight:500">${c.technique}</td>
+        <td><span class="tag tag-${(c.impact || '') === 'High' ? 'green' : (c.impact || '') === 'Medium' ? 'warm' : 'cyan'}" data-i18n="impact-${(c.impact || 'unknown').toLowerCase()}">${c.impact || ''}</span></td>
+      </tr>`).join('');
 
     const llmRows = (data.llmComparison || []).map(m => `
         <tr>
@@ -250,12 +258,24 @@ window.Renderers = {
         </tr>`).join('');
 
     container.innerHTML = `
-      <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">🧠</span> <span data-i18n="label-arch-overview">Architecture Overview</span></div>
-        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.architectureOverview || ''}</p>
+      <div class="glass-card accent-cyan">
+        <div class="card-title"><span class="card-icon">💡</span> <span data-i18n="label-solution-strategy">Solution Strategy</span></div>
+        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.solutionStrategy || ''}</p>
       </div>
-      ${orchHTML}
+      
+      <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-deterministic-core">⚡ Deterministic Core</span> (Low Cost)</h3>
+      <div class="card-grid">${deterministicHTML}</div>
+
+      <h3 style="margin-top:24px;margin-bottom:12px;color:var(--text-primary);font-size:16px"><span data-i18n="label-ai-agents">🧠 AI Agents</span> (High Value)</h3>
       <div class="card-grid">${agentsHTML}</div>
+      
+      <div class="glass-card accent-yellow" style="margin-top:24px">
+        <div class="card-title"><span class="card-icon">💰</span> <span data-i18n="label-cost-opt">Cost Optimization Analysis</span></div>
+        <table class="data-table" style="margin-top:12px">
+          <thead><tr><th data-i18n="th-technique">Technique</th><th data-i18n="th-impact">Impact</th></tr></thead>
+          <tbody>${costRows}</tbody>
+        </table>
+      </div>
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-llm-comp">LLM Comparison</span></div>
         <table class="data-table" style="margin-top:12px">
@@ -280,7 +300,7 @@ window.Renderers = {
         </ul>
       </div>
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-interaction-diagram">Agent Interaction Diagram</span></div>
+        <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-hybrid-diagram">Hybrid Architecture Flow</span></div>
         ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
