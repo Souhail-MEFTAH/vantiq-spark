@@ -240,7 +240,7 @@ RULES:
   * Do NOT include click handlers or linkStyle directives.
   * Every subgraph MUST have a matching 'end' keyword.
   * No HTML tags inside labels.
-  * VISUAL DISTINCTION: Use different shapes. For example, LLM Agents as circles ((Agent)) and other logic as rectangles [Logic]. Do NOT use `classDef`, `style`, or colors. Keep the diagram extremely simple and structurally sound.
+  * VISUAL DISTINCTION: Use different shapes. For example, LLM Agents as circles ((Agent)) and other logic as rectangles [Logic]. Do NOT use 'classDef', 'style', or colors. Keep the diagram extremely simple and structurally sound.
   * EVERY element MUST be connected. Do not output standalone nodes.
 - TRANSLATION RULE: All role names, component names, and descriptions MUST be translated into the user's target language.
 
