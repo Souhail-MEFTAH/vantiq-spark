@@ -1713,9 +1713,9 @@ async function renderMermaidDiagrams() {
             const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
             const hardenedCode = preprocessMermaid(rawCode);
 
-            // Skip if preprocessing resulted in trivial content (< 3 meaningful lines)
-            const meaningfulLines = hardenedCode.split('\n').filter(l => l.trim() && !/^\s*(graph|flowchart|sequenceDiagram)/.test(l.trim())).length;
-            if (meaningfulLines < 2) {
+            // Skip if preprocessing resulted in truly trivial content (< 1 meaningful line)
+            const meaningfulLines = hardenedCode.split('\n').filter(l => l.trim() && !/^\s*(graph|flowchart|sequenceDiagram|erDiagram|classDiagram|stateDiagram|pie|gantt|journey|gitGraph)/.test(l.trim())).length;
+            if (meaningfulLines < 1) {
                 el.innerHTML = `
                     <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
                         <div style="color:var(--text-tertiary)">Diagram contained insufficient connected elements.</div>
@@ -1729,8 +1729,8 @@ async function renderMermaidDiagrams() {
             const { svg } = await mermaid.render(id, hardenedCode);
 
             // Validate SVG output — reject empty/trivial renders
-            // Accept nodes (graph), actors/messages (sequence), or entities (er)
-            const hasVisibleElements = (svg.match(/<g[^>]*class="[^"]*(node|actor|messageLine|entity)[^"]*"/g) || []).length;
+            // Accept any SVG element with a class (nodes, actors, edges, etc.)
+            const hasVisibleElements = (svg.match(/<g[^>]*class="[^"]+"/g) || []).length;
             if (!svg || svg.length < 200 || hasVisibleElements < 1) {
                 console.warn(`[Mermaid] SVG appears empty (${svg?.length || 0} chars, ${hasVisibleElements} elements). Retrying...`);
                 throw new Error('Empty SVG output');
@@ -1748,7 +1748,7 @@ async function renderMermaidDiagrams() {
                 const { svg } = await mermaid.render(id2, simplified);
 
                 // Validate simplified SVG too
-                const hasElements = (svg.match(/<g[^>]*class="[^"]*(node|actor|messageLine|entity)[^"]*"/g) || []).length;
+                const hasElements = (svg.match(/<g[^>]*class="[^"]+"/g) || []).length;
                 if (!svg || svg.length < 200 || hasElements < 1) {
                     throw new Error('Simplified SVG also empty');
                 }
