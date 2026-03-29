@@ -1718,8 +1718,8 @@ async function renderMermaidDiagrams() {
             const { svg } = await mermaid.render(id, hardenedCode);
 
             // Validate SVG output — reject empty/trivial renders
-            // Accept any SVG element with a class (nodes, actors, edges, etc.)
-            const hasVisibleElements = (svg.match(/<g[^>]*class="[^"]+"/g) || []).length;
+            // Accept any SVG element with a class (nodes, actors, edges, paths, rects, lines etc.)
+            const hasVisibleElements = (svg.match(/class="[^"]+"/g) || []).length;
             if (!svg || svg.length < 200 || hasVisibleElements < 1) {
                 console.warn(`[Mermaid] SVG appears empty (${svg?.length || 0} chars, ${hasVisibleElements} elements). Retrying...`);
                 throw new Error('Empty SVG output');
@@ -1737,7 +1737,7 @@ async function renderMermaidDiagrams() {
                 const { svg } = await mermaid.render(id2, simplified);
 
                 // Validate simplified SVG too
-                const hasElements = (svg.match(/<g[^>]*class="[^"]+"/g) || []).length;
+                const hasElements = (svg.match(/class="[^"]+"/g) || []).length;
                 if (!svg || svg.length < 200 || hasElements < 1) {
                     throw new Error('Simplified SVG also empty');
                 }
