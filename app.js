@@ -1482,6 +1482,11 @@ document.addEventListener('keydown', (e) => {
  */
 function preprocessMermaid(code) {
     if (!code) return '';
+    let rawCode = code.trim();
+    rawCode = rawCode.replace(/```(?:mermaid)?\s*\n?/g, '').replace(/```\s*$/g, '').trim();
+    rawCode = rawCode.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    return rawCode;
+
     let cleaned = code.trim();
 
     // 0. Strip markdown fences if AI included them
@@ -1717,46 +1722,24 @@ async function renderMermaidDiagrams() {
 
             const { svg } = await mermaid.render(id, hardenedCode);
 
-            // Validate SVG output — reject empty/trivial renders
-            // Accept any SVG element with a class (nodes, actors, edges, paths, rects, lines etc.)
-            const hasVisibleElements = (svg.match(/class="[^"]+"/g) || []).length;
-            if (!svg || svg.length < 200 || hasVisibleElements < 1) {
-                console.warn(`[Mermaid] SVG appears empty (${svg?.length || 0} chars, ${hasVisibleElements} elements). Retrying...`);
+            if (!svg || svg.length < 50) {
+                console.warn(`[Mermaid] SVG appears empty. Retrying...`);
                 throw new Error('Empty SVG output');
             }
 
             el.innerHTML = svg;
             el.dataset.rendered = 'true';
         } catch (e) {
-            console.warn('[Mermaid] First render failed, attempting simplified fallback:', e.message);
-
-            // Retry with aggressive simplification
-            try {
-                const id2 = 'mermaid-retry-' + Math.random().toString(36).substr(2, 9);
-                const simplified = simplifyMermaid(rawCode);
-                const { svg } = await mermaid.render(id2, simplified);
-
-                // Validate simplified SVG too
-                const hasElements = (svg.match(/class="[^"]+"/g) || []).length;
-                if (!svg || svg.length < 200 || hasElements < 1) {
-                    throw new Error('Simplified SVG also empty');
-                }
-
-                el.innerHTML = svg;
-                el.dataset.rendered = 'true';
-                console.log(`[Mermaid] Fallback render succeeded for ${id2}`);
-            } catch (e2) {
-                console.warn('[Mermaid] Fallback also failed:', e2.message);
-                // Show raw code so the user at least sees something useful
-                const escaped = (rawCode || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                el.innerHTML = `
-                    <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
-                        <div style="color:var(--brand-warning);margin-bottom:8px;font-weight:600">⚠️ Diagram could not be rendered</div>
-                        <div style="color:var(--text-tertiary);margin-bottom:12px;font-size:11px">The AI generated Mermaid syntax that could not be parsed. You can copy the code below and test it at <a href="https://mermaid.live" target="_blank" style="color:var(--brand-primary)">mermaid.live</a></div>
-                        <pre style="background:var(--bg-primary);padding:12px;border-radius:var(--radius-md);color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap">${escaped}</pre>
-                    </div>`;
-                el.dataset.rendered = 'true';
-            }
+            console.warn('[Mermaid] render failed:', e.message);
+            // Show raw code so the user at least sees something useful
+            const escaped = (rawCode || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            el.innerHTML = `
+                <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
+                    <div style="color:var(--brand-warning);margin-bottom:8px;font-weight:600">⚠️ Diagram could not be rendered</div>
+                    <div style="color:var(--text-tertiary);margin-bottom:12px;font-size:11px">The AI generated Mermaid syntax that could not be parsed. You can copy the code below and test it at <a href="https://mermaid.live" target="_blank" style="color:var(--brand-primary)">mermaid.live</a></div>
+                    <pre style="background:var(--bg-primary);padding:12px;border-radius:var(--radius-md);color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap">${escaped}</pre>
+                </div>`;
+            el.dataset.rendered = 'true';
         }
     }
 }
@@ -1766,29 +1749,7 @@ async function renderMermaidDiagrams() {
  * reducing to basic node→node connections.
  */
 function simplifyMermaid(code) {
-    if (!code) return 'graph TD\nA["No diagram"]';
-    let cleaned = preprocessMermaid(code);
-
-    // Strip all style/class declarations
-    cleaned = cleaned.replace(/^\s*style\s+.*$/gm, '');
-    cleaned = cleaned.replace(/^\s*classDef\s+.*$/gm, '');
-    cleaned = cleaned.replace(/^\s*class\s+.*$/gm, '');
-    cleaned = cleaned.replace(/:::[\w]+/g, '');
-
-    // Strip click handlers
-    cleaned = cleaned.replace(/^\s*click\s+.*$/gm, '');
-
-    // Strip linkStyle
-    cleaned = cleaned.replace(/^\s*linkStyle\s+.*$/gm, '');
-
-    // Remove subgraph wrappers but keep inner content
-    cleaned = cleaned.replace(/^\s*subgraph\s+.*$/gm, '');
-    cleaned = cleaned.replace(/^\s*end\s*$/gm, '');
-
-    // Remove empty lines
-    cleaned = cleaned.replace(/\n{2,}/g, '\n').trim();
-
-    return cleaned;
+    return preprocessMermaid(code);
 }
 
 // ── Pipeline Progress ──
