@@ -385,13 +385,14 @@ window.Renderers = {
         <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text-accent)">${et.name}</span>
         <table class="data-table" style="margin-top:8px">
           <thead><tr><th data-i18n="th-field">Field</th><th data-i18n="th-type">Type</th><th data-i18n="th-description">Description</th></tr></thead>
-          <tbody>${fieldsHTML}</tbody>
-        </table>
       </div>`;
     }).join('');
 
-    const structureHTML = (data.projectStructure || []).map(d => `
-      <li><span class="list-icon">📁</span><div><strong style="color:var(--text-primary)">${d.path}</strong><br/><span style="font-size:11px;font-family:'JetBrains Mono',monospace">${d.files.join(', ')}</span></div></li>`).join('');
+    const structureHTML = (data.projectStructure || []).map(d => {
+      const fileArray = Array.isArray(d.files) ? d.files : (d.files ? [d.files] : []);
+      return `
+      <li><span class="list-icon">📁</span><div><strong style="color:var(--text-primary)">${d.path}</strong><br/><span style="font-size:11px;font-family:'JetBrains Mono',monospace">${fileArray.join(', ')}</span></div></li>`;
+    }).join('');
 
     container.innerHTML = `
       <div class="glass-card accent-cyan">

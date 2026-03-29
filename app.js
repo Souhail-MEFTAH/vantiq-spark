@@ -1962,7 +1962,7 @@ async function generate() {
             updatePipelineStep('agentic', 'completed');
         } catch (e4a) {
             console.error('[Pipeline] Agent 4b failed:', e4a.message);
-            showAgentError('Agentic AI Guide', e4a, document.getElementById('agentic-content'));
+            showAgentError('agentic-content', 'Agentic AI Guide', e4a);
             updatePipelineStep('agentic', 'completed');
         }
         enableNav('agentic');
@@ -1978,7 +1978,7 @@ async function generate() {
             updatePipelineStep('implementation', 'completed');
         } catch (e4b) {
             console.error('[Pipeline] Agent 6 failed:', e4b.message);
-            showAgentError('Implementation Generator', e4b, document.getElementById('implementation-content'));
+            showAgentError('implementation-content', 'Implementation Generator', e4b);
             updatePipelineStep('implementation', 'completed');
         }
         enableNav('implementation');
@@ -1993,7 +1993,7 @@ async function generate() {
             updatePipelineStep('linter', 'completed');
         } catch (e4c) {
             console.error('[Pipeline] Agent 11 failed:', e4c.message);
-            showAgentError('Architecture Linter', e4c, document.getElementById('linter-content'));
+            showAgentError('linter-content', 'Architecture Linter', e4c);
             updatePipelineStep('linter', 'completed');
         }
         enableNav('linter');
@@ -2013,7 +2013,7 @@ async function generate() {
             Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
         } else {
             console.error('[Pipeline] Agent 7 failed:', diagResult.reason?.message);
-            showAgentError('Architecture Visualizer', diagResult.reason, document.getElementById('diagrams-content'));
+            showAgentError('diagrams-content', 'Architecture Visualizer', diagResult.reason);
         }
         updatePipelineStep('visualizer', 'completed');
         enableNav('diagrams');
@@ -2023,7 +2023,7 @@ async function generate() {
             Renderers.renderDemo(state.results.demo, document.getElementById('demo-content'));
         } else {
             console.error('[Pipeline] Agent 8 failed:', demoResult.reason?.message);
-            showAgentError('Demo Scenario Generator', demoResult.reason, document.getElementById('demo-content'));
+            showAgentError('demo-content', 'Demo Scenario Generator', demoResult.reason);
         }
         updatePipelineStep('demo', 'completed');
         enableNav('demo');
@@ -2036,7 +2036,7 @@ async function generate() {
             updatePipelineStep('training', 'completed');
         } catch (e5) {
             console.error('[Pipeline] Agent 9 failed:', e5.message);
-            showAgentError('Training Lab Generator', e5, document.getElementById('training-content'));
+            showAgentError('training-content', 'Training Lab Generator', e5);
             updatePipelineStep('training', 'completed');
         }
         enableNav('training');
@@ -2058,7 +2058,7 @@ async function generate() {
             Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
         } else {
             console.error('[Pipeline] Agent 10 failed:', compResult.reason?.message);
-            showAgentError('Competitive Analysis', compResult.reason, document.getElementById('competitive-content'));
+            showAgentError('competitive-content', 'Competitive Analysis', compResult.reason);
         }
         updatePipelineStep('competitive', 'completed');
         enableNav('competitive');
@@ -2068,7 +2068,7 @@ async function generate() {
             Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
         } else {
             console.error('[Pipeline] Business Value Agent failed:', busResult.reason?.message);
-            showAgentError('Business Value', busResult.reason, document.getElementById('business-content'));
+            showAgentError('business-content', 'Business Value', busResult.reason);
         }
         updatePipelineStep('business', 'completed');
         enableNav('business');
