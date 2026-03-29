@@ -2,6 +2,12 @@
 // Vantiq Spark — Renderers
 // ============================================
 
+// Safely escape characters that might break HTML injection
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
 window.Renderers = {
 
   // ── Problem Analysis (Agent 1) ──
@@ -134,7 +140,7 @@ window.Renderers = {
       </div>
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-arch-diagram">Architecture Diagram</span></div>
-        ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>` : ''}
+      ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.mermaidDiagram)}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -284,7 +290,7 @@ window.Renderers = {
       </div>
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-hybrid-diagram">Hybrid Architecture Flow</span></div>
-        ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${data.mermaidDiagram}</pre></div>` : ''}
+        ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.mermaidDiagram)}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -340,7 +346,7 @@ window.Renderers = {
       </div>
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-event-flow">Event Flow Diagram</span></div>
-        ${data.flowDiagram ? `<div class="diagram-container"><pre class="mermaid">${data.flowDiagram}</pre></div>` : ''}
+        ${data.flowDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram)}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -414,7 +420,7 @@ window.Renderers = {
       <div class="glass-card accent-${['purple', 'cyan', 'green'][i % 3]}">
         <div class="card-title"><span class="card-icon">${d.type === 'architecture' ? '🏗️' : d.type === 'component' ? '🧩' : '☁️'}</span> ${d.title}</div>
         <p style="font-size:12px;color:var(--text-secondary);margin:6px 0 16px">${d.description}</p>
-        ${d.mermaid ? `<div class="diagram-container"><pre class="mermaid">${d.mermaid}</pre></div>` : '<p style="color:var(--text-tertiary)">No diagram data generated.</p>'}
+        ${d.mermaid ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(d.mermaid)}</pre></div>` : '<p style="color:var(--text-tertiary)">No diagram data generated.</p>'}
       </div>`).join('');
     container.innerHTML = diagramsHTML || '<p style="color:var(--text-tertiary)">No diagrams generated.</p>';
   },
