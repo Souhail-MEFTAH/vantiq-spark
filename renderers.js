@@ -10,9 +10,30 @@ function escapeHtml(str) {
 
 window.Renderers = {
 
-  // ── Problem Analysis (Agent 1) ──
+  // ── Sales Discovery Analysis (Agent 1) ──
   renderAnalysis(data, container) {
     if (!data || !container) return;
+    const painPointsHTML = (data.painPoints || []).map(p => `
+      <div class="glass-card" style="padding:12px 16px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="color:var(--text-primary)">${p.pain}</strong>
+          <span class="tag tag-${p.severity === 'Critical' ? 'rose' : p.severity === 'High' ? 'warm' : 'cyan'}">${p.severity}</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${p.impact}</p>
+      </div>`).join('');
+
+    const stakeholdersHTML = (data.stakeholders || []).map(s => `
+      <div class="glass-card" style="padding:12px 16px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="color:var(--text-primary)">${s.role}</strong>
+          <span class="tag tag-${s.buyerType === 'Economic' ? 'green' : s.buyerType === 'Champion' ? 'purple' : 'cyan'}">${s.buyerType}</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${s.concern}</p>
+      </div>`).join('');
+
+    const questionsHTML = (data.qualifyingQuestions || []).map((q, i) => `
+      <li style="margin-bottom:8px;color:var(--text-primary)"><span class="list-icon">${i + 1}.</span> ${q}</li>`).join('');
+
     container.innerHTML = `
       <div class="card-grid">
         <div class="glass-card accent-purple" style="animation-delay:0s">
@@ -24,29 +45,37 @@ window.Renderers = {
           <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-core-problem">Core Problem</span></div>
           <p style="font-size:14px;color:var(--text-primary);margin-top:8px">${data.coreProblem || ''}</p>
         </div>
-        <div class="glass-card accent-cyan" style="animation-delay:0.08s">
-          <div class="card-title"><span class="card-icon">👥</span> <span data-i18n="label-actors">Actors</span></div>
-          <div class="tag-list">${(data.actors || []).map(a => `<span class="tag tag-cyan">${a}</span>`).join('')}</div>
+        <div class="glass-card accent-warm" style="animation-delay:0.08s; grid-column: span 2">
+          <div class="card-title"><span class="card-icon">🚨</span> Pain Points</div>
+          ${painPointsHTML}
         </div>
-        <div class="glass-card accent-green" style="animation-delay:0.16s">
+        <div class="glass-card accent-cyan" style="animation-delay:0.12s">
+          <div class="card-title"><span class="card-icon">👥</span> Key Stakeholders</div>
+          ${stakeholdersHTML}
+        </div>
+        <div class="glass-card accent-rose" style="animation-delay:0.16s; grid-column: span 2">
+          <div class="card-title"><span class="card-icon">🔄</span> Current State</div>
+          <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.currentState || ''}</p>
+          <div style="margin-top:12px;padding:12px;border-radius:var(--radius-md);background:rgba(255,107,129,0.1)">
+            <strong style="color:var(--brand-danger)">Why Hard Without Vantiq:</strong>
+            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.whyHardWithoutVantiq || ''}</p>
+          </div>
+        </div>
+        <div class="glass-card accent-green" style="animation-delay:0.2s">
           <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-data-sources">Data Sources</span></div>
           <ul class="data-list">${(data.dataSources || []).map(d => `<li><span class="list-icon">◆</span>${d}</li>`).join('')}</ul>
         </div>
         <div class="glass-card accent-warm" style="animation-delay:0.24s">
-          <div class="card-title"><span class="card-icon">⚡</span> <span data-i18n="label-events">Events</span></div>
+          <div class="card-title"><span class="card-icon">⚡</span> <span data-i18n="label-events">Business Events</span></div>
           <div class="tag-list">${(data.events || []).map(e => `<span class="tag tag-warm">${e}</span>`).join('')}</div>
         </div>
-        <div class="glass-card accent-rose" style="animation-delay:0.32s">
-          <div class="card-title"><span class="card-icon">🧠</span> <span data-i18n="label-ai-tasks">AI Tasks</span></div>
-          <ul class="data-list">${(data.aiTasks || []).map(t => `<li><span class="list-icon">◆</span><div><strong style="color:var(--text-primary)">${t.task || ''}</strong><br/><span style="font-size:11px"><span data-i18n="type-${(t.type || 'unknown').toLowerCase()}">${t.type || ''}</span> — ${(t.models || []).join(', ')}</span></div></li>`).join('')}</ul>
-        </div>
-        <div class="glass-card accent-purple" style="animation-delay:0.4s">
-          <div class="card-title"><span class="card-icon">🧩</span> <span data-i18n="label-entities">Entities</span></div>
-          <div class="tag-list">${(data.entities || []).map(e => `<span class="tag tag-purple">${e}</span>`).join('')}</div>
-        </div>
-        <div class="glass-card accent-green" style="animation-delay:0.48s; grid-column: span 3">
+        <div class="glass-card accent-green" style="animation-delay:0.28s; grid-column: span 3">
           <div class="card-title"><span class="card-icon">🚀</span> <span data-i18n="label-why-vantiq">Why Vantiq?</span></div>
           <p style="font-size:14px;color:var(--text-primary);margin-top:8px; line-height: 1.5">${data.vantiqSuitability || ''}</p>
+        </div>
+        <div class="glass-card accent-purple" style="animation-delay:0.32s; grid-column: span 3">
+          <div class="card-title"><span class="card-icon">❓</span> Qualifying Questions for Customer</div>
+          <ol style="padding-left:0;list-style:none">${questionsHTML}</ol>
         </div>
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
@@ -391,6 +420,8 @@ window.Renderers = {
         <span style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text-accent)">${et.name}</span>
         <table class="data-table" style="margin-top:8px">
           <thead><tr><th data-i18n="th-field">Field</th><th data-i18n="th-type">Type</th><th data-i18n="th-description">Description</th></tr></thead>
+          <tbody>${fieldsHTML}</tbody>
+        </table>
       </div>`;
     }).join('');
 
@@ -425,80 +456,6 @@ window.Renderers = {
     container.innerHTML = diagramsHTML || '<p style="color:var(--text-tertiary)">No diagrams generated.</p>';
   },
 
-  // ── Demo Scenarios (Agent 8) ──
-  renderDemo(data, container) {
-    if (!data || !container) return;
-    const scenariosHTML = (data.scenarios || []).map(sc => {
-      const stepsHTML = (sc.steps || []).map(st => `
-        <li><div class="step-content"><strong>${st.title}</strong>${st.description}<br/><span style="font-size:11px;color:var(--brand-success)">✓ <span data-i18n="label-expected">Expected</span>: ${st.expected}</span></div></li>`).join('');
-
-      const eventsHTML = (sc.simulatedEvents || []).map(ev => `
-        <div class="glass-card" style="padding:12px;margin-bottom:8px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-            <span class="tag tag-warm">${ev.timing}</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-primary)">${ev.event}</span>
-          </div>
-          <div class="code-block" style="font-size:11px;margin:4px 0 0">${ev.payload}</div>
-        </div>`).join('');
-
-      return `
-        <div class="glass-card accent-purple">
-          <div class="card-title" style="font-size:18px"><span class="card-icon">🎬</span> ${sc.title}</div>
-          <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${sc.narrative}</p>
-          <div class="tag-list" style="margin:12px 0">
-            <span class="tag tag-cyan">⏱️ ${sc.duration}</span>
-            <span class="tag tag-purple">👥 ${sc.audience}</span>
-          </div>
-        </div>
-        <div class="glass-card accent-cyan">
-          <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-demo-steps">Demo Steps</span></div>
-          <ol class="step-list" style="margin-top:12px">${stepsHTML}</ol>
-        </div>
-        <div class="glass-card accent-warm">
-          <div class="card-title"><span class="card-icon">⚡</span> <span data-i18n="label-sim-events">Simulated Events</span></div>
-          ${eventsHTML}
-        </div>`;
-    }).join('');
-    container.innerHTML = scenariosHTML || '<p style="color:var(--text-tertiary)">No demo scenarios generated.</p>';
-    if (window.app && window.app.localizeUI) window.app.localizeUI();
-  },
-
-  // ── Training Labs (Agent 9) ──
-  renderTraining(data, container) {
-    if (!data || !container) return;
-    const labsHTML = (data.labs || []).map((lab, li) => {
-      const stepsHTML = (lab.steps || []).map(st => `
-        <li><div class="step-content"><strong>${st.instruction}</strong>${st.detail}<br/><span style="font-size:11px;color:var(--brand-warning)">💡 <span data-i18n="label-hint">Hint</span>: ${st.hint}</span></div></li>`).join('');
-
-      const objHTML = (lab.objectives || []).map(o => `<li><span class="list-icon">◆</span>${o}</li>`).join('');
-
-      return `
-        <div class="lab-card" style="margin-bottom:24px;animation:cardReveal 0.4s ease backwards;animation-delay:${li * 0.15}s">
-          <div class="lab-card-header">
-            <h3>📚 ${lab.title}</h3>
-            <p>${lab.description}</p>
-            <div class="tag-list" style="margin-top:8px">
-              <span class="tag tag-${(lab.difficulty || '') === 'Beginner' ? 'green' : (lab.difficulty || '') === 'Intermediate' ? 'warm' : 'rose'}" data-i18n="diff-${(lab.difficulty || 'unknown').toLowerCase()}">${lab.difficulty || ''}</span>
-              <span class="tag tag-cyan">⏱️ ${lab.duration}</span>
-            </div>
-          </div>
-          <div class="lab-card-body">
-            <div class="lab-objectives">
-              <h4 data-i18n="label-learning-obj">🎯 Learning Objectives</h4>
-              <ul class="data-list">${objHTML}</ul>
-            </div>
-            <h4 style="font-size:12px;font-weight:600;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px" data-i18n="label-steps">📝 Steps</h4>
-            <ol class="step-list">${stepsHTML}</ol>
-            <div class="glass-card accent-green" style="margin-top:16px">
-              <div class="card-title"><span class="card-icon">✅</span> <span data-i18n="label-outcome">Expected Outcome</span></div>
-              <p style="font-size:13px;color:var(--text-secondary)">${lab.expectedOutcome}</p>
-            </div>
-          </div>
-        </div>`;
-    }).join('');
-    container.innerHTML = labsHTML || '<p style="color:var(--text-tertiary)">No training labs generated.</p>';
-    if (window.app && window.app.localizeUI) window.app.localizeUI();
-  },
 
   // ── Architecture Linter (Agent 11) ──
   renderVantiqLinter(data, container) {
@@ -702,6 +659,182 @@ window.Renderers = {
     }
 
     if (container) container.innerHTML = html;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
+  },
+
+  // ── Use Case Scope (Agent 1b) ──
+  renderUseCaseScope(data, container) {
+    if (!data || !container) return;
+    const metricsHTML = (data.successMetrics || []).map(m => `
+      <div class="glass-card" style="padding:12px;margin-bottom:8px">
+        <strong style="color:var(--text-primary)">${m.metric}</strong>
+        <div style="display:flex;gap:12px;margin-top:6px">
+          <span class="tag tag-rose">Baseline: ${m.baseline}</span>
+          <span class="tag tag-green">Target: ${m.target}</span>
+        </div>
+      </div>`).join('');
+
+    const phasesHTML = (data.phases || []).map((p, i) => `
+      <div class="glass-card accent-${['purple','cyan','green','warm'][i % 4]}" style="animation-delay:${i * 0.1}s">
+        <div class="card-title"><span class="card-icon">${['🏁','🚀','📊','🌟'][i % 4]}</span> ${p.phase}</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${p.goal}</p>
+        <span class="tag tag-cyan">⏱️ ${p.duration}</span>
+        <ul class="data-list" style="margin-top:8px">${(p.deliverables || []).map(d => `<li><span class="list-icon">◆</span>${d}</li>`).join('')}</ul>
+      </div>`).join('');
+
+    const risksHTML = (data.risks || []).map(r => `
+      <div class="glass-card" style="padding:12px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong style="color:var(--text-primary)">${r.risk}</strong>
+          <span class="tag tag-${r.likelihood === 'High' ? 'rose' : r.likelihood === 'Medium' ? 'warm' : 'green'}">${r.likelihood}</span>
+        </div>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">→ ${r.mitigation}</p>
+      </div>`).join('');
+
+    container.innerHTML = `
+      <div class="card-grid">
+        <div class="glass-card accent-purple" style="grid-column: span 3">
+          <div class="card-title" style="font-size:18px"><span class="card-icon">🎯</span> ${data.useCaseTitle || 'Use Case'}</div>
+          <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${data.elevator || ''}</p>
+        </div>
+        <div class="glass-card accent-green">
+          <div class="card-title"><span class="card-icon">✅</span> In Scope</div>
+          <ul class="data-list">${(data.inScope || []).map(s => `<li><span class="list-icon">◆</span>${s}</li>`).join('')}</ul>
+        </div>
+        <div class="glass-card accent-rose">
+          <div class="card-title"><span class="card-icon">❌</span> Out of Scope</div>
+          <ul class="data-list">${(data.outOfScope || []).map(s => `<li><span class="list-icon">◆</span>${s}</li>`).join('')}</ul>
+        </div>
+        <div class="glass-card accent-cyan">
+          <div class="card-title"><span class="card-icon">📊</span> Success Metrics</div>
+          ${metricsHTML}
+        </div>
+        ${phasesHTML}
+        <div class="glass-card accent-warm" style="grid-column: span 2">
+          <div class="card-title"><span class="card-icon">⚠️</span> Risks & Mitigations</div>
+          ${risksHTML}
+        </div>
+        <div class="glass-card accent-purple">
+          <div class="card-title"><span class="card-icon">📝</span> Dependencies</div>
+          <ul class="data-list">${(data.dependencies || []).map(d => `<li><span class="list-icon">◆</span>${d}</li>`).join('')}</ul>
+          <div class="card-title" style="margin-top:12px"><span class="card-icon">💡</span> Assumptions</div>
+          <ul class="data-list">${(data.assumptions || []).map(a => `<li><span class="list-icon">◆</span>${a}</li>`).join('')}</ul>
+        </div>
+      </div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
+  },
+
+  // ── Adjacent Use Cases (Expansion) ──
+  renderAdjacentUseCases(data, container) {
+    if (!data || !container) return;
+    const ucHTML = (data.adjacentUseCases || []).map((uc, i) => `
+      <div class="glass-card accent-${['purple','cyan','green','warm','rose'][i % 5]}" style="animation-delay:${i * 0.1}s">
+        <div class="card-title" style="font-size:16px"><span class="card-icon">🔗</span> ${uc.title}</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${uc.description}</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+          <span class="tag tag-${uc.effort === 'Low' ? 'green' : uc.effort === 'Medium' ? 'warm' : 'rose'}">⏱ Effort: ${uc.effort}</span>
+          <span class="tag tag-${uc.businessValue === 'High' ? 'green' : 'cyan'}">Value: ${uc.businessValue}</span>
+          <span class="tag tag-purple">📅 ${uc.estimatedTimeline}</span>
+        </div>
+        <div style="margin-top:8px">
+          <strong style="font-size:11px;color:var(--text-tertiary)">♻️ REUSED:</strong>
+          <div class="tag-list" style="margin-top:4px">${(uc.reusedComponents || []).map(c => `<span class="tag tag-green" style="font-size:10px">${c}</span>`).join('')}</div>
+        </div>
+        <div style="margin-top:6px">
+          <strong style="font-size:11px;color:var(--text-tertiary)">➕ NEW:</strong>
+          <div class="tag-list" style="margin-top:4px">${(uc.newComponents || []).map(c => `<span class="tag tag-cyan" style="font-size:10px">${c}</span>`).join('')}</div>
+        </div>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;font-style:italic">🔄 ${uc.synergy}</p>
+      </div>`).join('');
+
+    container.innerHTML = `
+      <div class="card-grid">${ucHTML}</div>`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
+  },
+
+  // ── Roadmap (Expansion) ──
+  renderRoadmap(data, container) {
+    if (!data || !container) return;
+    const quartersHTML = (data.quarters || []).map((q, i) => {
+      const milestonesHTML = (q.milestones || []).map(m => `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span class="tag tag-${m.type === 'Technical' ? 'cyan' : m.type === 'Business' ? 'green' : 'purple'}" style="font-size:10px">${m.type}</span>
+          <span style="font-size:12px;color:var(--text-primary)">${m.milestone}</span>
+        </div>`).join('');
+      return `
+        <div class="glass-card accent-${['purple','cyan','green','warm'][i % 4]}" style="animation-delay:${i * 0.15}s">
+          <div class="card-title" style="font-size:16px"><span class="card-icon">${['🌱','🌿','🌳','🌟'][i % 4]}</span> ${q.quarter}</div>
+          <p style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;font-weight:600;margin:4px 0">${q.theme || ''}</p>
+          <div style="margin:12px 0">${milestonesHTML}</div>
+          <div style="margin-top:8px"><strong style="font-size:11px;color:var(--text-tertiary)">TEAM:</strong> <span style="font-size:12px;color:var(--text-secondary)">${q.teamNeeds || ''}</span></div>
+          <div class="glass-card accent-green" style="padding:8px 12px;margin-top:8px">
+            <span style="font-size:12px;color:var(--text-primary)">🎯 ${q.expectedOutcome || ''}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    container.innerHTML = `
+      <div class="glass-card accent-purple" style="margin-bottom:16px">
+        <div class="card-title" style="font-size:18px"><span class="card-icon">🗺️</span> ${data.roadmapTitle || 'Roadmap'}</div>
+        <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${data.vision || ''}</p>
+      </div>
+      <div class="card-grid">${quartersHTML}</div>
+      ${data.investmentSummary ? `
+        <div class="glass-card accent-warm" style="margin-top:16px">
+          <div class="card-title"><span class="card-icon">💰</span> Investment Summary</div>
+          <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.investmentSummary}</p>
+        </div>` : ''}`;
+    if (window.app && window.app.localizeUI) window.app.localizeUI();
+  },
+
+  // ── Platform Value Growth (Expansion) ──
+  renderPlatformValueGrowth(data, container) {
+    if (!data || !container) return;
+    const vp = data.valueProjection || {};
+    const renderHorizon = (label, icon, horizon) => {
+      if (!horizon) return '';
+      const metricsHTML = (horizon.metrics || []).map(m => `
+        <div class="glass-card" style="padding:10px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong style="font-size:13px;color:var(--text-primary)">${m.metric}</strong>
+            <span class="tag tag-${m.category === 'Cost Savings' ? 'green' : m.category === 'Revenue' ? 'purple' : m.category === 'Efficiency' ? 'cyan' : 'warm'}">${m.category}</span>
+          </div>
+          <p style="font-size:14px;font-weight:700;color:var(--brand-success);margin-top:4px">${m.value}</p>
+        </div>`).join('');
+      return `
+        <div class="glass-card accent-cyan">
+          <div class="card-title"><span class="card-icon">${icon}</span> ${label}</div>
+          ${metricsHTML}
+          <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;font-style:italic">${horizon.narrative || ''}</p>
+        </div>`;
+    };
+
+    const strategicHTML = (data.strategicValue || []).map(s => `
+      <div class="glass-card" style="padding:12px;margin-bottom:8px">
+        <strong style="color:var(--text-primary)">${s.dimension}</strong>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${s.description}</p>
+      </div>`).join('');
+
+    container.innerHTML = `
+      <div class="card-grid">
+        ${renderHorizon('6 Months', '📈', vp.month6)}
+        ${renderHorizon('12 Months', '📊', vp.month12)}
+        ${renderHorizon('24 Months', '🚀', vp.month24)}
+      </div>
+      <div class="glass-card accent-purple" style="margin-top:16px">
+        <div class="card-title"><span class="card-icon">🏆</span> Strategic Value</div>
+        ${strategicHTML}
+      </div>
+      ${data.competitiveAdvantage ? `
+        <div class="glass-card accent-green" style="margin-top:16px">
+          <div class="card-title"><span class="card-icon">🛡️</span> Competitive Advantage</div>
+          <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.competitiveAdvantage}</p>
+        </div>` : ''}
+      ${data.executiveSummary ? `
+        <div class="glass-card accent-warm" style="margin-top:16px">
+          <div class="card-title"><span class="card-icon">💼</span> Executive Summary</div>
+          <p style="font-size:14px;color:var(--text-primary);margin-top:8px;line-height:1.6">${data.executiveSummary}</p>
+        </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   }
 };

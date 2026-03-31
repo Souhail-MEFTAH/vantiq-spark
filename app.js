@@ -1827,7 +1827,412 @@ function showAgentError(contentId, agentName, error) {
     }
 }
 
-// ── Main Generation Pipeline (Parallel Batched) ──
+// ── Checkpoint Gate UI ──
+function showCheckpoint(phaseNumber, phaseName, prompt, nextPhaseFn) {
+    const lastPanel = document.querySelector('.panel.active') || document.querySelector('.panel:not([style*="display: none"])');
+    // Build a checkpoint card and inject it at the bottom of the current view
+    const checkpointId = `checkpoint-phase-${phaseNumber}`;
+    // Remove any existing checkpoint
+    const existing = document.getElementById(checkpointId);
+    if (existing) existing.remove();
+
+    const checkpointHTML = `
+      <div id="${checkpointId}" class="glass-card accent-green" style="margin-top:24px;border:2px solid var(--brand-success);animation:cardReveal 0.4s ease">
+        <div class="card-title" style="font-size:16px"><span class="card-icon">✅</span> Phase ${phaseNumber}: ${phaseName} Complete</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin:12px 0;line-height:1.6">${prompt}</p>
+        <textarea id="checkpoint-notes-${phaseNumber}" class="refine-input" rows="3" 
+          style="width:100%;margin:12px 0;padding:12px;font-size:13px;resize:vertical;border-radius:var(--radius-md);background:var(--bg-primary);color:var(--text-primary);border:1px solid var(--border-default)"
+          placeholder="Optional: Add notes, corrections, or constraints for the next phase..."></textarea>
+        <div style="display:flex; gap:8px; margin-top:8px">
+          <select id="checkpoint-skip-${phaseNumber}" class="refine-input" style="flex:1; padding:12px; font-size:14px; border-radius:var(--radius-md); background:var(--bg-primary); color:var(--text-primary); border:1px solid var(--border-default)">
+            <option value="app.runPhase1Discovery()" ${nextPhaseFn === 'app.runPhase1Discovery()' ? 'selected' : ''}>Phase 1: Discovery</option>
+            <option value="app.runPhase2Value()" ${nextPhaseFn === 'app.runPhase2Value()' ? 'selected' : ''}>Phase 2: Value Assessment</option>
+            <option value="app.runPhase3Architecture()" ${nextPhaseFn === 'app.runPhase3Architecture()' ? 'selected' : ''}>Phase 3: Architecture</option>
+            <option value="app.runPhase4AIConsulting()" ${nextPhaseFn === 'app.runPhase4AIConsulting()' ? 'selected' : ''}>Phase 4: AI Consulting</option>
+            <option value="app.runPhase5Implementation()" ${nextPhaseFn === 'app.runPhase5Implementation()' ? 'selected' : ''}>Phase 5: Implementation</option>
+            <option value="app.runPhase6Expansion()" ${nextPhaseFn === 'app.runPhase6Expansion()' ? 'selected' : ''}>Phase 6: Expansion</option>
+          </select>
+          <button class="btn btn-primary" style="flex:1; padding:12px; font-size:14px; font-weight:600" 
+            onclick="(function(){ 
+              var notes = document.getElementById('checkpoint-notes-${phaseNumber}').value.trim();
+              state.phaseNotes = state.phaseNotes || {};
+              state.phaseNotes['phase${phaseNumber}'] = notes;
+              var selectedFn = document.getElementById('checkpoint-skip-${phaseNumber}').value;
+              document.getElementById('${checkpointId}').style.display='none';
+              eval(selectedFn);
+            })()">
+            Continue →
+          </button>
+        </div>
+      </div>`;
+
+    // Find the content container of the last tab of this phase and append the checkpoint
+    if (lastPanel) {
+        const contentEl = lastPanel.querySelector('[id$="-content"]');
+        if (contentEl) {
+            contentEl.insertAdjacentHTML('beforeend', checkpointHTML);
+        }
+    }
+}
+
+// Build phase context string from previous phase notes
+function getPhaseContext() {
+    if (!state.phaseNotes) return '';
+    let ctx = '';
+    for (const [phase, notes] of Object.entries(state.phaseNotes)) {
+        if (notes) ctx += `\nUSER FEEDBACK FROM ${phase}: ${notes}\n`;
+    }
+    return ctx;
+}
+
+// ── Error display helper for pipeline ──
+function showPipelineError(e) {
+    console.error('Pipeline error:', e);
+    document.getElementById('generatingOverlay').classList.remove('visible');
+
+    const errorMsg = e.message || 'An unexpected error occurred';
+    let technicalAdvice = 'The pipeline was halted. Please check your model selection or API key permissions in Settings.';
+
+    if (errorMsg.includes('API key') || errorMsg.includes('401')) {
+        showSettings();
+        return;
+    } else if (errorMsg.toLowerCase().includes('fetch') || errorMsg.includes('NetworkError')) {
+        technicalAdvice = 'A network error occurred while reaching OpenAI. Please check your internet connection or try again shortly.';
+    } else if (errorMsg.includes('timed out')) {
+        technicalAdvice = 'The request took too long. Try a faster model or try again.';
+    } else if (errorMsg.includes('429')) {
+        technicalAdvice = 'You have been rate limited by OpenAI. Please wait a few moments before trying again.';
+    }
+
+    const el = document.getElementById('analysis-content');
+    if (el) {
+        el.innerHTML = `
+          <div class="glass-card accent-rose" style="margin-top: 20px;">
+            <div class="card-title"><span class="card-icon">⚠️</span> <span data-i18n="error-gen-failed">Generation Failed</span></div>
+            <p style="font-size:14px;color:var(--text-primary);margin:12px 0">${errorMsg}</p>
+            <p style="font-size:12px;color:var(--text-tertiary)">${technicalAdvice}</p>
+          </div>`;
+        localizeUI();
+        switchPanel('analysis');
+    }
+
+    state.generating = false;
+    document.getElementById('generateBtn').disabled = false;
+}
+
+// ══════════════════════════════════════════════
+// Phase 1: Discovery (Sales Analysis + Use Case Scope)
+// ══════════════════════════════════════════════
+async function runPhase1Discovery(text) {
+    try {
+        document.getElementById('generatingOverlay').classList.add('visible');
+        document.getElementById('generatingAgentName').textContent = '🔍 Phase 1 — Sales Discovery';
+
+        // Agent 1: Sales Discovery Analyst
+        updatePipelineStep('interpreter', 'active');
+        state.results.analysis = await Agents.problemInterpreter(text, "", null, state.language);
+        Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
+        updatePipelineStep('interpreter', 'completed');
+        enableNav('analysis');
+
+        // Agent 1b: Use Case Scope
+        document.getElementById('generatingAgentName').textContent = '🎯 Agent 1b — Use Case Scope';
+        state.results.useCaseScope = await Agents.useCaseScope(text, state.results.analysis, "", null, state.language);
+        Renderers.renderUseCaseScope(state.results.useCaseScope, document.getElementById('usecasescope-content'));
+        enableNav('usecasescope');
+
+        // Update browser tab title
+        if (state.results.analysis?.domain) {
+            document.title = `${state.results.analysis.domain} — Vantiq Spark`;
+            renderHistory();
+        }
+
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        state.generating = false;
+        document.getElementById('generateBtn').disabled = false;
+
+        switchPanel('usecasescope');
+
+        // Checkpoint on LAST tab of Discovery
+        showCheckpoint(1, 'Discovery',
+            'Does this accurately capture the problem and use case scope? Validate the success metrics and phasing before we assess business value.',
+            'app.runPhase2Value()');
+
+    } catch (e) { showPipelineError(e); }
+}
+
+// ══════════════════════════════════════════════
+// Phase 2: Value & Competitive Position
+// ══════════════════════════════════════════════
+async function runPhase2Value() {
+    state.generating = true;
+    const ctx = getPhaseContext();
+
+    try {
+        document.getElementById('generatingOverlay').classList.add('visible');
+        document.getElementById('generatingAgentName').textContent = '💰 Phase 2 — Value Assessment';
+        document.getElementById('generateBtn').disabled = true;
+
+        updatePipelineStep('business', 'active');
+        updatePipelineStep('competitive', 'active');
+
+        const competitorsInput = document.getElementById('competitorsInput');
+        const competitorsText = competitorsInput ? competitorsInput.value.trim() : '';
+
+        const [busResult, compResult] = await Promise.allSettled([
+            Agents.businessValue(state.problemText + ctx, state.results.analysis, state.results.architecture || null, "", null, state.language),
+            Agents.competitiveAnalysis(state.problemText + ctx, state.results.analysis, state.results.architecture || null, competitorsText, "", null, state.language)
+        ]);
+
+        if (busResult.status === 'fulfilled') {
+            state.results.businessValue = busResult.value;
+            Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
+        } else {
+            showAgentError('business-content', 'Business Value', busResult.reason);
+        }
+        updatePipelineStep('business', 'completed');
+        enableNav('business');
+
+        if (compResult.status === 'fulfilled') {
+            state.results.competitive = compResult.value;
+            Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
+        } else {
+            showAgentError('competitive-content', 'Competitive Analysis', compResult.reason);
+        }
+        updatePipelineStep('competitive', 'completed');
+        enableNav('competitive');
+
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        state.generating = false;
+        document.getElementById('generateBtn').disabled = false;
+
+        switchPanel('competitive');
+
+        // Checkpoint on LAST tab of Value section
+        showCheckpoint(2, 'Value Assessment',
+            'Do these value drivers resonate with your customer? Any specific competitors or objections to address before building the architecture?',
+            'app.runPhase3Architecture()');
+
+    } catch (e) { showPipelineError(e); }
+}
+
+// ══════════════════════════════════════════════
+// Phase 3: Architecture (Arch + Events + Domain + Linter + Diagrams)
+// ══════════════════════════════════════════════
+async function runPhase3Architecture() {
+    state.generating = true;
+    const ctx = getPhaseContext();
+
+    try {
+        document.getElementById('generatingOverlay').classList.add('visible');
+        document.getElementById('generatingAgentName').textContent = '🏗️ Phase 3 — Architecture';
+        document.getElementById('generateBtn').disabled = true;
+
+        // Agent 2: Domain Model
+        try {
+            updatePipelineStep('domain', 'active');
+            document.getElementById('generatingAgentName').textContent = '🧩 Agent 2 — Domain Model';
+            state.results.domainModel = await Agents.domainModelGenerator(state.problemText + ctx, state.results.analysis, "", null, state.language);
+            Renderers.renderDomainModel(state.results.domainModel, document.getElementById('domain-content'));
+            updatePipelineStep('domain', 'completed');
+        } catch (eDom) {
+            showAgentError('domain-content', 'Domain Model', eDom);
+            updatePipelineStep('domain', 'completed');
+        }
+        enableNav('domain');
+
+        if (state.results.domainModel?.projectName) {
+            document.title = `${state.results.domainModel.projectName} — Vantiq Spark`;
+            renderHistory();
+        }
+
+        // Agent 3 + Agent 5 in parallel
+        updatePipelineStep('architecture', 'active');
+        updatePipelineStep('events', 'active');
+        document.getElementById('generatingAgentName').textContent = '🏗️ Phase 3 — Architecture & Events';
+
+        const [archResult, eventsResult] = await Promise.all([
+            Agents.architectureGenerator(state.problemText + ctx, state.results.analysis, state.results.useCaseScope || null, "", null, state.language),
+            Agents.eventSystemDesigner(state.problemText + ctx, state.results.analysis, state.results.useCaseScope || null, "", null, state.language)
+        ]);
+
+        state.results.architecture = archResult;
+        Renderers.renderArchitecture(state.results.architecture, document.getElementById('architecture-content'));
+        updatePipelineStep('architecture', 'completed');
+        enableNav('architecture');
+
+        state.results.eventSystem = eventsResult;
+        Renderers.renderEventSystem(state.results.eventSystem, document.getElementById('events-content'));
+        updatePipelineStep('events', 'completed');
+        enableNav('events');
+
+        // Agent 11: Architecture Linter
+        try {
+            updatePipelineStep('linter', 'active');
+            document.getElementById('generatingAgentName').textContent = '🛑 Agent 11 — Architecture Linter';
+            state.results.linter = await Agents.vantiqLinter(state.problemText + ctx, state.results.analysis, state.results.architecture, state.results.eventSystem, null, "", null, state.language);
+            Renderers.renderVantiqLinter(state.results.linter, document.getElementById('linter-content'));
+            updatePipelineStep('linter', 'completed');
+        } catch (eLint) {
+            showAgentError('linter-content', 'Architecture Linter', eLint);
+            updatePipelineStep('linter', 'completed');
+        }
+        enableNav('linter');
+
+        // Agent 7: Architecture Visualizer
+        try {
+            updatePipelineStep('visualizer', 'active');
+            document.getElementById('generatingAgentName').textContent = '📊 Agent 7 — Diagrams';
+            state.results.diagrams = await Agents.architectureVisualizer(state.problemText + ctx, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
+            Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
+            updatePipelineStep('visualizer', 'completed');
+        } catch (eDiag) {
+            showAgentError('diagrams-content', 'Architecture Visualizer', eDiag);
+            updatePipelineStep('visualizer', 'completed');
+        }
+        enableNav('diagrams');
+
+        setTimeout(() => renderMermaidDiagrams(), 200);
+
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        state.generating = false;
+        document.getElementById('generateBtn').disabled = false;
+
+        switchPanel('diagrams');
+
+        // Checkpoint on LAST tab of Architecture section
+        showCheckpoint(3, 'Architecture',
+            'Does this architecture align with the customer\'s infrastructure? Any integration or deployment constraints before we explore AI consulting?',
+            'app.runPhase4AIConsulting()');
+
+    } catch (e) { showPipelineError(e); }
+}
+
+// ══════════════════════════════════════════════
+// Phase 4: AI Consulting (AI Models + Agentic)
+// ══════════════════════════════════════════════
+async function runPhase4AIConsulting() {
+    state.generating = true;
+    const ctx = getPhaseContext();
+
+    try {
+        document.getElementById('generatingOverlay').classList.add('visible');
+        document.getElementById('generatingAgentName').textContent = '🤖 Phase 4 — AI Consulting';
+        document.getElementById('generateBtn').disabled = true;
+
+        updatePipelineStep('aimodel', 'active');
+
+        // Agent 4: AI Model Advisor
+        state.results.aiModels = await Agents.aiModelAdvisor(state.problemText + ctx, state.results.analysis, "", null, state.language);
+        Renderers.renderAIModels(state.results.aiModels, document.getElementById('aimodels-content'));
+        updatePipelineStep('aimodel', 'completed');
+        enableNav('aimodels');
+
+        // Agent 4b: Agentic Approach
+        try {
+            updatePipelineStep('agentic', 'active');
+            document.getElementById('generatingAgentName').textContent = '🧠 Agent 4b — Agentic Approach';
+            state.results.agenticGuide = await Agents.agenticGuide(state.problemText + ctx, state.results.analysis, state.results.domainModel, null, "", null, state.language);
+            Renderers.renderAgenticGuide(state.results.agenticGuide, document.getElementById('agentic-content'));
+            setTimeout(() => renderMermaidDiagrams(), 100);
+            updatePipelineStep('agentic', 'completed');
+        } catch (e4b) {
+            showAgentError('agentic-content', 'Agentic Approach', e4b);
+            updatePipelineStep('agentic', 'completed');
+        }
+        enableNav('agentic');
+
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        state.generating = false;
+        document.getElementById('generateBtn').disabled = false;
+
+        switchPanel('agentic');
+
+        // Checkpoint on LAST tab of AI Consulting section
+        showCheckpoint(4, 'AI Consulting',
+            'Are the AI capabilities realistic for the customer\'s environment? Any constraints on cloud vs. edge, budget, or infrastructure before generating the implementation plan?',
+            'app.runPhase5Implementation()');
+
+    } catch (e) { showPipelineError(e); }
+}
+
+// ══════════════════════════════════════════════
+// Phase 5: Implementation
+// ══════════════════════════════════════════════
+async function runPhase5Implementation() {
+    state.generating = true;
+    const ctx = getPhaseContext();
+
+    try {
+        document.getElementById('generatingOverlay').classList.add('visible');
+        document.getElementById('generatingAgentName').textContent = '🛠️ Phase 5 — Implementation';
+        document.getElementById('generateBtn').disabled = true;
+
+        updatePipelineStep('implementation', 'active');
+        state.results.implementation = await Agents.implementationGenerator(state.problemText + ctx, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
+        Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
+        updatePipelineStep('implementation', 'completed');
+        enableNav('implementation');
+
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        state.generating = false;
+        document.getElementById('generateBtn').disabled = false;
+
+        switchPanel('implementation');
+
+        // Checkpoint on LAST tab — continue to Expansion
+        showCheckpoint(5, 'Implementation',
+            'Does this implementation plan look right? Ready to explore expansion opportunities — adjacent use cases, roadmap, and value growth?',
+            'app.runPhase6Expansion()');
+
+    } catch (e) { showPipelineError(e); }
+}
+
+// ══════════════════════════════════════════════
+// Phase 6: Expansion (Adjacent Use Cases + Roadmap + Platform Value Growth)
+// ══════════════════════════════════════════════
+async function runPhase6Expansion() {
+    state.generating = true;
+    const ctx = getPhaseContext();
+
+    try {
+        document.getElementById('generatingOverlay').classList.add('visible');
+        document.getElementById('generatingAgentName').textContent = '🔗 Phase 6 — Expansion';
+        document.getElementById('generateBtn').disabled = true;
+
+        // Adjacent Use Cases
+        document.getElementById('generatingAgentName').textContent = '🔗 Adjacent Use Cases';
+        state.results.adjacentUseCases = await Agents.adjacentUseCases(state.problemText + ctx, state.results.analysis, state.results.architecture, state.results.implementation, "", null, state.language);
+        Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content'));
+        enableNav('adjacent');
+
+        // Roadmap
+        document.getElementById('generatingAgentName').textContent = '🗺️ 12-Month Roadmap';
+        state.results.roadmap = await Agents.roadmap(state.problemText + ctx, state.results.analysis, state.results.architecture, state.results.implementation, state.results.businessValue || null, "", null, state.language);
+        Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content'));
+        enableNav('roadmap');
+
+        // Platform Value Growth
+        document.getElementById('generatingAgentName').textContent = '📈 Platform Value Growth';
+        state.results.platformValueGrowth = await Agents.platformValueGrowth(state.problemText + ctx, state.results.analysis, state.results.architecture, state.results.businessValue || null, "", null, state.language);
+        Renderers.renderPlatformValueGrowth(state.results.platformValueGrowth, document.getElementById('valuegrowth-content'));
+        enableNav('valuegrowth');
+
+        // Save the full generation to history
+        document.getElementById('generatingAgentName').textContent = '💾 Saving Project & Preparing PDF Export...';
+        setTimeout(() => saveHistory(state), 100);
+
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        document.getElementById('btnExportPdf').style.display = 'block';
+        switchPanel('valuegrowth');
+
+    } catch (e) { showPipelineError(e); }
+
+    state.generating = false;
+    document.getElementById('generateBtn').disabled = false;
+}
+
+// ── Main Entry Point ──
 async function generate() {
     const input = document.getElementById('problemInput');
     const text = input.value.trim();
@@ -1844,6 +2249,7 @@ async function generate() {
 
     state.problemText = text;
     state.generating = true;
+    state.phaseNotes = {};
 
     // Show pipeline bar and overlay
     document.getElementById('pipelineBar').classList.add('visible');
@@ -1854,230 +2260,7 @@ async function generate() {
     document.querySelectorAll('.pipeline-step').forEach(s => s.classList.remove('active', 'completed'));
     document.querySelectorAll('.pipeline-connector').forEach(c => c.classList.remove('completed'));
 
-    try {
-        // ── Phase 1: Agent 1 (no dependencies) ──
-        updatePipelineStep('interpreter', 'active');
-        state.results.analysis = await Agents.problemInterpreter(text, "", null, state.language);
-        Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
-        updatePipelineStep('interpreter', 'completed');
-        enableNav('analysis');
-
-        // ── Phase 2: Agent 2 + Agent 4 in parallel ──
-        // Agent 2 needs: analysis | Agent 4 needs: analysis
-        updatePipelineStep('domain', 'active');
-        updatePipelineStep('aimodel', 'active');
-        document.getElementById('generatingAgentName').textContent = '🧩 Agent 2 + 🤖 Agent 4 (parallel)';
-
-        const [domainResult, aiResult] = await Promise.all([
-            Agents.domainModelGenerator(text, state.results.analysis, "", null, state.language),
-            Agents.aiModelAdvisor(text, state.results.analysis, "", null, state.language)
-        ]);
-
-        state.results.domainModel = domainResult;
-        Renderers.renderDomainModel(state.results.domainModel, document.getElementById('domain-content'));
-        updatePipelineStep('domain', 'completed');
-        enableNav('domain');
-
-        // Update browser tab title and history panel with AI-generated project name
-        if (state.results.domainModel?.projectName) {
-            document.title = `${state.results.domainModel.projectName} — Vantiq Spark`;
-            renderHistory(); // Refresh history cards to show the new title immediately
-        }
-
-        state.results.aiModels = aiResult;
-        Renderers.renderAIModels(state.results.aiModels, document.getElementById('aimodels-content'));
-        updatePipelineStep('aimodel', 'completed');
-        enableNav('aimodels');
-
-        // ── Phase 3: Agent 3 + Agent 5 in parallel ──
-        // Agent 3 needs: analysis + domainModel | Agent 5 needs: analysis + domainModel
-        updatePipelineStep('architecture', 'active');
-        updatePipelineStep('events', 'active');
-        document.getElementById('generatingAgentName').textContent = '🏗️ Agent 3 + ⚡ Agent 5 (parallel)';
-
-        const [archResult, eventsResult] = await Promise.all([
-            Agents.architectureGenerator(text, state.results.analysis, state.results.domainModel, "", null, state.language),
-            Agents.eventSystemDesigner(text, state.results.analysis, state.results.domainModel, "", null, state.language)
-        ]);
-
-        state.results.architecture = archResult;
-        Renderers.renderArchitecture(state.results.architecture, document.getElementById('architecture-content'));
-        updatePipelineStep('architecture', 'completed');
-        enableNav('architecture');
-
-        state.results.eventSystem = eventsResult;
-        Renderers.renderEventSystem(state.results.eventSystem, document.getElementById('events-content'));
-        updatePipelineStep('events', 'completed');
-        enableNav('events');
-
-        // ── Phase 4A: Agent 4b (Sequential) ──
-        // Wrapped in fault-isolation: failure here should not block later agents
-        try {
-            updatePipelineStep('agentic', 'active');
-            document.getElementById('generatingAgentName').textContent = '🧠 Agent 4b — Agentic AI Pattern Guide';
-
-            const agenticResult = await Agents.agenticGuide(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
-            state.results.agenticGuide = agenticResult;
-            Renderers.renderAgenticGuide(state.results.agenticGuide, document.getElementById('agentic-content'));
-            setTimeout(() => renderMermaidDiagrams(), 100);
-            updatePipelineStep('agentic', 'completed');
-        } catch (e4a) {
-            console.error('[Pipeline] Agent 4b failed:', e4a.message);
-            showAgentError('agentic-content', 'Agentic AI Guide', e4a);
-            updatePipelineStep('agentic', 'completed');
-        }
-        enableNav('agentic');
-
-        // ── Phase 4B: Agent 6 (Sequential) ──
-        try {
-            updatePipelineStep('implementation', 'active');
-            document.getElementById('generatingAgentName').textContent = '🛠️ Agent 6 — Implementation Generator';
-
-            const implResult = await Agents.implementationGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language);
-            state.results.implementation = implResult;
-            Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
-            updatePipelineStep('implementation', 'completed');
-        } catch (e4b) {
-            console.error('[Pipeline] Agent 6 failed:', e4b.message);
-            showAgentError('implementation-content', 'Implementation Generator', e4b);
-            updatePipelineStep('implementation', 'completed');
-        }
-        enableNav('implementation');
-
-        // ── Phase 4C: Agent 11 (Architecture Linter) ──
-        try {
-            updatePipelineStep('linter', 'active');
-            document.getElementById('generatingAgentName').textContent = '🛑 Agent 11 — Architecture Linter';
-
-            state.results.linter = await Agents.vantiqLinter(text, state.results.analysis, state.results.architecture, state.results.eventSystem, state.results.implementation, "", null, state.language);
-            Renderers.renderVantiqLinter(state.results.linter, document.getElementById('linter-content'));
-            updatePipelineStep('linter', 'completed');
-        } catch (e4c) {
-            console.error('[Pipeline] Agent 11 failed:', e4c.message);
-            showAgentError('linter-content', 'Architecture Linter', e4c);
-            updatePipelineStep('linter', 'completed');
-        }
-        enableNav('linter');
-
-        // ── Phase 4D: Agent 7 + Agent 8 in parallel ──
-        updatePipelineStep('visualizer', 'active');
-        updatePipelineStep('demo', 'active');
-        document.getElementById('generatingAgentName').textContent = '📊 Agent 7 + 🎬 Agent 8 (parallel)';
-
-        const [diagResult, demoResult] = await Promise.allSettled([
-            Agents.architectureVisualizer(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language),
-            Agents.demoScenarioGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, "", null, state.language)
-        ]);
-
-        if (diagResult.status === 'fulfilled') {
-            state.results.diagrams = diagResult.value;
-            Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
-        } else {
-            console.error('[Pipeline] Agent 7 failed:', diagResult.reason?.message);
-            showAgentError('diagrams-content', 'Architecture Visualizer', diagResult.reason);
-        }
-        updatePipelineStep('visualizer', 'completed');
-        enableNav('diagrams');
-
-        if (demoResult.status === 'fulfilled') {
-            state.results.demo = demoResult.value;
-            Renderers.renderDemo(state.results.demo, document.getElementById('demo-content'));
-        } else {
-            console.error('[Pipeline] Agent 8 failed:', demoResult.reason?.message);
-            showAgentError('demo-content', 'Demo Scenario Generator', demoResult.reason);
-        }
-        updatePipelineStep('demo', 'completed');
-        enableNav('demo');
-
-        // ── Phase 5: Agent 9 (needs implementation from Agent 6) ──
-        try {
-            updatePipelineStep('training', 'active');
-            state.results.training = await Agents.trainingLabGenerator(text, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation, "", null, state.language);
-            Renderers.renderTraining(state.results.training, document.getElementById('training-content'));
-            updatePipelineStep('training', 'completed');
-        } catch (e5) {
-            console.error('[Pipeline] Agent 9 failed:', e5.message);
-            showAgentError('training-content', 'Training Lab Generator', e5);
-            updatePipelineStep('training', 'completed');
-        }
-        enableNav('training');
-
-        // ── Phase 6: Agent 10 & 11 (Competitive Analysis & Business Value in parallel) ──
-        updatePipelineStep('competitive', 'active');
-        updatePipelineStep('business', 'active');
-        document.getElementById('generatingAgentName').textContent = '🏆 Agent 10 & 💡 Agent 11 (parallel)';
-        const competitorsInput = document.getElementById('competitorsInput');
-        const competitorsText = competitorsInput ? competitorsInput.value.trim() : '';
-
-        const [compResult, busResult] = await Promise.allSettled([
-            Agents.competitiveAnalysis(text, state.results.analysis, state.results.architecture, competitorsText, "", null, state.language),
-            Agents.businessValue(text, state.results.analysis, state.results.architecture, "", null, state.language)
-        ]);
-
-        if (compResult.status === 'fulfilled') {
-            state.results.competitive = compResult.value;
-            Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
-        } else {
-            console.error('[Pipeline] Agent 10 failed:', compResult.reason?.message);
-            showAgentError('competitive-content', 'Competitive Analysis', compResult.reason);
-        }
-        updatePipelineStep('competitive', 'completed');
-        enableNav('competitive');
-
-        if (busResult.status === 'fulfilled') {
-            state.results.businessValue = busResult.value;
-            Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
-        } else {
-            console.error('[Pipeline] Business Value Agent failed:', busResult.reason?.message);
-            showAgentError('business-content', 'Business Value', busResult.reason);
-        }
-        updatePipelineStep('business', 'completed');
-        enableNav('business');
-
-        // Save the successful generation to history
-        document.getElementById('generatingAgentName').textContent = '💾 Saving Project & Preparing PDF Export...';
-        setTimeout(() => saveHistory(state), 100);
-
-        // Done — hide overlay and navigate to first result
-        document.getElementById('generatingOverlay').classList.remove('visible');
-        document.getElementById('btnExportPdf').style.display = 'block';
-        switchPanel('analysis');
-
-    } catch (e) {
-        console.error('Pipeline error:', e);
-        document.getElementById('generatingOverlay').classList.remove('visible');
-
-        const errorMsg = e.message || 'An unexpected error occurred';
-        let technicalAdvice = 'The pipeline was halted. Please check your model selection or API key permissions in Settings.';
-
-        // Detailed error categorization
-        if (errorMsg.includes('API key') || errorMsg.includes('401')) {
-            showSettings();
-            return;
-        } else if (errorMsg.toLowerCase().includes('fetch') || errorMsg.includes('NetworkError')) {
-            technicalAdvice = 'A network error occurred while reaching OpenAI. Please check your internet connection or try again shortly.';
-        } else if (errorMsg.includes('timed out')) {
-            technicalAdvice = 'The request took too long. This can happen with large models like GPT-5.4. Try a faster model or try again.';
-        } else if (errorMsg.includes('429')) {
-            technicalAdvice = 'You have been rate limited by OpenAI. Please wait a few moments before trying again.';
-        }
-
-        // Display the localized error card with specific advice
-        const el = document.getElementById('analysis-content');
-        if (el) {
-            el.innerHTML = `
-              <div class="glass-card accent-rose" style="margin-top: 20px;">
-                <div class="card-title"><span class="card-icon">⚠️</span> <span data-i18n="error-gen-failed">Generation Failed</span></div>
-                <p style="font-size:14px;color:var(--text-primary);margin:12px 0">${errorMsg}</p>
-                <p style="font-size:12px;color:var(--text-tertiary)">${technicalAdvice}</p>
-              </div>`;
-            localizeUI();
-            switchPanel('analysis');
-        }
-    }
-
-    state.generating = false;
-    document.getElementById('generateBtn').disabled = false;
+    await runPhase1Discovery(text);
 }
 
 // ── Regenerate Single Agent (GPT-5.2) ──
@@ -2101,6 +2284,10 @@ async function regenerate(agentKey) {
         interpreter: async () => {
             state.results.analysis = await Agents.problemInterpreter(state.problemText, refinement, state.results.analysis, state.language);
             Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
+        },
+        usecasescope: async () => {
+            state.results.useCaseScope = await Agents.useCaseScope(state.problemText, state.results.analysis, refinement, state.results.useCaseScope, state.language);
+            Renderers.renderUseCaseScope(state.results.useCaseScope, document.getElementById('usecasescope-content'));
         },
         domain: async () => {
             state.results.domainModel = await Agents.domainModelGenerator(state.problemText, state.results.analysis, refinement, state.results.domainModel, state.language);
@@ -2134,14 +2321,6 @@ async function regenerate(agentKey) {
             Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
             setTimeout(() => renderMermaidDiagrams(), 100);
         },
-        demo: async () => {
-            state.results.demo = await Agents.demoScenarioGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, refinement, state.results.demo, state.language);
-            Renderers.renderDemo(state.results.demo, document.getElementById('demo-content'));
-        },
-        training: async () => {
-            state.results.training = await Agents.trainingLabGenerator(state.problemText, state.results.analysis, state.results.domainModel, state.results.architecture, state.results.implementation, refinement, state.results.training, state.language);
-            Renderers.renderTraining(state.results.training, document.getElementById('training-content'));
-        },
         linter: async () => {
             const refineInput = document.getElementById('refine-linter');
             const refText = refineInput ? refineInput.value.trim() : "";
@@ -2157,6 +2336,18 @@ async function regenerate(agentKey) {
         business: async () => {
             state.results.businessValue = await Agents.businessValue(state.problemText, state.results.analysis, state.results.architecture, refinement, state.results.businessValue, state.language);
             Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
+        },
+        adjacent: async () => {
+            state.results.adjacentUseCases = await Agents.adjacentUseCases(state.problemText, state.results.analysis, state.results.architecture, state.results.implementation, refinement, state.results.adjacentUseCases, state.language);
+            Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content'));
+        },
+        roadmap: async () => {
+            state.results.roadmap = await Agents.roadmap(state.problemText, state.results.analysis, state.results.architecture, state.results.implementation, state.results.businessValue, refinement, state.results.roadmap, state.language);
+            Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content'));
+        },
+        valuegrowth: async () => {
+            state.results.platformValueGrowth = await Agents.platformValueGrowth(state.problemText, state.results.analysis, state.results.architecture, state.results.businessValue, refinement, state.results.platformValueGrowth, state.language);
+            Renderers.renderPlatformValueGrowth(state.results.platformValueGrowth, document.getElementById('valuegrowth-content'));
         }
     };
 
@@ -2168,6 +2359,7 @@ async function regenerate(agentKey) {
         console.error(`Regenerate ${agentKey} error:`, e);
         const contentMap = {
             interpreter: 'analysis-content',
+            usecasescope: 'usecasescope-content',
             domain: 'domain-content',
             architecture: 'architecture-content',
             aimodel: 'aimodels-content',
@@ -2175,11 +2367,12 @@ async function regenerate(agentKey) {
             events: 'events-content',
             implementation: 'implementation-content',
             visualizer: 'diagrams-content',
-            demo: 'demo-content',
-            training: 'training-content',
             linter: 'linter-content',
             competitive: 'competitive-content',
-            business: 'business-content'
+            business: 'business-content',
+            adjacent: 'adjacent-content',
+            roadmap: 'roadmap-content',
+            valuegrowth: 'valuegrowth-content'
         };
         showAgentError(contentMap[agentKey], agentKey, e);
     }
@@ -2749,5 +2942,10 @@ window.app = {
     openCoach,
     closeCoach,
     sendCoachMessage,
-    askCoachSuggestion
+    askCoachSuggestion,
+    runPhase2Value,
+    runPhase3Architecture,
+    runPhase4AIConsulting,
+    runPhase5Implementation,
+    runPhase6Expansion
 };
