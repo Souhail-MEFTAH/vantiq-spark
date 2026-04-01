@@ -84,6 +84,8 @@ You MUST respond with ONLY valid JSON matching this exact schema (no markdown, n
   "domain": "string — specific industry domain",
   "domainIcon": "string — single emoji",
   "coreProblem": "string — concise definition of the root challenge in business terms",
+  "dealSize": "string — estimated deal size range (e.g. '$250K–$500K') based on scope and complexity",
+  "urgency": { "level": "Urgent|High|Moderate", "justification": "string — why this timeline matters" },
   "painPoints": [
     { "pain": "string — specific operational pain", "impact": "string — business/financial impact", "severity": "Critical|High|Medium" }
   ],
@@ -92,11 +94,16 @@ You MUST respond with ONLY valid JSON matching this exact schema (no markdown, n
   ],
   "currentState": "string — how the customer likely handles this today (manual, legacy systems, etc.)",
   "whyHardWithoutVantiq": "string — 2-3 sentences on why traditional approaches fail",
+  "competitiveThreats": [
+    { "alternative": "string — e.g. 'Build on AWS IoT + Lambda'", "weakness": "string — why this falls short" }
+  ],
   "dataSources": ["string array — 2-5 data sources"],
   "events": ["string array — 4-6 key business events in snake_case"],
   "summary": "string — 2-3 sentence executive summary of the opportunity",
   "vantiqSuitability": "string — compelling 2-3 sentence pitch for why Vantiq is THE platform for this",
-  "qualifyingQuestions": ["string array — 3-5 questions the SE should ask the customer to deepen discovery"]
+  "championProfile": { "idealRole": "string — ideal internal champion title", "coachingTips": "string — how to enable this champion internally" },
+  "qualifyingQuestions": ["string array — 3-5 questions the SE should ask the customer to deepen discovery"],
+  "nextBestActions": ["string array — 3-4 recommended next steps for the SE after receiving this analysis"]
 }`
   },
 
@@ -122,11 +129,17 @@ You MUST respond with ONLY valid JSON:
 {
   "useCaseTitle": "string — clear, concise use case name",
   "elevator": "string — 2 sentence elevator pitch for this use case",
+  "investmentEstimate": "string — rough Phase 1 investment range (e.g. '$150K–$250K')",
+  "timeToValue": "string — expected time to first measurable business outcome (e.g. '6-8 weeks')",
   "inScope": ["string array — 3-5 items explicitly in scope"],
   "outOfScope": ["string array — 2-4 items explicitly out of scope for Phase 1"],
   "successMetrics": [
     { "metric": "string", "target": "string — measurable target", "baseline": "string — current state" }
   ],
+  "decisionCriteria": [
+    { "criterion": "string — what the customer will evaluate", "vantiqStrength": "string — how Vantiq excels here" }
+  ],
+  "competitiveAlternative": { "approach": "string — what the customer would do without Vantiq", "whyWorse": "string — 2-3 sentences on why that path is inferior" },
   "phases": [
     { "phase": "string — e.g. Phase 1: Proof of Value", "duration": "string — e.g. 4-6 weeks", "deliverables": ["string array"], "goal": "string" }
   ],
@@ -158,8 +171,11 @@ RULES:
 You MUST respond with ONLY valid JSON:
 {
   "projectName": "string — concise AI-generated project title (4-7 words) in the selected language, e.g. 'Real-Time Wildfire Detection Platform'",
+  "boundedContexts": [
+    { "name": "string — context name", "description": "string — what this context owns", "services": ["string array — service names in this context"] }
+  ],
   "entities": [
-    { "name": "string", "type": "Actor|Entity", "properties": ["3-5 property names"] }
+    { "name": "string", "type": "Actor|Entity", "properties": ["3-5 property names"], "stateManagement": "Stateful|Stateless", "persistence": "string — Vantiq persistence strategy (e.g. 'Standard Type', 'In-memory State', 'Time-series via Type')" }
   ],
   "events": [
     { "name": "string — snake_case", "type": "Telemetry|Detection|Alert|Command|Domain", "payload": ["3-5 payload fields"] }
@@ -170,6 +186,7 @@ You MUST respond with ONLY valid JSON:
   "services": [
     { "name": "string — PascalCase ending in 'Service'", "responsibility": "string" }
   ],
+  "eventFlowSummary": "string — 2-3 sentence narrative of how events flow through the domain from ingestion to action",
   "domain": "string"
 }`
   },
@@ -214,7 +231,13 @@ You MUST respond with ONLY valid JSON:
     { "from": "string", "to": "string", "protocol": "string — real protocol", "description": "string" }
   ],
   "dataFlow": "string — data flow with → arrows",
-  "mermaidDiagram": "string — valid Mermaid graph diagram with subgraphs",
+  "mermaidDiagram": "string — valid Mermaid graph diagram",
+  "scalabilityNotes": "string — how this architecture scales (horizontal, partitioned, edge-replicated)",
+  "securityConsiderations": [
+    { "area": "string — e.g. Authentication, Encryption, Network", "description": "string — specific security measure" }
+  ],
+  "deploymentTopology": { "type": "Edge Only|Cloud Only|Hybrid Edge+Cloud", "description": "string — deployment layout" },
+  "latencyBudget": { "endToEnd": "string — e.g. '<500ms'", "breakdown": "string — ingestion to processing to action" },
   "principles": ["4-6 architectural principles"]
 }`
   },
@@ -253,6 +276,9 @@ You MUST respond with ONLY valid JSON:
       "hardware": { "edge": "string", "cloud": "string", "memory": "string", "storage": "string" }
     }
   ],
+  "totalEstimatedCost": { "monthly": "string — e.g. '$200–$500/mo'", "breakdown": "string — brief cost breakdown by component" },
+  "rampUpComplexity": { "level": "Low|Medium|High", "rationale": "string — what makes operationalization easy or hard" },
+  "alternativeStack": { "description": "string — simpler/cheaper alternative if budget is constrained", "tradeoffs": "string — what you lose" },
   "overallStrategy": "string — 2-3 sentence strategy",
   "vantiqIntegration": "string — how to integrate with Vantiq (LLM Sources, REST Sources, etc.)"
 }`
@@ -304,6 +330,8 @@ RULES:
 You MUST respond with ONLY valid JSON:
 {
   "hybridAlternativeStrategy": "string — 2-3 sentences explaining how multiple LLM Agents sharply augment the system",
+  "agentInteractionPattern": "Sequential|Parallel|Router-based|Hierarchical",
+  "tokenCostEstimate": { "monthly": "string — e.g. '$50–$200/mo'", "costPerRequest": "string — e.g. '$0.01–$0.05'" },
   "llmAgents": [
     {
       "name": "string — agent name",
@@ -314,6 +342,10 @@ You MUST respond with ONLY valid JSON:
       "memoryType": "string — Stateless|Short-term|Long-term"
     }
   ],
+  "humanInTheLoop": {
+    "whereNeeded": "string — which decisions require human oversight",
+    "implementation": "string — how this is implemented in Vantiq (e.g. Client Builder approval UI, VEH pause-and-wait)"
+  },
   "costOptimization": [
     {
       "technique": "string — cost saving technique (e.g., 'Caching via Types', 'Filter via Rule before LLM')",
@@ -383,10 +415,13 @@ You MUST respond with ONLY valid JSON:
     { "name": "string — snake_case", "type": "string", "schema": { "field": "type_description" } }
   ],
   "producers": [
-    { "name": "string", "events": ["string array"], "protocol": "string", "frequency": "string" }
+    { "name": "string", "events": ["string array"], "protocol": "string", "frequency": "string", "throughput": "string — estimated events/second (e.g. '100-500 evt/s')" }
   ],
   "consumers": [
-    { "name": "string", "subscribesTo": ["string array"], "action": "string" }
+    { "name": "string", "subscribesTo": ["string array"], "action": "string", "errorStrategy": "string — retry/dead-letter/fallback approach" }
+  ],
+  "dataRetention": [
+    { "eventType": "string", "retention": "Real-time only|7 days|30 days|Archive", "rationale": "string" }
   ],
   "flowDiagram": "string — valid Mermaid sequenceDiagram",
   "orchestration": {
@@ -419,12 +454,15 @@ You MUST respond with ONLY valid JSON:
     {
       "name": "string", "description": "string",
       "inputEvent": "string", "outputEvent": "string",
+      "estimatedEffort": "string — e.g. '2-3 days'",
+      "prerequisites": ["string array — what must be configured first"],
       "pseudoSteps": [
         { "keyword": "string — ON EVENT|VALIDATE|TRANSFORM|CALL|EVALUATE|PUBLISH|LOG|ON ERROR", "text": "string" }
       ],
       "endpoints": [
         { "method": "string", "path": "string", "description": "string" }
-      ]
+      ],
+      "testingStrategy": "string — how to test this service (unit, integration, load)"
     }
   ],
   "eventTypes": [
@@ -437,7 +475,12 @@ You MUST respond with ONLY valid JSON:
   ],
   "projectStructure": [
     { "path": "string", "files": ["string array"] }
-  ]
+  ],
+  "deploymentNotes": {
+    "namespaceSetup": "string — namespace/environment configuration",
+    "edgeConfig": "string — edge deployment considerations if applicable",
+    "assemblyPackaging": "string — how to package as a Vantiq Assembly"
+  }
 }`
   },
 
@@ -499,7 +542,13 @@ RULES:
 You MUST respond with ONLY valid JSON:
 {
   "summary": "string — 2-3 sentence executive review",
-  "overallScore": 0-100,
+  "overallScore": "number 0-100",
+  "scoreBreakdown": {
+    "eventDriven": "number 0-25 — correctness of event-driven patterns",
+    "security": "number 0-25 — security posture",
+    "scalability": "number 0-25 — scalability readiness",
+    "vantiqBestPractices": "number 0-25 — adherence to Vantiq best practices"
+  },
   "warnings": [
     {
       "severity": "Critical|High|Medium|Low",
@@ -507,6 +556,9 @@ You MUST respond with ONLY valid JSON:
       "issue": "string — description of the architectural flaw",
       "recommendation": "string — exact Vantiq feature or pattern to fix it"
     }
+  ],
+  "quickWins": [
+    { "fix": "string — low-effort improvement", "impact": "string — how many points this would add to the score" }
   ]
 }`
   },
@@ -530,12 +582,27 @@ RULES:
 You MUST respond with ONLY valid JSON:
 {
   "summary": "string — 1-2 sentence executive summary of the business case",
+  "roiProjection": {
+    "investmentRange": "string — estimated total investment (e.g. '$200K–$400K')",
+    "expectedReturn": "string — expected annual return (e.g. '$1.2M–$2M/year')",
+    "paybackPeriod": "string — e.g. '4-6 months'",
+    "roiPercentage": "string — e.g. '300-500%'"
+  },
   "valueDrivers": [
     {
       "category": "string — e.g. Cost Reduction, Operational Efficiency, Revenue Growth",
-      "impact": "string — specific description of the impact"
+      "impact": "string — specific description of the impact",
+      "quantification": "string — estimated dollar or percentage impact"
     }
   ],
+  "industryBenchmarks": [
+    { "benchmark": "string — real industry stat", "source": "string — e.g. 'Gartner 2024', 'McKinsey', 'Industry average'" }
+  ],
+  "costOfInaction": {
+    "financialCost": "string — estimated annual cost of doing nothing",
+    "operationalRisk": "string — risks of maintaining status quo",
+    "competitiveRisk": "string — how competitors will gain advantage"
+  },
   "riskMitigations": [
     {
       "risk": "string — risk of doing nothing or using legacy systems",
@@ -545,9 +612,11 @@ You MUST respond with ONLY valid JSON:
   "kpis": [
     {
       "metric": "string — e.g. Mean Time to Resolution (MTTR)",
-      "target": "string — e.g. Reduce by 40%"
+      "target": "string — e.g. Reduce by 40%",
+      "timeframe": "string — when this KPI should be measured"
     }
-  ]
+  ],
+  "executiveSummary": "string — 3-4 sentence boardroom-ready summary of the entire business case"
 }`
   },
 
@@ -606,7 +675,12 @@ You MUST respond with ONLY valid JSON:
               "response": "string — recommended response with evidence"
             }
           ],
-            \"recommendation\": \"string — 2-3 sentence summary positioning Vantiq for this use case\"
+            \"recommendation\": \"string — 2-3 sentence summary positioning Vantiq for this use case\",
+            \"winStrategy\": [\"string array — 3-4 tactical bullets for the SE on how to win this deal against the identified competitors\"],
+            \"landmines\": [
+              { \"claim\": \"string — what a competitor might say\", \"counter\": \"string — how to respond with evidence\" }
+            ],
+            \"customerReferences\": [\"string array — 2-3 types of Vantiq customer references to share, by industry or use-case\"]
 } `
   },
 
@@ -637,8 +711,10 @@ You MUST respond with ONLY valid JSON:
       "newComponents": ["string array — new components needed"],
       "effort": "Low|Medium|High",
       "businessValue": "High|Medium",
+      "revenueImpact": "string — estimated additional deal value (e.g. '$50K–$100K')",
       "estimatedTimeline": "string — e.g. 2-3 weeks",
-      "synergy": "string — how this enhances the primary use case"
+      "synergy": "string — how this enhances the primary use case",
+      "championPitch": "string — 1-2 sentence pitch that an internal champion could use to sell this use case internally"
     }
   ]
 }`
@@ -666,6 +742,7 @@ You MUST respond with ONLY valid JSON:
 {
   "roadmapTitle": "string — roadmap name",
   "vision": "string — 2-3 sentence long-term vision",
+  "totalInvestmentRange": "string — total 12-month investment estimate (e.g. '$500K–$1M')",
   "quarters": [
     {
       "quarter": "string — e.g. Q1: Foundation",
@@ -675,8 +752,12 @@ You MUST respond with ONLY valid JSON:
       ],
       "deliverables": ["string array"],
       "teamNeeds": "string — team requirements for this quarter",
-      "expectedOutcome": "string — measurable business outcome"
+      "expectedOutcome": "string — measurable business outcome",
+      "successCriteria": "string — how to measure success for this quarter"
     }
+  ],
+  "keyDecisionPoints": [
+    { "timing": "string — e.g. 'End of Q1'", "decision": "string — go/no-go decision", "criteria": "string — what determines the decision" }
   ],
   "investmentSummary": "string — high-level investment/resource summary across the 12 months",
   "riskMitigations": [
@@ -721,7 +802,9 @@ You MUST respond with ONLY valid JSON:
       "metrics": [
         { "metric": "string", "value": "string", "category": "Cost Savings|Revenue|Efficiency|Risk Reduction" }
       ],
-      "narrative": "string"
+      "narrative": "string",
+      "cumulativeROI": "string — cumulative ROI percentage at 24 months",
+      "platformMaturityLevel": "string — e.g. Enterprise Platform"
     }
   },
   "strategicValue": [

@@ -41,7 +41,17 @@ window.Renderers = {
           <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin:8px 0">${data.domain || ''}</div>
           <p style="font-size:13px;color:var(--text-secondary)">${data.summary || ''}</p>
         </div>
-        <div class="glass-card accent-rose" style="animation-delay:0.04s; grid-column: span 2">
+        <div class="glass-card accent-cyan" style="animation-delay:0.04s; grid-column: span 2">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div class="card-title" style="margin:0"><span class="card-icon">💼</span> Deal Snapshot</div>
+            <div style="display:flex;gap:8px">
+              ${data.dealSize ? `<span class="tag tag-green" style="font-size:12px;font-weight:700">💰 ${data.dealSize}</span>` : ''}
+              ${data.urgency ? `<span class="tag tag-${data.urgency.level === 'Urgent' ? 'rose' : data.urgency.level === 'High' ? 'warm' : 'cyan'}" style="font-size:11px">⏱️ ${data.urgency.level}</span>` : ''}
+            </div>
+          </div>
+          ${data.urgency?.justification ? `<p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.urgency.justification}</p>` : ''}
+        </div>
+        <div class="glass-card accent-rose" style="animation-delay:0.08s; grid-column: span 2">
           <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-core-problem">Core Problem</span></div>
           <p style="font-size:14px;color:var(--text-primary);margin-top:8px">${data.coreProblem || ''}</p>
         </div>
@@ -61,6 +71,15 @@ window.Renderers = {
             <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.whyHardWithoutVantiq || ''}</p>
           </div>
         </div>
+        ${(data.competitiveThreats && data.competitiveThreats.length) ? `
+        <div class="glass-card accent-warm" style="animation-delay:0.18s; grid-column: span 3">
+          <div class="card-title"><span class="card-icon">⚔️</span> Competitive Threats</div>
+          ${data.competitiveThreats.map(ct => `
+            <div class="glass-card" style="padding:12px;margin-bottom:8px">
+              <strong style="color:var(--text-primary);font-size:13px">${ct.alternative}</strong>
+              <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">❌ ${ct.weakness}</p>
+            </div>`).join('')}
+        </div>` : ''}
         <div class="glass-card accent-green" style="animation-delay:0.2s">
           <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-data-sources">Data Sources</span></div>
           <ul class="data-list">${(data.dataSources || []).map(d => `<li><span class="list-icon">◆</span>${d}</li>`).join('')}</ul>
@@ -73,10 +92,27 @@ window.Renderers = {
           <div class="card-title"><span class="card-icon">🚀</span> <span data-i18n="label-why-vantiq">Why Vantiq?</span></div>
           <p style="font-size:14px;color:var(--text-primary);margin-top:8px; line-height: 1.5">${data.vantiqSuitability || ''}</p>
         </div>
-        <div class="glass-card accent-purple" style="animation-delay:0.32s; grid-column: span 3">
-          <div class="card-title"><span class="card-icon">❓</span> Qualifying Questions for Customer</div>
+        ${data.championProfile ? `
+        <div class="glass-card accent-purple" style="animation-delay:0.3s; grid-column: span 2">
+          <div class="card-title"><span class="card-icon">🏆</span> Champion Coaching</div>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <div class="tag tag-green" style="flex-shrink:0;font-size:12px">👤 ${data.championProfile.idealRole}</div>
+          </div>
+          <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;line-height:1.5">${data.championProfile.coachingTips}</p>
+        </div>` : ''}
+        <div class="glass-card accent-cyan" style="animation-delay:0.32s">
+          <div class="card-title"><span class="card-icon">❓</span> Qualifying Questions</div>
           <ol style="padding-left:0;list-style:none">${questionsHTML}</ol>
         </div>
+        ${(data.nextBestActions && data.nextBestActions.length) ? `
+        <div class="glass-card accent-green" style="animation-delay:0.34s; grid-column: span 3">
+          <div class="card-title"><span class="card-icon">✅</span> Recommended Next Steps</div>
+          <ol style="padding-left:0;list-style:none">${data.nextBestActions.map((a, i) => `
+            <li style="margin-bottom:8px;color:var(--text-primary);display:flex;align-items:flex-start;gap:8px">
+              <span class="tag tag-purple" style="flex-shrink:0;font-size:11px">${i + 1}</span>
+              <span>${a}</span>
+            </li>`).join('')}</ol>
+        </div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -88,6 +124,10 @@ window.Renderers = {
       <div class="entity-card">
         <div class="entity-type">${e.type}</div>
         <div class="entity-name">${e.name}</div>
+        <div style="display:flex;gap:4px;margin-top:4px">
+          <span class="tag tag-${e.stateManagement === 'Stateful' ? 'green' : 'cyan'}" style="font-size:9px">${e.stateManagement || 'Unknown'}</span>
+          ${e.persistence ? `<span class="tag tag-warm" style="font-size:9px">${e.persistence}</span>` : ''}
+        </div>
         <div style="margin-top:6px">${(e.properties || []).map(p => `<span class="tag tag-purple" style="font-size:10px;margin:2px">${p}</span>`).join('')}</div>
       </div>`).join('');
 
@@ -124,7 +164,22 @@ window.Renderers = {
       <div class="glass-card accent-warm">
         <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-commands">Commands</span></div>
         <div class="tag-list">${commandsHTML}</div>
-      </div>`;
+      </div>
+      ${(data.boundedContexts && data.boundedContexts.length) ? `
+      <div class="glass-card accent-cyan">
+        <div class="card-title"><span class="card-icon">🛡️</span> Bounded Contexts</div>
+        ${data.boundedContexts.map(bc => `
+          <div class="glass-card" style="padding:12px;margin-bottom:8px">
+            <strong style="color:var(--text-primary)">${bc.name}</strong>
+            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${bc.description}</p>
+            <div class="tag-list" style="margin-top:6px">${(bc.services || []).map(s => `<span class="tag tag-purple" style="font-size:10px">${s}</span>`).join('')}</div>
+          </div>`).join('')}
+      </div>` : ''}
+      ${data.eventFlowSummary ? `
+      <div class="glass-card accent-green">
+        <div class="card-title"><span class="card-icon">🌊</span> Event Flow</div>
+        <p style="font-size:13px;color:var(--text-primary);margin-top:8px;line-height:1.6">${data.eventFlowSummary}</p>
+      </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -170,7 +225,36 @@ window.Renderers = {
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-arch-diagram">Architecture Diagram</span></div>
       ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.mermaidDiagram)}</pre></div>` : ''}
-      </div>`;
+      </div>
+      ${data.scalabilityNotes ? `
+      <div class="glass-card accent-cyan">
+        <div class="card-title"><span class="card-icon">📈</span> Scalability</div>
+        <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.scalabilityNotes}</p>
+      </div>` : ''}
+      ${(data.securityConsiderations && data.securityConsiderations.length) ? `
+      <div class="glass-card accent-rose">
+        <div class="card-title"><span class="card-icon">🔒</span> Security Considerations</div>
+        ${data.securityConsiderations.map(sc => `
+          <div class="glass-card" style="padding:12px;margin-bottom:8px">
+            <strong style="color:var(--text-primary);font-size:13px">${sc.area}</strong>
+            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${sc.description}</p>
+          </div>`).join('')}
+      </div>` : ''}
+      ${(data.deploymentTopology || data.latencyBudget) ? `
+      <div class="card-grid">
+        ${data.deploymentTopology ? `
+        <div class="glass-card accent-purple">
+          <div class="card-title"><span class="card-icon">☁️</span> Deployment</div>
+          <div class="tag tag-cyan" style="font-size:12px;margin-top:8px">${data.deploymentTopology.type}</div>
+          <p style="font-size:12px;color:var(--text-secondary);margin-top:8px">${data.deploymentTopology.description}</p>
+        </div>` : ''}
+        ${data.latencyBudget ? `
+        <div class="glass-card accent-warm">
+          <div class="card-title"><span class="card-icon">⏱️</span> Latency Budget</div>
+          <div style="font-size:20px;font-weight:700;color:var(--brand-success);margin-top:8px">${data.latencyBudget.endToEnd}</div>
+          <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.latencyBudget.breakdown}</p>
+        </div>` : ''}
+      </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -342,6 +426,7 @@ window.Renderers = {
         <td>${(p.events || []).map(e => `<span class="tag tag-warm">${e}</span>`).join(' ')}</td>
         <td><span class="tag tag-cyan">${p.protocol}</span></td>
         <td>${p.frequency}</td>
+        <td>${p.throughput ? `<span class="tag tag-green" style="font-size:10px">${p.throughput}</span>` : ''}</td>
       </tr>`).join('');
 
     const consumersHTML = (data.consumers || []).map(c => `
@@ -349,6 +434,7 @@ window.Renderers = {
         <td style="color:var(--text-primary);font-weight:500">${c.name}</td>
         <td>${(c.subscribesTo || []).map(e => `<span class="tag tag-purple">${e}</span>`).join(' ')}</td>
         <td>${c.action}</td>
+        <td>${c.errorStrategy ? `<span class="tag tag-rose" style="font-size:10px">${c.errorStrategy}</span>` : ''}</td>
       </tr>`).join('');
 
     const eventOrch = data.orchestration || {};
@@ -366,17 +452,30 @@ window.Renderers = {
       <div class="card-grid">
         <div class="glass-card accent-green">
           <div class="card-title"><span class="card-icon">📤</span> <span data-i18n="label-producers">Producers</span></div>
-          <table class="data-table"><thead><tr><th data-i18n="th-producer">Producer</th><th data-i18n="th-events">Events</th><th data-i18n="th-protocol">Protocol</th><th data-i18n="th-frequency">Frequency</th></tr></thead><tbody>${producersHTML}</tbody></table>
+          <table class="data-table"><thead><tr><th data-i18n="th-producer">Producer</th><th data-i18n="th-events">Events</th><th data-i18n="th-protocol">Protocol</th><th data-i18n="th-frequency">Frequency</th><th>Throughput</th></tr></thead><tbody>${producersHTML}</tbody></table>
         </div>
         <div class="glass-card accent-purple">
           <div class="card-title"><span class="card-icon">📥</span> <span data-i18n="label-consumers">Consumers</span></div>
-          <table class="data-table"><thead><tr><th data-i18n="th-consumer">Consumer</th><th data-i18n="th-subscribes">Subscribes To</th><th data-i18n="th-action">Action</th></tr></thead><tbody>${consumersHTML}</tbody></table>
+          <table class="data-table"><thead><tr><th data-i18n="th-consumer">Consumer</th><th data-i18n="th-subscribes">Subscribes To</th><th data-i18n="th-action">Action</th><th>Error Strategy</th></tr></thead><tbody>${consumersHTML}</tbody></table>
         </div>
       </div>
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-event-flow">Event Flow Diagram</span></div>
         ${data.flowDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram)}</pre></div>` : ''}
-      </div>`;
+      </div>
+      ${(data.dataRetention && data.dataRetention.length) ? `
+      <div class="glass-card accent-warm">
+        <div class="card-title"><span class="card-icon">🗃️</span> Data Retention Policy</div>
+        <table class="data-table" style="margin-top:8px">
+          <thead><tr><th>Event Type</th><th>Retention</th><th>Rationale</th></tr></thead>
+          <tbody>${data.dataRetention.map(dr => `
+            <tr>
+              <td style="color:var(--text-primary);font-weight:500">${dr.eventType}</td>
+              <td><span class="tag tag-${dr.retention === 'Archive' ? 'purple' : dr.retention === '30 days' ? 'cyan' : dr.retention === '7 days' ? 'warm' : 'green'}">${dr.retention}</span></td>
+              <td style="font-size:12px;color:var(--text-secondary)">${dr.rationale}</td>
+            </tr>`).join('')}</tbody>
+        </table>
+      </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -392,18 +491,31 @@ window.Renderers = {
 
       return `
       <div class="glass-card accent-purple">
-        <div class="card-title"><span class="card-icon">⚙️</span> ${s.name}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="card-title"><span class="card-icon">⚙️</span> ${s.name}</div>
+          ${s.estimatedEffort ? `<span class="tag tag-warm" style="font-size:11px">⏱ ${s.estimatedEffort}</span>` : ''}
+        </div>
         <p style="font-size:12px;color:var(--text-secondary);margin:6px 0">${s.description}</p>
         <div class="tag-list" style="margin:8px 0">
           <span class="tag tag-cyan"><span data-i18n="label-input">Input</span>: ${s.inputEvent || 'N/A'}</span>
           <span class="tag tag-green"><span data-i18n="label-output">Output</span>: ${s.outputEvent || 'N/A'}</span>
         </div>
+        ${(s.prerequisites && s.prerequisites.length) ? `
+        <div style="margin:8px 0;padding:8px 12px;border-radius:var(--radius-md);background:rgba(139,92,246,0.1)">
+          <strong style="font-size:11px;color:var(--text-tertiary)">PREREQUISITES:</strong>
+          <div class="tag-list" style="margin-top:4px">${s.prerequisites.map(p => `<span class="tag tag-purple" style="font-size:10px">${p}</span>`).join('')}</div>
+        </div>` : ''}
         <div class="pseudo-code-block">
           <div class="pseudo-title"><span data-i18n="label-pseudo-code">Pseudo-Code</span> — ${s.name}</div>
           <ul class="pseudo-steps">${stepsHTML}</ul>
         </div>
         <div style="margin-top:12px;font-size:12px;font-weight:600;color:var(--text-tertiary)" data-i18n="label-api-endpoints">API Endpoints:</div>
         ${(s.endpoints || []).map(ep => `<div style="font-size:12px;margin-top:4px"><span class="tag tag-warm">${ep.method}</span> <span style="font-family:'JetBrains Mono',monospace;color:var(--text-secondary)">${ep.path}</span></div>`).join('')}
+        ${s.testingStrategy ? `
+        <div style="margin-top:12px;padding:8px 12px;border-radius:var(--radius-md);background:rgba(34,211,238,0.1)">
+          <strong style="font-size:11px;color:var(--text-tertiary)">🧪 TESTING:</strong>
+          <span style="font-size:12px;color:var(--text-secondary);margin-left:4px">${s.testingStrategy}</span>
+        </div>` : ''}
       </div>`;
     }).join('');
 
@@ -440,7 +552,16 @@ window.Renderers = {
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">📝</span> <span data-i18n="label-event-defs">Event Type Definitions</span></div>
         ${typesHTML}
-      </div>`;
+      </div>
+      ${data.deploymentNotes ? `
+      <div class="glass-card accent-warm">
+        <div class="card-title"><span class="card-icon">🚀</span> Deployment Notes</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+          ${data.deploymentNotes.namespaceSetup ? `<div class="glass-card" style="flex:1;min-width:200px;padding:12px"><strong style="font-size:11px;color:var(--text-tertiary)">NAMESPACE SETUP</strong><p style="font-size:12px;color:var(--text-primary);margin-top:4px">${data.deploymentNotes.namespaceSetup}</p></div>` : ''}
+          ${data.deploymentNotes.edgeConfig ? `<div class="glass-card" style="flex:1;min-width:200px;padding:12px"><strong style="font-size:11px;color:var(--text-tertiary)">EDGE CONFIG</strong><p style="font-size:12px;color:var(--text-primary);margin-top:4px">${data.deploymentNotes.edgeConfig}</p></div>` : ''}
+          ${data.deploymentNotes.assemblyPackaging ? `<div class="glass-card" style="flex:1;min-width:200px;padding:12px"><strong style="font-size:11px;color:var(--text-tertiary)">ASSEMBLY</strong><p style="font-size:12px;color:var(--text-primary);margin-top:4px">${data.deploymentNotes.assemblyPackaging}</p></div>` : ''}
+        </div>
+      </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -502,6 +623,40 @@ window.Renderers = {
 
     if (data.warnings.length === 0) {
       html += '<div class="glass-card"><p style="color:var(--text-secondary); margin:0;">No architectural flaws detected! The system design aligns perfectly with Vantiq best practices.</p></div>';
+    }
+
+    // Score Breakdown
+    if (data.scoreBreakdown) {
+      const sb = data.scoreBreakdown;
+      const renderBar = (label, value, max) => {
+        const pct = Math.round((value / max) * 100);
+        const color = pct >= 75 ? 'var(--brand-success)' : pct >= 50 ? 'var(--brand-warning)' : 'var(--brand-danger)';
+        return `<div style="margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-bottom:4px"><span>${label}</span><span style="font-weight:700;color:${color}">${value}/${max}</span></div>
+          <div style="height:6px;border-radius:3px;background:rgba(255,255,255,0.1)"><div style="height:100%;width:${pct}%;border-radius:3px;background:${color};transition:width 0.5s"></div></div>
+        </div>`;
+      };
+      html += `<div class="glass-card accent-cyan" style="margin-top:var(--space-4)">
+        <div class="card-title"><span class="card-icon">📊</span> Score Breakdown</div>
+        ${renderBar('Event-Driven Patterns', sb.eventDriven || 0, 25)}
+        ${renderBar('Security Posture', sb.security || 0, 25)}
+        ${renderBar('Scalability', sb.scalability || 0, 25)}
+        ${renderBar('Vantiq Best Practices', sb.vantiqBestPractices || 0, 25)}
+      </div>`;
+    }
+
+    // Quick Wins
+    if (data.quickWins && data.quickWins.length) {
+      html += `<div class="glass-card accent-green" style="margin-top:var(--space-4)">
+        <div class="card-title"><span class="card-icon">⚡</span> Quick Wins</div>
+        ${data.quickWins.map(qw => `
+          <div class="glass-card" style="padding:12px;margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="color:var(--text-primary);font-size:13px">${escapeHtml(qw.fix)}</span>
+              <span class="tag tag-green" style="font-size:10px">${escapeHtml(qw.impact)}</span>
+            </div>
+          </div>`).join('')}
+      </div>`;
     }
 
     if (container) container.innerHTML = html;
@@ -600,6 +755,42 @@ window.Renderers = {
         </div>`;
     }
 
+    // Win Strategy
+    if (data.winStrategy && data.winStrategy.length) {
+      html += `
+        <div class="glass-card accent-green" style="margin-top:20px;border:2px solid var(--brand-success)">
+          <div class="card-title"><span class="card-icon">🏆</span> Win Strategy</div>
+          <ol style="padding-left:0;list-style:none">${data.winStrategy.map((s, i) => `
+            <li style="margin-bottom:8px;color:var(--text-primary);display:flex;align-items:flex-start;gap:8px">
+              <span class="tag tag-green" style="flex-shrink:0;font-size:11px">${i + 1}</span>
+              <span>${escapeHtml(s)}</span>
+            </li>`).join('')}</ol>
+        </div>`;
+    }
+
+    // Competitive Landmines
+    if (data.landmines && data.landmines.length) {
+      const mineHTML = data.landmines.map(l => `
+        <div class="glass-card" style="padding:14px;margin-bottom:8px">
+          <div style="font-weight:600;font-size:13px;color:var(--brand-danger);margin-bottom:6px">💣 "${escapeHtml(l.claim)}"</div>
+          <div style="font-size:12px;color:var(--text-primary);padding-left:12px;border-left:2px solid var(--brand-success)">✅ ${escapeHtml(l.counter)}</div>
+        </div>`).join('');
+      html += `
+        <div class="glass-card accent-warm" style="margin-top:20px">
+          <div class="card-title"><span class="card-icon">⚠️</span> Competitive Landmines</div>
+          ${mineHTML}
+        </div>`;
+    }
+
+    // Customer References
+    if (data.customerReferences && data.customerReferences.length) {
+      html += `
+        <div class="glass-card accent-purple" style="margin-top:20px">
+          <div class="card-title"><span class="card-icon">📞</span> Reference Suggestions</div>
+          <ul class="data-list">${data.customerReferences.map(r => `<li><span class="list-icon">◆</span>${escapeHtml(r)}</li>`).join('')}</ul>
+        </div>`;
+    }
+
     if (container) container.innerHTML = html;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -608,6 +799,21 @@ window.Renderers = {
   renderBusinessValue: function (data, container) {
     if (!data) return;
     let html = '';
+
+    // ROI Snapshot Hero
+    if (data.roiProjection) {
+      const roi = data.roiProjection;
+      html += `
+        <div class="glass-card accent-green" style="margin-bottom:20px">
+          <div class="card-title"><span class="card-icon">📈</span> ROI Snapshot</div>
+          <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
+            ${roi.investmentRange ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Investment</div><div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:4px">${escapeHtml(roi.investmentRange)}</div></div>` : ''}
+            ${roi.expectedReturn ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Expected Return</div><div style="font-size:18px;font-weight:700;color:var(--brand-success);margin-top:4px">${escapeHtml(roi.expectedReturn)}</div></div>` : ''}
+            ${roi.paybackPeriod ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Payback Period</div><div style="font-size:18px;font-weight:700;color:var(--brand-primary);margin-top:4px">${escapeHtml(roi.paybackPeriod)}</div></div>` : ''}
+            ${roi.roiPercentage ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">ROI</div><div style="font-size:22px;font-weight:700;color:var(--brand-success);margin-top:4px">${escapeHtml(roi.roiPercentage)}</div></div>` : ''}
+          </div>
+        </div>`;
+    }
 
     if (data.summary) {
       html += `
@@ -622,6 +828,7 @@ window.Renderers = {
         <div class="glass-card" style="padding:14px;margin-bottom:8px">
           <div style="font-weight:600;font-size:14px;color:var(--brand-success);margin-bottom:4px">📈 ${escapeHtml(d.category)}</div>
           <p style="font-size:13px;color:var(--text-primary);margin:0">${escapeHtml(d.impact)}</p>
+          ${d.quantification ? `<div style="font-size:12px;font-weight:700;color:var(--brand-primary);margin-top:4px">💲 ${escapeHtml(d.quantification)}</div>` : ''}
         </div>`).join('');
       html += `
         <div class="glass-card accent-green" style="margin-bottom:20px">
@@ -648,6 +855,7 @@ window.Renderers = {
         <div class="glass-card" style="padding:14px;flex:1;min-width:200px">
           <div style="font-size:12px;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${escapeHtml(k.metric)}</div>
           <div style="font-weight:700;font-size:16px;color:var(--brand-primary)">${escapeHtml(k.target)}</div>
+          ${k.timeframe ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">⏰ ${escapeHtml(k.timeframe)}</div>` : ''}
         </div>`).join('');
       html += `
         <div class="glass-card accent-warm">
@@ -675,8 +883,8 @@ window.Renderers = {
       </div>`).join('');
 
     const phasesHTML = (data.phases || []).map((p, i) => `
-      <div class="glass-card accent-${['purple','cyan','green','warm'][i % 4]}" style="animation-delay:${i * 0.1}s">
-        <div class="card-title"><span class="card-icon">${['🏁','🚀','📊','🌟'][i % 4]}</span> ${p.phase}</div>
+      <div class="glass-card accent-${['purple', 'cyan', 'green', 'warm'][i % 4]}" style="animation-delay:${i * 0.1}s">
+        <div class="card-title"><span class="card-icon">${['🏁', '🚀', '📊', '🌟'][i % 4]}</span> ${p.phase}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${p.goal}</p>
         <span class="tag tag-cyan">⏱️ ${p.duration}</span>
         <ul class="data-list" style="margin-top:8px">${(p.deliverables || []).map(d => `<li><span class="list-icon">◆</span>${d}</li>`).join('')}</ul>
@@ -697,6 +905,14 @@ window.Renderers = {
           <div class="card-title" style="font-size:18px"><span class="card-icon">🎯</span> ${data.useCaseTitle || 'Use Case'}</div>
           <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${data.elevator || ''}</p>
         </div>
+        ${(data.investmentEstimate || data.timeToValue) ? `
+        <div class="glass-card accent-cyan" style="grid-column: span 3">
+          <div class="card-title"><span class="card-icon">💰</span> Investment & Time to Value</div>
+          <div style="display:flex;gap:16px;margin-top:8px">
+            ${data.investmentEstimate ? `<div class="glass-card" style="flex:1;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Phase 1 Investment</div><div style="font-size:18px;font-weight:700;color:var(--brand-primary);margin-top:4px">${data.investmentEstimate}</div></div>` : ''}
+            ${data.timeToValue ? `<div class="glass-card" style="flex:1;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Time to Value</div><div style="font-size:18px;font-weight:700;color:var(--brand-success);margin-top:4px">${data.timeToValue}</div></div>` : ''}
+          </div>
+        </div>` : ''}
         <div class="glass-card accent-green">
           <div class="card-title"><span class="card-icon">✅</span> In Scope</div>
           <ul class="data-list">${(data.inScope || []).map(s => `<li><span class="list-icon">◆</span>${s}</li>`).join('')}</ul>
@@ -709,6 +925,21 @@ window.Renderers = {
           <div class="card-title"><span class="card-icon">📊</span> Success Metrics</div>
           ${metricsHTML}
         </div>
+        ${(data.decisionCriteria && data.decisionCriteria.length) ? `
+        <div class="glass-card accent-warm" style="grid-column: span 2">
+          <div class="card-title"><span class="card-icon">🏁</span> Decision Criteria</div>
+          ${data.decisionCriteria.map(dc => `
+            <div class="glass-card" style="padding:12px;margin-bottom:8px">
+              <strong style="color:var(--text-primary);font-size:13px">${dc.criterion}</strong>
+              <p style="font-size:12px;color:var(--brand-success);margin-top:4px">✅ Vantiq: ${dc.vantiqStrength}</p>
+            </div>`).join('')}
+        </div>` : ''}
+        ${data.competitiveAlternative ? `
+        <div class="glass-card accent-rose">
+          <div class="card-title"><span class="card-icon">⚠️</span> Without Vantiq</div>
+          <p style="font-size:13px;color:var(--text-primary);margin:8px 0;font-weight:600">${data.competitiveAlternative.approach}</p>
+          <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.competitiveAlternative.whyWorse}</p>
+        </div>` : ''}
         ${phasesHTML}
         <div class="glass-card accent-warm" style="grid-column: span 2">
           <div class="card-title"><span class="card-icon">⚠️</span> Risks & Mitigations</div>
@@ -728,12 +959,13 @@ window.Renderers = {
   renderAdjacentUseCases(data, container) {
     if (!data || !container) return;
     const ucHTML = (data.adjacentUseCases || []).map((uc, i) => `
-      <div class="glass-card accent-${['purple','cyan','green','warm','rose'][i % 5]}" style="animation-delay:${i * 0.1}s">
+      <div class="glass-card accent-${['purple', 'cyan', 'green', 'warm', 'rose'][i % 5]}" style="animation-delay:${i * 0.1}s">
         <div class="card-title" style="font-size:16px"><span class="card-icon">🔗</span> ${uc.title}</div>
         <p style="font-size:13px;color:var(--text-secondary);margin:8px 0">${uc.description}</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
           <span class="tag tag-${uc.effort === 'Low' ? 'green' : uc.effort === 'Medium' ? 'warm' : 'rose'}">⏱ Effort: ${uc.effort}</span>
           <span class="tag tag-${uc.businessValue === 'High' ? 'green' : 'cyan'}">Value: ${uc.businessValue}</span>
+          ${uc.revenueImpact ? `<span class="tag tag-purple" style="font-weight:700">💰 ${uc.revenueImpact}</span>` : ''}
           <span class="tag tag-purple">📅 ${uc.estimatedTimeline}</span>
         </div>
         <div style="margin-top:8px">
@@ -745,6 +977,7 @@ window.Renderers = {
           <div class="tag-list" style="margin-top:4px">${(uc.newComponents || []).map(c => `<span class="tag tag-cyan" style="font-size:10px">${c}</span>`).join('')}</div>
         </div>
         <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;font-style:italic">🔄 ${uc.synergy}</p>
+        ${uc.championPitch ? `<div style="margin-top:8px;padding:8px 12px;border-radius:var(--radius-md);background:rgba(139,92,246,0.1);font-size:12px;color:var(--text-primary);font-style:italic">💬 "${uc.championPitch}"</div>` : ''}
       </div>`).join('');
 
     container.innerHTML = `
@@ -762,14 +995,15 @@ window.Renderers = {
           <span style="font-size:12px;color:var(--text-primary)">${m.milestone}</span>
         </div>`).join('');
       return `
-        <div class="glass-card accent-${['purple','cyan','green','warm'][i % 4]}" style="animation-delay:${i * 0.15}s">
-          <div class="card-title" style="font-size:16px"><span class="card-icon">${['🌱','🌿','🌳','🌟'][i % 4]}</span> ${q.quarter}</div>
+        <div class="glass-card accent-${['purple', 'cyan', 'green', 'warm'][i % 4]}" style="animation-delay:${i * 0.15}s">
+          <div class="card-title" style="font-size:16px"><span class="card-icon">${['🌱', '🌿', '🌳', '🌟'][i % 4]}</span> ${q.quarter}</div>
           <p style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;font-weight:600;margin:4px 0">${q.theme || ''}</p>
           <div style="margin:12px 0">${milestonesHTML}</div>
           <div style="margin-top:8px"><strong style="font-size:11px;color:var(--text-tertiary)">TEAM:</strong> <span style="font-size:12px;color:var(--text-secondary)">${q.teamNeeds || ''}</span></div>
           <div class="glass-card accent-green" style="padding:8px 12px;margin-top:8px">
             <span style="font-size:12px;color:var(--text-primary)">🎯 ${q.expectedOutcome || ''}</span>
           </div>
+          ${q.successCriteria ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;padding:6px 8px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05)">✅ Success: ${q.successCriteria}</div>` : ''}
         </div>`;
     }).join('');
 
@@ -777,13 +1011,16 @@ window.Renderers = {
       <div class="glass-card accent-purple" style="margin-bottom:16px">
         <div class="card-title" style="font-size:18px"><span class="card-icon">🗺️</span> ${data.roadmapTitle || 'Roadmap'}</div>
         <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${data.vision || ''}</p>
+        ${data.totalInvestmentRange ? `<div class="tag tag-warm" style="font-size:13px;font-weight:700;margin-top:8px">💰 Total 12-Month Investment: ${data.totalInvestmentRange}</div>` : ''}
       </div>
       <div class="card-grid">${quartersHTML}</div>
       ${data.investmentSummary ? `
         <div class="glass-card accent-warm" style="margin-top:16px">
           <div class="card-title"><span class="card-icon">💰</span> Investment Summary</div>
           <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.investmentSummary}</p>
-        </div>` : ''}`;
+        </div>` : ''}
+      ${(data.keyDecisionPoints && data.keyDecisionPoints.length) ? '<div class=\"glass-card accent-rose\" style=\"margin-top:16px\"><div class=\"card-title\"><span class=\"card-icon\">🚦</span> Key Decision Points</div>' + data.keyDecisionPoints.map(dp => '<div class=\"glass-card\" style=\"padding:12px;margin-bottom:8px\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><strong style=\"color:var(--text-primary);font-size:13px\">' + dp.decision + '</strong><span class=\"tag tag-warm\" style=\"font-size:10px\">' + dp.timing + '</span></div><p style=\"font-size:12px;color:var(--text-secondary);margin-top:4px\">' + dp.criteria + '</p></div>').join('') + '</div>' : ''}`;
+
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -794,33 +1031,37 @@ window.Renderers = {
     const renderHorizon = (label, icon, horizon) => {
       if (!horizon) return '';
       const metricsHTML = (horizon.metrics || []).map(m => `
-        <div class="glass-card" style="padding:10px;margin-bottom:6px">
+        < div class="glass-card" style = "padding:10px;margin-bottom:6px" >
           <div style="display:flex;justify-content:space-between;align-items:center">
             <strong style="font-size:13px;color:var(--text-primary)">${m.metric}</strong>
             <span class="tag tag-${m.category === 'Cost Savings' ? 'green' : m.category === 'Revenue' ? 'purple' : m.category === 'Efficiency' ? 'cyan' : 'warm'}">${m.category}</span>
           </div>
           <p style="font-size:14px;font-weight:700;color:var(--brand-success);margin-top:4px">${m.value}</p>
-        </div>`).join('');
+        </div > `).join('');
       return `
-        <div class="glass-card accent-cyan">
+      < div class="glass-card accent-cyan" >
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <div class="card-title"><span class="card-icon">${icon}</span> ${label}</div>
+          ${horizon.cumulativeROI ? `<span class="tag tag-green" style="font-size:12px;font-weight:700">📈 ROI: ${horizon.cumulativeROI}</span>` : ''}
+        </div>
+          ${horizon.platformMaturityLevel ? `<div class="tag tag-purple" style="margin:8px 0;font-size:11px">${horizon.platformMaturityLevel}</div>` : ''}
           ${metricsHTML}
-          <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;font-style:italic">${horizon.narrative || ''}</p>
-        </div>`;
+    <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;font-style:italic">${horizon.narrative || ''}</p>
+        </div > `;
     };
 
     const strategicHTML = (data.strategicValue || []).map(s => `
-      <div class="glass-card" style="padding:12px;margin-bottom:8px">
+      < div class="glass-card" style = "padding:12px;margin-bottom:8px" >
         <strong style="color:var(--text-primary)">${s.dimension}</strong>
         <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${s.description}</p>
-      </div>`).join('');
+      </div > `).join('');
 
     container.innerHTML = `
-      <div class="card-grid">
+      < div class="card-grid" >
         ${renderHorizon('6 Months', '📈', vp.month6)}
         ${renderHorizon('12 Months', '📊', vp.month12)}
         ${renderHorizon('24 Months', '🚀', vp.month24)}
-      </div>
+      </div >
       <div class="glass-card accent-purple" style="margin-top:16px">
         <div class="card-title"><span class="card-icon">🏆</span> Strategic Value</div>
         ${strategicHTML}
@@ -829,12 +1070,14 @@ window.Renderers = {
         <div class="glass-card accent-green" style="margin-top:16px">
           <div class="card-title"><span class="card-icon">🛡️</span> Competitive Advantage</div>
           <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.competitiveAdvantage}</p>
-        </div>` : ''}
+        </div>` : ''
+      }
       ${data.executiveSummary ? `
         <div class="glass-card accent-warm" style="margin-top:16px">
           <div class="card-title"><span class="card-icon">💼</span> Executive Summary</div>
           <p style="font-size:14px;color:var(--text-primary);margin-top:8px;line-height:1.6">${data.executiveSummary}</p>
-        </div>` : ''}`;
+        </div>` : ''
+      } `;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   }
 };
