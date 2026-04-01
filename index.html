@@ -137,24 +137,14 @@
 
       <!-- Pipeline Progress Bar -->
       <div class="pipeline-bar" id="pipelineBar">
-        <div class="pipeline-step" data-agent="interpreter" id="step-interpreter">
+        <div class="pipeline-step" data-agent="discovery" id="step-discovery">
           <span class="step-icon">🔍</span>
-          <span data-i18n="step-interpreter">Discovery</span>
+          <span data-i18n="step-discovery">Discovery</span>
         </div>
         <div class="pipeline-connector"></div>
-        <div class="pipeline-step" data-agent="business" id="step-business">
+        <div class="pipeline-step" data-agent="value" id="step-value">
           <span class="step-icon">💰</span>
-          <span data-i18n="step-business">Value</span>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-step" data-agent="competitive" id="step-competitive">
-          <span class="step-icon">🏆</span>
-          <span data-i18n="step-competitive">Compete</span>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-step" data-agent="domain" id="step-domain">
-          <span class="step-icon">🧩</span>
-          <span data-i18n="step-domain">Domain</span>
+          <span data-i18n="step-value">Value Assessment</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="architecture" id="step-architecture">
@@ -162,29 +152,19 @@
           <span data-i18n="step-architecture">Architecture</span>
         </div>
         <div class="pipeline-connector"></div>
-        <div class="pipeline-step" data-agent="events" id="step-events">
-          <span class="step-icon">⚡</span>
-          <span data-i18n="step-events">Events</span>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-step" data-agent="visualizer" id="step-visualizer">
-          <span class="step-icon">📊</span>
-          <span data-i18n="step-visualizer">Diagrams</span>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-step" data-agent="aimodel" id="step-aimodel">
+        <div class="pipeline-step" data-agent="ai" id="step-ai">
           <span class="step-icon">🤖</span>
-          <span data-i18n="step-aimodel">AI</span>
-        </div>
-        <div class="pipeline-connector"></div>
-        <div class="pipeline-step" data-agent="agentic" id="step-agentic">
-          <span class="step-icon">🧠</span>
-          <span data-i18n="step-agentic">Agentic</span>
+          <span data-i18n="step-ai">AI Consulting</span>
         </div>
         <div class="pipeline-connector"></div>
         <div class="pipeline-step" data-agent="implementation" id="step-implementation">
           <span class="step-icon">🛠️</span>
-          <span data-i18n="step-implementation">Implement</span>
+          <span data-i18n="step-implementation">Implementation</span>
+        </div>
+        <div class="pipeline-connector"></div>
+        <div class="pipeline-step" data-agent="expansion" id="step-expansion">
+          <span class="step-icon">🔗</span>
+          <span data-i18n="step-expansion">Expansion</span>
         </div>
       </div>
 
@@ -330,16 +310,20 @@
         <div class="panel" id="panel-usecasescope">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🎯</span> <span data-i18n="usecasescope-title">Use Case Scope</span></div>
-              <div class="section-subtitle" data-i18n="usecasescope-subtitle">Agent 1b — Scope, Success Metrics & Phasing</div>
+              <div class="section-title"><span class="section-icon">🎯</span> <span data-i18n="usecasescope-title">Use
+                  Case Scope</span></div>
+              <div class="section-subtitle" data-i18n="usecasescope-subtitle">Agent 1b — Scope, Success Metrics &
+                Phasing</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
-              <input type="text" id="refine-usecasescope" class="refine-input" data-i18n-placeholder="refine-placeholder"
+              <input type="text" id="refine-usecasescope" class="refine-input"
+                data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('usecasescope')" />
               <button class="btn btn-regenerate" onclick="app.regenerate('usecasescope')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
-              <button class="coach-toggle-btn" onclick="app.openCoach('usecasescope')"><span class="coach-icon">🎓</span>
+              <button class="coach-toggle-btn" onclick="app.openCoach('usecasescope')"><span
+                  class="coach-icon">🎓</span>
                 <span data-i18n="coach-btn">AI Coach</span></button>
             </div>
           </div>
@@ -420,7 +404,8 @@
             <div>
               <div class="section-title"><span class="section-icon">🧠</span> <span data-i18n="agentic-title">Agentic
                   Approach</span></div>
-              <div class="section-subtitle" data-i18n="agentic-subtitle">Agent 4b — Agentic Approach Architect output</div>
+              <div class="section-subtitle" data-i18n="agentic-subtitle">Agent 4b — Agentic Approach Architect output
+              </div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-agentic" class="refine-input" data-i18n-placeholder="refine-placeholder"
@@ -507,8 +492,10 @@
         <div class="panel" id="panel-adjacent">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🔗</span> <span data-i18n="adjacent-title">Adjacent Use Cases</span></div>
-              <div class="section-subtitle" data-i18n="adjacent-subtitle">Expansion — Additional use cases from shared architecture</div>
+              <div class="section-title"><span class="section-icon">🔗</span> <span data-i18n="adjacent-title">Adjacent
+                  Use Cases</span></div>
+              <div class="section-subtitle" data-i18n="adjacent-subtitle">Expansion — Additional use cases from shared
+                architecture</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-adjacent" class="refine-input" data-i18n-placeholder="refine-placeholder"
@@ -525,7 +512,8 @@
         <div class="panel" id="panel-roadmap">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">🗺️</span> <span data-i18n="roadmap-title">12-Month Roadmap</span></div>
+              <div class="section-title"><span class="section-icon">🗺️</span> <span data-i18n="roadmap-title">12-Month
+                  Roadmap</span></div>
               <div class="section-subtitle" data-i18n="roadmap-subtitle">Expansion — Platform growth roadmap</div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
@@ -543,8 +531,10 @@
         <div class="panel" id="panel-valuegrowth">
           <div class="section-header">
             <div>
-              <div class="section-title"><span class="section-icon">📈</span> <span data-i18n="valuegrowth-title">Platform Value Growth</span></div>
-              <div class="section-subtitle" data-i18n="valuegrowth-subtitle">Expansion — Value compounding over time</div>
+              <div class="section-title"><span class="section-icon">📈</span> <span
+                  data-i18n="valuegrowth-title">Platform Value Growth</span></div>
+              <div class="section-subtitle" data-i18n="valuegrowth-subtitle">Expansion — Value compounding over time
+              </div>
             </div>
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-valuegrowth" class="refine-input" data-i18n-placeholder="refine-placeholder"

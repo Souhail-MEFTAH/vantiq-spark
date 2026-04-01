@@ -1754,69 +1754,51 @@ function simplifyMermaid(code) {
 
 // ── Pipeline Progress ──
 function updatePipelineStep(agentKey, status) {
-    const step = document.getElementById('step-' + agentKey);
-    if (!step) return;
-    step.classList.remove('active', 'completed');
-    if (status === 'active') step.classList.add('active');
-    if (status === 'completed') step.classList.add('completed');
+    const phaseMap = {
+        interpreter: { phase: 'discovery', isLast: true },
+        business: { phase: 'value', isLast: false },
+        competitive: { phase: 'value', isLast: true },
+        domain: { phase: 'architecture', isLast: false },
+        architecture: { phase: 'architecture', isLast: false },
+        events: { phase: 'architecture', isLast: false },
+        linter: { phase: 'architecture', isLast: false },
+        visualizer: { phase: 'architecture', isLast: true },
+        aimodel: { phase: 'ai', isLast: false },
+        agentic: { phase: 'ai', isLast: true },
+        implementation: { phase: 'implementation', isLast: true },
+        adjacent: { phase: 'expansion', isLast: false },
+        roadmap: { phase: 'expansion', isLast: false },
+        valueGrowth: { phase: 'expansion', isLast: true }
+    };
+
+    const mapping = phaseMap[agentKey] || { phase: agentKey, isLast: true };
+    const step = document.getElementById('step-' + mapping.phase);
+
+    if (step) {
+        if (status === 'active') {
+            step.classList.remove('completed');
+            step.classList.add('active');
+        } else if (status === 'completed' && mapping.isLast) {
+            step.classList.remove('active');
+            step.classList.add('completed');
+        }
+    }
 
     // Update connectors
     const connectors = document.querySelectorAll('.pipeline-connector');
     const steps = document.querySelectorAll('.pipeline-step');
+    let prevCompleted = true;
     steps.forEach((s, i) => {
-        if (i < connectors.length && s.classList.contains('completed')) {
-            connectors[i].classList.add('completed');
+        if (i < connectors.length) {
+            if (s.classList.contains('completed') || (s.classList.contains('active') && prevCompleted)) {
+                connectors[i].classList.add('completed');
+            } else {
+                connectors[i].classList.remove('completed');
+                prevCompleted = false;
+            }
         }
     });
 
-    // Update overlay text
-    const overlay = document.getElementById('generatingAgentName');
-    const lang = state.language || 'en';
-    const translations = I18N[lang] || I18N.en;
-
-    // Agent names/labels from I18N
-    const stepKeys = {
-        interpreter: 'step-interpreter',
-        domain: 'step-domain',
-        architecture: 'step-architecture',
-        aimodel: 'step-aimodel',
-        agentic: 'step-agentic',
-        events: 'step-events',
-        implementation: 'step-implementation',
-        visualizer: 'step-visualizer',
-        demo: 'step-demo',
-        training: 'step-training'
-    };
-
-    if (status === 'active' && overlay) {
-        const key = stepKeys[agentKey];
-        const label = translations[key] || agentKey;
-        const icon = {
-            interpreter: '🔍', domain: '🧩', architecture: '🏗️', aimodel: '🤖',
-            agentic: '🧠', events: '⚡', implementation: '🛠️', visualizer: '📊',
-            demo: '🎬', training: '🎓'
-        }[agentKey] || '';
-
-        // Use a prefix like "Agent X — " translated if needed, but for simplicity we can use Agent number
-        const agentNumber = {
-            interpreter: 1, domain: 2, architecture: 3, aimodel: 4,
-            agentic: '4b', events: 5, implementation: 6, visualizer: 7,
-            demo: 8, training: 9
-        }[agentKey] || 1;
-
-        const agentLabel = lang === 'ko' ? '에이전트' : lang === 'ja' ? 'エージェント' : lang === 'ar' ? 'الوكيل' : 'Agent';
-        const labelText = stepKeys[agentKey] && translations[stepKeys[agentKey]] ? translations[stepKeys[agentKey]] : (
-            agentKey === 'domain' ? 'Domain Model' :
-                agentKey === 'architecture' ? 'Architecture' :
-                    agentKey === 'aimodel' ? 'AI Models' :
-                        agentKey === 'agentic' ? 'Agentic Approach' :
-                            agentKey === 'events' ? 'Event System' :
-                                agentKey === 'implementation' ? 'Implementation' :
-                                    agentKey === 'visualizer' ? 'Diagrams' :
-                                        agentKey === 'interpreter' ? 'Sales Discovery' : agentKey
-        );
-        overlay.textContent = `${icon} ${agentLabel} ${agentNumber} — ${labelText}`;
-    }
 }
 
 function enableNav(panelId) {
