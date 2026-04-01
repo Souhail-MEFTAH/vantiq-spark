@@ -439,9 +439,9 @@ window.Renderers = {
           <thead><tr><th>Event Type</th><th>Retention</th><th>Rationale</th></tr></thead>
           <tbody>${data.dataRetention.map(dr => `
             <tr>
-              <td style="color:var(--text-primary);font-weight:500">${dr.eventType}</td>
-              <td><span class="tag tag-${dr.retention === 'Archive' ? 'purple' : dr.retention === '30 days' ? 'cyan' : dr.retention === '7 days' ? 'warm' : 'green'}">${dr.retention}</span></td>
-              <td style="font-size:12px;color:var(--text-secondary)">${dr.rationale}</td>
+              <td style="color:var(--text-primary);font-weight:500">${dr.eventType || dr.type || dr.event || 'Unknown'}</td>
+              <td><span class="tag tag-${(dr.retention || '') === 'Archive' ? 'purple' : (dr.retention || '') === '30 days' ? 'cyan' : (dr.retention || '') === '7 days' ? 'warm' : 'green'}">${dr.retention || dr.duration || 'N/A'}</span></td>
+              <td style="font-size:12px;color:var(--text-secondary)">${dr.rationale || dr.reason || dr.description || ''}</td>
             </tr>`).join('')}</tbody>
         </table>
       </div>` : ''}`;
@@ -525,11 +525,12 @@ window.Renderers = {
       ${data.deploymentNotes ? `
       <div class="glass-card accent-warm">
         <div class="card-title"><span class="card-icon">🚀</span> Deployment Notes</div>
+        ${typeof data.deploymentNotes === 'string' ? `<p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.deploymentNotes}</p>` : `
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
           ${data.deploymentNotes.namespaceSetup ? `<div class="glass-card" style="flex:1;min-width:200px;padding:12px"><strong style="font-size:11px;color:var(--text-tertiary)">NAMESPACE SETUP</strong><p style="font-size:12px;color:var(--text-primary);margin-top:4px">${data.deploymentNotes.namespaceSetup}</p></div>` : ''}
           ${data.deploymentNotes.edgeConfig ? `<div class="glass-card" style="flex:1;min-width:200px;padding:12px"><strong style="font-size:11px;color:var(--text-tertiary)">EDGE CONFIG</strong><p style="font-size:12px;color:var(--text-primary);margin-top:4px">${data.deploymentNotes.edgeConfig}</p></div>` : ''}
           ${data.deploymentNotes.assemblyPackaging ? `<div class="glass-card" style="flex:1;min-width:200px;padding:12px"><strong style="font-size:11px;color:var(--text-tertiary)">ASSEMBLY</strong><p style="font-size:12px;color:var(--text-primary);margin-top:4px">${data.deploymentNotes.assemblyPackaging}</p></div>` : ''}
-        </div>
+        </div>`}
       </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -952,14 +953,8 @@ window.Renderers = {
       <div class="glass-card accent-purple" style="margin-bottom:16px">
         <div class="card-title" style="font-size:18px"><span class="card-icon">🗺️</span> ${data.roadmapTitle || 'Roadmap'}</div>
         <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${data.vision || ''}</p>
-        ${data.totalInvestmentRange ? `<div class="tag tag-warm" style="font-size:13px;font-weight:700;margin-top:8px">💰 Total 12-Month Investment: ${data.totalInvestmentRange}</div>` : ''}
       </div>
       <div class="card-grid">${quartersHTML}</div>
-      ${data.investmentSummary ? `
-        <div class="glass-card accent-warm" style="margin-top:16px">
-          <div class="card-title"><span class="card-icon">💰</span> Investment Summary</div>
-          <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.investmentSummary}</p>
-        </div>` : ''}
       ${(data.keyDecisionPoints && data.keyDecisionPoints.length) ? '<div class=\"glass-card accent-rose\" style=\"margin-top:16px\"><div class=\"card-title\"><span class=\"card-icon\">🚦</span> Key Decision Points</div>' + data.keyDecisionPoints.map(dp => {
       const dec = typeof dp === 'string' ? dp : dp.decision || dp.name || 'Decision';
       const timing = typeof dp === 'string' ? 'TBD' : dp.timing || 'TBD';
