@@ -15,8 +15,7 @@ window.PDFGenerator = {
             const projectName = results.domainModel?.projectName || untitledName;
             const dateStr = new Date().toLocaleDateString(lang);
 
-            // 1. Configure Fonts — use verified fontsource CDN paths
-            // Arabic, Japanese, Korean fonts are served from cdn.jsdelivr.net/fontsource/fonts/
+            // 1. Configure Fonts
             pdfMake.fonts = {
                 Roboto: {
                     normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Regular.ttf',
@@ -44,29 +43,17 @@ window.PDFGenerator = {
                 }
             };
 
-            // Select primary font based on language
             let primaryFont = 'Roboto';
             if (lang === 'ar') primaryFont = 'NotoSansArabic';
             else if (lang === 'ja') primaryFont = 'NotoSansJP';
             else if (lang === 'ko') primaryFont = 'NotoSansKR';
 
-            // 2. Initialize Document Definition
             const docDefinition = {
-                info: {
-                    title: projectName,
-                    author: 'Vantiq Spark AI Solution Studio',
-                    subject: 'Architecture Blueprint',
-                },
+                info: { title: projectName, author: 'Vantiq Spark AI Solution Studio', subject: 'Architecture Blueprint' },
                 pageSize: 'A4',
                 pageOrientation: 'portrait',
                 pageMargins: [40, 60, 40, 60],
-                defaultStyle: {
-                    font: primaryFont,
-                    fontSize: 10,
-                    color: '#333333',
-                    lineHeight: 1.3,
-                    alignment: isArabic ? 'right' : 'left'
-                },
+                defaultStyle: { font: primaryFont, fontSize: 10, color: '#333333', lineHeight: 1.3, alignment: isArabic ? 'right' : 'left' },
                 styles: {
                     title: { fontSize: 24, bold: true, color: '#00c389', margin: [0, 0, 0, 10] },
                     subtitle: { fontSize: 14, color: '#555555', margin: [0, 0, 0, 40] },
@@ -77,136 +64,59 @@ window.PDFGenerator = {
                     tableCell: { fontSize: 9, margin: [4, 4, 4, 4] },
                     list: { margin: [0, 0, 0, 10] }
                 },
-                content: [] // Back to standard array for max compatibility
+                content: []
             };
 
-            // ── Arabic helper: Comprehensive RTL Processing ──
-            // Handles: word reordering, list markers, table column reversal,
-            // margin flipping, and directional symbol replacement.
             const applyArabicRTL = (node, depth = 0) => {
-                if (!isArabic) return;
-                if (!node || typeof node !== 'object') return;
-                if (depth > 50) return; // Recursion guard
-
-                // Process array of nodes
-                if (Array.isArray(node)) {
-                    node.forEach(n => applyArabicRTL(n, depth + 1));
-                    return;
-                }
-
-                // ── 1. Convert ul/ol to manual RTL stacks ──
-                // pdfMake's built-in list RTL is unreliable. We convert each list
-                // into a stack of {columns} rows with the marker on the RIGHT side.
+                if (!isArabic || !node || typeof node !== 'object' || depth > 50) return;
+                if (Array.isArray(node)) { node.forEach(n => applyArabicRTL(n, depth + 1)); return; }
                 if (node.ul || node.ol) {
                     const items = node.ul || node.ol;
                     const isOrdered = !!node.ol;
                     const stackItems = [];
-
                     items.forEach((item, idx) => {
                         const marker = isOrdered ? `.${idx + 1}` : '•';
-
-                        // Recursively process the item first
                         applyArabicRTL(item, depth + 1);
-
-                        // Build columns: [text content ← marker] for RTL visual order
                         stackItems.push({
                             columns: [
-                                typeof item === 'string'
-                                    ? { text: item, alignment: 'right', width: '*' }
-                                    : Object.assign({}, item, { alignment: 'right', width: '*' }),
+                                typeof item === 'string' ? { text: item, alignment: 'right', width: '*' } : Object.assign({}, item, { alignment: 'right', width: '*' }),
                                 { text: marker, width: 20, alignment: 'right', font: 'Roboto', color: '#555555', fontSize: 10 }
                             ],
-                            columnGap: 6,
-                            margin: [0, 2, 0, 2]
+                            columnGap: 6, margin: [0, 2, 0, 2]
                         });
                     });
-
-                    // Replace the ul/ol with a stack
-                    delete node.ul;
-                    delete node.ol;
-                    node.stack = stackItems;
-                    node.margin = node.margin || [0, 0, 0, 10];
+                    delete node.ul; delete node.ol; node.stack = stackItems; node.margin = node.margin || [0, 0, 0, 10];
                     return;
                 }
-
-                // ── 2. Reverse table columns for RTL ──
                 if (node.table && node.table.body) {
-                    node.table.body.forEach(row => {
-                        if (Array.isArray(row)) {
-                            row.reverse();
-                            row.forEach(cell => applyArabicRTL(cell, depth + 1));
-                        }
-                    });
-                    if (node.table.widths && Array.isArray(node.table.widths)) {
-                        node.table.widths.reverse();
-                    }
+                    node.table.body.forEach(row => { if (Array.isArray(row)) { row.reverse(); row.forEach(cell => applyArabicRTL(cell, depth + 1)); } });
+                    if (node.table.widths && Array.isArray(node.table.widths)) { node.table.widths.reverse(); }
                 }
-
-                // ── 3. Process child containers ──
                 if (node.columns) { node.columns.forEach(c => applyArabicRTL(c, depth + 1)); }
                 if (node.stack) { node.stack.forEach(s => applyArabicRTL(s, depth + 1)); }
-
-                // ── 4. Flip left/right margins ──
-                if (Array.isArray(node.margin) && node.margin.length === 4) {
-                    const [left, top, right, bottom] = node.margin;
-                    node.margin = [right, top, left, bottom];
-                }
-
-                // ── 5. Process text — reverse words and fix directional symbols ──
+                if (Array.isArray(node.margin) && node.margin.length === 4) { const [l, t, r, b] = node.margin; node.margin = [r, t, l, b]; }
                 if (typeof node.text === 'string' && node.text.trim()) {
-                    // Replace directional arrows for RTL
                     node.text = node.text.replace(/\u2192/g, '\u2190').replace(/->/g, '<-');
-
                     const str = node.text;
                     const hasArabic = /[\u0600-\u06FF]/.test(str);
-
                     if (hasArabic) {
                         const lines = str.split('\n');
                         const newTextRuns = [];
-
                         lines.forEach((line, index) => {
-                            if (!line.trim()) {
-                                if (index < lines.length - 1) newTextRuns.push({ text: '\n' });
-                                return;
-                            }
-
-                            // Tokenize: Latin phrases | Arabic words | spaces | punctuation
+                            if (!line.trim()) { if (index < lines.length - 1) newTextRuns.push({ text: '\n' }); return; }
                             const tokens = line.match(/([a-zA-Z0-9](?:[\x20-\x7E]*[a-zA-Z0-9])?)|([\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]+)|(\s+)|([\x21-\x7E]+)|([^\x00-\x7F]+)/g) || [line];
-
-                            // Reverse tokens for visual RTL
-                            const reversedTokens = tokens.reverse();
-
-                            reversedTokens.forEach(token => {
+                            tokens.reverse().forEach(token => {
                                 const hasArabicChars = /[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(token);
-                                newTextRuns.push({
-                                    text: token,
-                                    font: hasArabicChars ? 'NotoSansArabic' : 'Roboto'
-                                });
+                                newTextRuns.push({ text: token, font: hasArabicChars ? 'NotoSansArabic' : 'Roboto' });
                             });
-
-                            if (index < lines.length - 1) {
-                                newTextRuns.push({ text: '\n' });
-                            }
+                            if (index < lines.length - 1) newTextRuns.push({ text: '\n' });
                         });
-
-                        node.text = newTextRuns;
-                        node.alignment = node.alignment || 'right';
-                    } else {
-                        node.font = node.font || 'Roboto';
-                        node.alignment = node.alignment || 'right';
-                    }
-                } else if (Array.isArray(node.text)) {
-                    node.text.reverse();
-                    node.text.forEach(t => applyArabicRTL(t, depth + 1));
-                }
-
-                // ── 6. Ensure alignment is always right ──
-                if (!node.alignment && (node.text || node.stack)) {
-                    node.alignment = 'right';
-                }
+                        node.text = newTextRuns; node.alignment = node.alignment || 'right';
+                    } else { node.font = node.font || 'Roboto'; node.alignment = node.alignment || 'right'; }
+                } else if (Array.isArray(node.text)) { node.text.reverse(); node.text.forEach(t => applyArabicRTL(t, depth + 1)); }
+                if (!node.alignment && (node.text || node.stack)) node.alignment = 'right';
             };
 
-            // Helper to add sections safely
             const addSection = (contentArray) => {
                 if (contentArray && Array.isArray(contentArray)) {
                     if (isArabic) contentArray.forEach(item => applyArabicRTL(item, 0));
@@ -214,464 +124,285 @@ window.PDFGenerator = {
                 }
             };
 
-            // ... (rest of the content generation remains the same)
-            // Note: I'm keeping the original loop logic but using the fixed addSection
-
-            // ==========================================
             // TITLE PAGE
-            // ==========================================
             addSection([
                 { text: projectName, style: 'title' },
                 { text: `${translations['pdf-blueprint'] || 'Architecture Blueprint'} — ${dateStr}`, style: 'subtitle' },
                 { text: translations['pdf-problem-stmt'] || 'Problem Statement:', style: 'subsectionHeader' },
                 { text: state.problemText || translations['pdf-no-problem'] || "No problem statement provided.", style: 'bodyText', italics: true },
-                { text: '', pageBreak: 'after' } // Force page break after title
+                { text: '', pageBreak: 'after' }
             ]);
 
-            // ==========================================
-            // AGENT 1: PROBLEM ANALYSIS
-            // ==========================================
-            if (results.analysis) {
+            // 1. PROBLEM ANALYSIS (Phases 1 & 1b)
+            if (results.analysis || results.useCaseScope) {
                 const analysisBlocks = [];
+                if (results.analysis?.domain) analysisBlocks.push({ text: translations['pdf-industry'] || 'Industry Domain:', style: 'subsectionHeader' }, { text: results.analysis.domain, style: 'bodyText' });
+                if (results.analysis?.summary) analysisBlocks.push({ text: translations['pdf-summary'] || 'System Summary:', style: 'subsectionHeader' }, { text: results.analysis.summary, style: 'bodyText' });
+                if (results.analysis?.coreProblem) analysisBlocks.push({ text: translations['label-core-problem'] || 'Core Problem:', style: 'subsectionHeader' }, { text: results.analysis.coreProblem, style: 'bodyText' });
 
-                if (results.analysis.domain) {
-                    analysisBlocks.push({ text: translations['pdf-industry'] || 'Industry Domain:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ text: results.analysis.domain, style: 'bodyText' });
-                }
-
-                if (results.analysis.summary) {
-                    analysisBlocks.push({ text: translations['pdf-summary'] || 'System Summary:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ text: results.analysis.summary, style: 'bodyText' });
-                }
-
-                if (results.analysis.coreProblem) {
-                    analysisBlocks.push({ text: translations['label-core-problem'] || 'Core Problem:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ text: results.analysis.coreProblem, style: 'bodyText' });
-                }
-
-                if (results.analysis.actors && results.analysis.actors.length > 0) {
-                    analysisBlocks.push({ text: translations['pdf-actors'] || 'Primary Actors:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ ul: results.analysis.actors.filter(a => a).map(a => ({ text: a, style: 'bodyText' })), style: 'list' });
-                }
-
-                if (results.analysis.entities && results.analysis.entities.length > 0) {
-                    analysisBlocks.push({ text: translations['pdf-entities'] || 'Core Entities:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ ul: results.analysis.entities.filter(e => e).map(e => ({ text: e, style: 'bodyText' })), style: 'list' });
-                }
-
-                if (results.analysis.dataSources && results.analysis.dataSources.length > 0) {
-                    analysisBlocks.push({ text: translations['pdf-data-sources'] || 'Key Data Sources:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ ul: results.analysis.dataSources.filter(d => d).map(d => ({ text: d, style: 'bodyText' })), style: 'list' });
-                }
-
-                if (results.analysis.events && results.analysis.events.length > 0) {
-                    analysisBlocks.push({ text: translations['pdf-principal-events'] || 'Principal Events:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ ul: results.analysis.events.filter(e => e).map(e => ({ text: e, style: 'bodyText' })), style: 'list' });
-                }
-
-                if (results.analysis.aiTasks && results.analysis.aiTasks.length > 0) {
-                    analysisBlocks.push({ text: translations['pdf-ai-tasks'] || 'AI / ML Tasks:', style: 'subsectionHeader' });
-                    const aiTasksList = results.analysis.aiTasks.map(t => {
-                        return { text: `${t.task} (${t.type}) — Models: ${t.models.join(', ')}`, style: 'bodyText' };
+                if (results.analysis?.dealSize) {
+                    analysisBlocks.push({ text: 'Deal Snapshot:', style: 'subsectionHeader' });
+                    analysisBlocks.push({
+                        ul: [
+                            { text: `Deal Size: ${results.analysis.dealSize}` },
+                            { text: `Urgency: ${results.analysis.urgency?.level || 'Unknown'} - ${results.analysis.urgency?.justification || ''}` }
+                        ], style: 'list'
                     });
-                    analysisBlocks.push({ ul: aiTasksList, style: 'list' });
                 }
 
-                if (results.analysis.vantiqSuitability) {
-                    analysisBlocks.push({ text: translations['pdf-vantiq-suitability'] || 'Vantiq Suitability:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ text: results.analysis.vantiqSuitability, style: 'bodyText' });
+                if (results.useCaseScope) {
+                    analysisBlocks.push({ text: 'Use Case Scope & Investment:', style: 'subsectionHeader' });
+                    analysisBlocks.push({
+                        ul: [
+                            ...(results.useCaseScope.investmentEstimate ? [{ text: `Investment: ${results.useCaseScope.investmentEstimate}` }] : []),
+                            ...(results.useCaseScope.timeToValue ? [{ text: `Time to Value: ${results.useCaseScope.timeToValue}` }] : [])
+                        ], style: 'list'
+                    });
                 }
 
-                if (analysisBlocks.length > 0) {
-                    addSection([
-                        { text: translations['pdf-sec-analysis'] || '1. Problem Analysis & Scope', style: 'sectionHeader' },
-                        ...analysisBlocks
-                    ]);
+                if (results.analysis?.painPoints?.length) {
+                    analysisBlocks.push({ text: 'Pain Points:', style: 'subsectionHeader' });
+                    analysisBlocks.push({ ul: results.analysis.painPoints.map(p => ({ text: `${p.pain} [${p.severity}]: ${p.impact}` })), style: 'list' });
                 }
+
+                if (results.analysis?.actors?.length) {
+                    analysisBlocks.push({ text: translations['pdf-actors'] || 'Primary Actors:', style: 'subsectionHeader' }, { ul: results.analysis.actors.map(a => ({ text: a })), style: 'list' });
+                }
+
+                if (results.analysis?.events?.length) {
+                    analysisBlocks.push({ text: translations['pdf-principal-events'] || 'Principal Events:', style: 'subsectionHeader' }, { ul: results.analysis.events.map(e => ({ text: e })), style: 'list' });
+                }
+
+                if (results.analysis?.aiTasks?.length) {
+                    analysisBlocks.push({ text: translations['pdf-ai-tasks'] || 'AI / ML Tasks:', style: 'subsectionHeader' }, { ul: results.analysis.aiTasks.map(t => ({ text: `${t.task} (${t.type}) — Models: ${(t.models || []).join(', ')}` })), style: 'list' });
+                }
+
+                if (analysisBlocks.length > 0) addSection([{ text: '1. Problem Analysis & Discovery', style: 'sectionHeader' }, ...analysisBlocks]);
             }
 
-            // ==========================================
-            // AGENT 2: DOMAIN MODEL
-            // ==========================================
+            // 2. BUSINESS VALUE & COMPETITIVE (Phases 11 & 10)
+            if (results.businessValue || results.competitive) {
+                const bzBlocks = [];
+                if (results.businessValue?.summary) bzBlocks.push({ text: results.businessValue.summary, style: 'bodyText', italics: true });
+
+                if (results.businessValue?.roiProjection) {
+                    bzBlocks.push({ text: 'ROI Projection:', style: 'subsectionHeader' });
+                    const r = results.businessValue.roiProjection;
+                    bzBlocks.push({ ul: [`Investment: ${r.investmentRange || ''}`, `Expected Return: ${r.expectedReturn || ''}`, `Payback Period: ${r.paybackPeriod || ''}`, `ROI: ${r.roiPercentage || ''}`], style: 'list' });
+                }
+
+                if (results.businessValue?.costOfInaction) {
+                    bzBlocks.push({ text: 'Cost of Inaction:', style: 'subsectionHeader' });
+                    bzBlocks.push({ text: results.businessValue.costOfInaction, style: 'bodyText' });
+                }
+
+                if (results.competitive?.competitors?.length) {
+                    bzBlocks.push({ text: 'Competitive Comparison:', style: 'subsectionHeader' });
+                    const compBody = [[{ text: 'Competitor / Approach', style: 'tableHeader' }, { text: 'Strengths', style: 'tableHeader' }, { text: 'Weaknesses / Gaps', style: 'tableHeader' }]];
+                    results.competitive.competitors.forEach(c => compBody.push([{ text: c.name || "", bold: true }, { text: (c.strengths || []).join(', ') }, { text: (c.weaknesses || []).join(', ') }]));
+                    bzBlocks.push({ table: { headerRows: 1, widths: ['30%', '35%', '35%'], body: compBody }, layout: 'lightHorizontalLines', margin: [0, 5, 0, 15] });
+                }
+
+                if (results.competitive?.winStrategy?.length) {
+                    bzBlocks.push({ text: 'Win Strategy:', style: 'subsectionHeader' });
+                    bzBlocks.push({ ul: results.competitive.winStrategy.map(w => ({ text: w })), style: 'list' });
+                }
+
+                if (bzBlocks.length > 0) addSection([{ text: '2. Business Value & Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }, ...bzBlocks]);
+            }
+
+            // 3. DOMAIN MODEL (Agent 2)
             if (results.domainModel) {
-                const domainBlocks = [];
+                const dmBlocks = [];
+                if (results.domainModel.domain) dmBlocks.push({ text: results.domainModel.domain, style: 'bodyText', margin: [0, 0, 0, 15] });
 
-                if (results.domainModel.domain) {
-                    domainBlocks.push({ text: results.domainModel.domain, style: 'bodyText', margin: [0, 0, 0, 15] });
+                if (results.domainModel.boundedContexts?.length) {
+                    dmBlocks.push({ text: 'Bounded Contexts:', style: 'subsectionHeader' });
+                    dmBlocks.push({ ul: results.domainModel.boundedContexts.map(b => ({ text: `${b.name}: ${b.description}` })), style: 'list' });
                 }
 
-                // Entities Table
-                if (results.domainModel.entities && results.domainModel.entities.length > 0) {
-                    const entityBody = [
-                        [
-                            { text: translations['pdf-th-entity-name'] || 'Entity / Type Name', style: 'tableHeader' },
-                            { text: translations['pdf-th-type-class'] || 'Type classification', style: 'tableHeader' },
-                            { text: translations['pdf-th-props'] || 'Properties', style: 'tableHeader' }
-                        ]
-                    ];
-                    results.domainModel.entities.forEach(e => {
-                        entityBody.push([
-                            { text: e.name || "", style: 'tableCell', bold: true },
-                            { text: e.type || "", style: 'tableCell' },
-                            { text: (e.properties || []).join(', '), style: 'tableCell' }
-                        ]);
-                    });
-
-                    domainBlocks.push({ text: translations['pdf-vantiq-types'] || 'Vantiq Types (Entities)', style: 'subsectionHeader' });
-                    domainBlocks.push({
-                        table: {
-                            headerRows: 1,
-                            widths: ['30%', '20%', '50%'],
-                            body: entityBody
-                        },
-                        layout: 'lightHorizontalLines',
-                        margin: [0, 0, 0, 15]
-                    });
+                if (results.domainModel.entities?.length) {
+                    const entityBody = [[{ text: 'Entity / Type Name', style: 'tableHeader' }, { text: 'Classification', style: 'tableHeader' }, { text: 'Properties', style: 'tableHeader' }]];
+                    results.domainModel.entities.forEach(e => entityBody.push([{ text: e.name || "", bold: true }, { text: `${e.type || ''} [${e.stateManagement || 'Stateful'}]` }, { text: (e.properties || []).join(', ') }]));
+                    dmBlocks.push({ text: 'Vantiq Types (Entities)', style: 'subsectionHeader' }, { table: { headerRows: 1, widths: ['30%', '20%', '50%'], body: entityBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                 }
 
-                // Events Table
-                if (results.domainModel.events && results.domainModel.events.length > 0) {
-                    const eventBody = [
-                        [
-                            { text: translations['pdf-th-event-name'] || 'Event Name', style: 'tableHeader' },
-                            { text: translations['pdf-th-event-type'] || 'Event Type', style: 'tableHeader' },
-                            { text: translations['pdf-th-payload'] || 'Payload Structure', style: 'tableHeader' }
-                        ]
-                    ];
-                    results.domainModel.events.forEach(e => {
-                        eventBody.push([
-                            { text: e.name || "", style: 'tableCell', bold: true },
-                            { text: e.type || "", style: 'tableCell' },
-                            { text: (e.payload || []).join(', '), style: 'tableCell' }
-                        ]);
-                    });
-
-                    domainBlocks.push({ text: translations['pdf-event-streams'] || 'Event Streams', style: 'subsectionHeader' });
-                    domainBlocks.push({
-                        table: {
-                            headerRows: 1,
-                            widths: ['30%', '20%', '50%'],
-                            body: eventBody
-                        },
-                        layout: 'lightHorizontalLines',
-                        margin: [0, 0, 0, 15]
-                    });
+                if (results.domainModel.eventFlowSummary) {
+                    dmBlocks.push({ text: 'Event Flow Summary:', style: 'subsectionHeader' }, { text: results.domainModel.eventFlowSummary, style: 'bodyText' });
                 }
 
-                // Services Table
-                if (results.domainModel.services && results.domainModel.services.length > 0) {
-                    const serviceBody = [
-                        [
-                            { text: translations['pdf-th-service-name'] || 'Service Name', style: 'tableHeader' },
-                            { text: translations['pdf-th-resp'] || 'Responsibility', style: 'tableHeader' }
-                        ]
-                    ];
-                    results.domainModel.services.forEach(s => {
-                        serviceBody.push([
-                            { text: s.name || "", style: 'tableCell', bold: true },
-                            { text: s.responsibility || "", style: 'tableCell' }
-                        ]);
-                    });
-
-                    domainBlocks.push({ text: translations['pdf-microservices'] || 'Microservices', style: 'subsectionHeader' });
-                    domainBlocks.push({
-                        table: {
-                            headerRows: 1,
-                            widths: ['35%', '65%'],
-                            body: serviceBody
-                        },
-                        layout: 'lightHorizontalLines',
-                        margin: [0, 0, 0, 10]
-                    });
-                }
-
-                if (domainBlocks.length > 0) {
-                    addSection([{ text: translations['pdf-sec-domain'] || '2. Domain Model', style: 'sectionHeader', pageBreak: 'before' }, ...domainBlocks]);
-                }
+                if (dmBlocks.length > 0) addSection([{ text: '3. Domain Model', style: 'sectionHeader', pageBreak: 'before' }, ...dmBlocks]);
             }
 
-            // ==========================================
-            // AGENT 3: SYSTEM ARCHITECTURE
-            // ==========================================
+            // 4. SYSTEM ARCHITECTURE & LINTER (Agent 3 & 11)
             if (results.architecture) {
                 const archBlocks = [];
+                if (results.architecture.description) archBlocks.push({ text: results.architecture.description, style: 'bodyText' });
 
-                if (results.architecture.description) {
-                    archBlocks.push({ text: results.architecture.description, style: 'bodyText' });
-                }
-
-                // Components
-                if (results.architecture.components && results.architecture.components.length > 0) {
-                    const compBody = [
-                        [
-                            { text: translations['pdf-th-comp'] || 'Component', style: 'tableHeader' },
-                            { text: translations['th-description'] || 'Description', style: 'tableHeader' },
-                            { text: translations['pdf-th-tech'] || 'Technologies', style: 'tableHeader' }
-                        ]
-                    ];
-                    results.architecture.components.forEach(c => {
-                        compBody.push([
-                            { text: c.name || "", style: 'tableCell', bold: true },
-                            { text: c.description || "", style: 'tableCell' },
-                            { text: (c.tech || []).join(', '), style: 'tableCell' }
-                        ]);
-                    });
-
-                    archBlocks.push({ text: translations['pdf-arch-comps'] || 'Architecture Components', style: 'subsectionHeader' });
-                    archBlocks.push({
-                        table: {
-                            headerRows: 1,
-                            widths: ['25%', '50%', '25%'],
-                            body: compBody
-                        },
-                        layout: 'lightHorizontalLines',
-                        margin: [0, 0, 0, 15]
-                    });
-                }
-
-                // Integrations
-                if (results.architecture.integrations && results.architecture.integrations.length > 0) {
-                    archBlocks.push({ text: translations['pdf-int-flows'] || 'Integration Flows', style: 'subsectionHeader' });
-                    const ol = results.architecture.integrations.map(i => {
-                        return { text: `[${i.protocol || 'API'}] ${i.from || "?"} → ${i.to || "?"}: ${i.description || ""}`, style: 'bodyText' };
-                    });
-                    archBlocks.push({ ul: ol, style: 'list' });
-                }
-
-                // Principles
-                if (results.architecture.principles && results.architecture.principles.length > 0) {
-                    archBlocks.push({ text: translations['pdf-arch-principles'] || 'Architecture Principles', style: 'subsectionHeader' });
-                    archBlocks.push({ ul: results.architecture.principles.map(p => ({ text: p, style: 'bodyText' })), style: 'list' });
-                }
-
-                if (archBlocks.length > 0) {
-                    // Add Linter / Architecture Review if available
-                    if (results.linter && results.linter.findings && results.linter.findings.length > 0) {
-                        archBlocks.push({ text: translations['pdf-arch-review'] || 'Architecture Review Findings:', style: 'subsectionHeader' });
-                        const findings = results.linter.findings.map(f => {
-                            return { text: `[${f.severity || 'INFO'}] ${f.finding}: ${f.recommendation || ""}`, style: 'bodyText' };
-                        });
-                        archBlocks.push({ ul: findings, style: 'list' });
-                    }
-
-                    addSection([{ text: translations['pdf-sec-arch'] || '3. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
-                }
-            }
-
-            // ==========================================
-            // AGENT 4: AI MODEL SELECTION
-            // ==========================================
-            if (results.aiModels && results.aiModels.models && results.aiModels.models.length > 0) {
-                addSection([{ text: translations['pdf-sec-aimodels'] || '4. AI Model Recommendations', style: 'sectionHeader', pageBreak: 'before' }]);
-
-                const modelBody = [
-                    [
-                        { text: translations['pdf-th-capability'] || 'Capability', style: 'tableHeader' },
-                        { text: translations['pdf-th-models'] || 'Recommended Models', style: 'tableHeader' },
-                        { text: translations['pdf-th-justification'] || 'Justification', style: 'tableHeader' }
-                    ]
-                ];
-
-                results.aiModels.models.forEach(m => {
-                    modelBody.push([
-                        { text: m.capability || "", style: 'tableCell', bold: true },
-                        { text: (m.recommendations || []).join(', '), style: 'tableCell' },
-                        { text: m.justification || "", style: 'tableCell' }
-                    ]);
+                archBlocks.push({ text: 'Architecture Blueprint Insights:', style: 'subsectionHeader' });
+                archBlocks.push({
+                    ul: [
+                        ...(results.architecture.scalabilityNotes ? [{ text: `Scalability: ${results.architecture.scalabilityNotes}` }] : []),
+                        ...(results.architecture.securityConsiderations ? [{ text: `Security: ${results.architecture.securityConsiderations}` }] : []),
+                        ...(results.architecture.deploymentTopology ? [{ text: `Topology: ${results.architecture.deploymentTopology}` }] : []),
+                        ...(results.architecture.latencyBudget ? [{ text: `Latency Budget: ${results.architecture.latencyBudget}` }] : [])
+                    ], style: 'list'
                 });
 
-                addSection([
-                    {
-                        table: {
-                            headerRows: 1,
-                            widths: ['25%', '30%', '45%'],
-                            body: modelBody
-                        },
-                        layout: 'lightHorizontalLines',
-                        margin: [0, 10, 0, 15]
-                    }
-                ]);
-
-                if (results.aiModels.infrastructure) {
-                    addSection([{ text: translations['pdf-infra-guardrails'] || 'Infrastructure & Guardrails:', style: 'subsectionHeader' }]);
-                    addSection([{ text: results.aiModels.infrastructure, style: 'bodyText' }]);
+                if (results.architecture.components?.length) {
+                    const compBody = [[{ text: 'Component', style: 'tableHeader' }, { text: 'Description', style: 'tableHeader' }, { text: 'Technologies', style: 'tableHeader' }]];
+                    results.architecture.components.forEach(c => compBody.push([{ text: c.name || "", bold: true }, { text: c.description || "" }, { text: (c.tech || []).join(', ') }]));
+                    archBlocks.push({ text: 'Architecture Components', style: 'subsectionHeader' }, { table: { headerRows: 1, widths: ['25%', '50%', '25%'], body: compBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                 }
+
+                if (results.linter?.findings?.length) {
+                    archBlocks.push({ text: `Architecture Review Findings (Score: ${results.linter.overallGrade || 'N/A'}):`, style: 'subsectionHeader' });
+                    archBlocks.push({ ul: results.linter.findings.map(f => ({ text: `[${f.severity || 'INFO'}] ${f.finding}: ${f.recommendation || ""}` })), style: 'list' });
+                    if (results.linter.quickWins?.length) {
+                        archBlocks.push({ text: 'Quick Wins:', style: 'subsectionHeader' });
+                        archBlocks.push({ ul: results.linter.quickWins.map(q => ({ text: q })), style: 'list' });
+                    }
+                }
+
+                if (archBlocks.length > 0) addSection([{ text: '4. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
             }
 
-            // ==========================================
-            // AGENT 5: EVENT SYSTEM FLOWS
-            // ==========================================
-            if (results.eventSystem && results.eventSystem.flows && results.eventSystem.flows.length > 0) {
-                addSection([{ text: translations['pdf-sec-events'] || '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
+            // 5. EVENT SYSTEM (Agent 5)
+            if (results.eventSystem) {
+                const evBlocks = [];
 
-                results.eventSystem.flows.forEach(f => {
-                    addSection([
-                        { text: f.flowName || "Event Flow", style: 'subsectionHeader' },
-                        { text: f.description || "", style: 'bodyText' }
-                    ]);
+                if (results.eventSystem.orchestrationPattern) {
+                    evBlocks.push({ text: 'Orchestration Pattern:', style: 'subsectionHeader' }, { text: results.eventSystem.orchestrationPattern, style: 'bodyText' });
+                }
 
-                    if (f.steps && f.steps.length > 0) {
-                        const stepList = f.steps.map(s => {
-                            return { text: `[${s.component || 'App'}] ${s.action || ""}`, style: 'bodyText' };
-                        });
-                        addSection([{ ol: stepList, style: 'list' }]);
+                if (results.eventSystem.schemas?.length) {
+                    const schemaBody = [[{ text: 'Event Type', style: 'tableHeader' }, { text: 'Key Fields', style: 'tableHeader' }]];
+                    results.eventSystem.schemas.forEach(s => Object.keys(s).forEach(k => schemaBody.push([{ text: k, bold: true }, { text: s[k] }])));
+                    if (schemaBody.length > 1) {
+                        evBlocks.push({ text: 'Event Schemas', style: 'subsectionHeader' }, { table: { headerRows: 1, widths: ['40%', '60%'], body: schemaBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                     }
-                });
-            }
-
-            // ==========================================
-            // AGENT 4b: AGENTIC AI GUIDE
-            // ==========================================
-            if (results.agenticGuide && results.agenticGuide.agents && results.agenticGuide.agents.length > 0) {
-                addSection([{ text: translations['pdf-sec-agentic'] || '6. Agentic AI Orchestration', style: 'sectionHeader', pageBreak: 'before' }]);
-
-                results.agenticGuide.agents.forEach(a => {
-                    addSection([
-                        { text: a.agentName || "AI Agent", style: 'subsectionHeader' },
-                        { text: `Role: ${a.role || ""}`, style: 'bodyText', bold: true },
-                        { text: a.description || "", style: 'bodyText' }
-                    ]);
-
-                    if (a.tools && a.tools.length > 0) {
-                        addSection([{ text: 'Tools & Capabilities:', style: 'bodyText', bold: true, margin: [0, 5, 0, 2] }]);
-                        addSection([{ ul: a.tools, style: 'list' }]);
-                    }
-                });
-            }
-
-            // ==========================================
-            // AGENT 10: COMPETITIVE ANALYSIS
-            // ==========================================
-            // AGENT 11: BUSINESS VALUE
-            // ==========================================
-            if (results.businessValue) {
-                addSection([{ text: translations['business-title'] || '7. Business Value Justifier', style: 'sectionHeader', pageBreak: 'before' }]);
-
-                if (results.businessValue.summary) {
-                    addSection([{ text: results.businessValue.summary, style: 'bodyText', italics: true, margin: [0, 0, 0, 15] }]);
                 }
 
-                if (results.businessValue.valueDrivers && results.businessValue.valueDrivers.length > 0) {
-                    addSection([{ text: 'Value Drivers:', style: 'subsectionHeader' }]);
-                    const drivers = results.businessValue.valueDrivers.map(d => ({
-                        text: [
-                            { text: `${d.category || ''}: `, bold: true },
-                            d.impact || ''
-                        ],
-                        style: 'bodyText'
-                    }));
-                    addSection([{ ul: drivers, style: 'list' }]);
+                if (results.eventSystem.producers?.length) {
+                    const prodBody = [[{ text: 'Producer', style: 'tableHeader' }, { text: 'Events Emitted', style: 'tableHeader' }, { text: 'Frequency / Protocol', style: 'tableHeader' }]];
+                    results.eventSystem.producers.forEach(p => prodBody.push([{ text: p.name || "", bold: true }, { text: (p.events || []).join(', ') }, { text: `${p.frequency || ''} / ${p.protocol || ''}` }]));
+                    evBlocks.push({ text: 'Producers', style: 'subsectionHeader' }, { table: { headerRows: 1, widths: ['30%', '40%', '30%'], body: prodBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                 }
 
-                if (results.businessValue.riskMitigations && results.businessValue.riskMitigations.length > 0) {
-                    addSection([{ text: 'Risk Mitigations:', style: 'subsectionHeader' }]);
-                    const risks = results.businessValue.riskMitigations.map(r => ({
-                        text: [
-                            { text: `${r.risk || 'Risk'}: `, bold: true },
-                            r.solution || ''
-                        ],
-                        style: 'bodyText'
-                    }));
-                    addSection([{ ul: risks, style: 'list' }]);
-                }
-
-                if (results.businessValue.kpis && results.businessValue.kpis.length > 0) {
-                    addSection([{ text: 'Success KPIs:', style: 'subsectionHeader' }]);
-                    const kpiBody = [
-                        [
-                            { text: 'Metric', style: 'tableHeader' },
-                            { text: 'Target', style: 'tableHeader' }
-                        ]
-                    ];
-                    results.businessValue.kpis.forEach(k => {
-                        kpiBody.push([
-                            { text: k.metric || '', style: 'tableCell' },
-                            { text: k.target || '', style: 'tableCell', bold: true }
-                        ]);
+                if (results.eventSystem.dataRetention?.length) {
+                    const retBody = [[{ text: 'Event Type', style: 'tableHeader' }, { text: 'Retention Limit', style: 'tableHeader' }, { text: 'Rationale', style: 'tableHeader' }]];
+                    results.eventSystem.dataRetention.forEach(r => {
+                        const evtTitle = r.eventType || r.type || r.event || r.name || "Unknown";
+                        retBody.push([{ text: evtTitle, bold: true }, { text: r.limit || r.retentionLimit || r.retention || '' }, { text: r.rationale || r.description || r.reason || '' }]);
                     });
-
-                    addSection([{
-                        table: {
-                            headerRows: 1,
-                            widths: ['50%', '50%'],
-                            body: kpiBody
-                        },
-                        layout: 'lightHorizontalLines',
-                        margin: [0, 5, 0, 15]
-                    }]);
+                    evBlocks.push({ text: 'Data Retention Policy', style: 'subsectionHeader' }, { table: { headerRows: 1, widths: ['30%', '25%', '45%'], body: retBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                 }
+
+                if (evBlocks.length > 0) addSection([{ text: '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }, ...evBlocks]);
             }
 
-            // ==========================================
-            if (results.competitive) {
-                addSection([{ text: translations['pdf-sec-compete'] || '7. Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }]);
+            // 6. AI MODELS & AGENTIC (Agents 4 & 4b)
+            if (results.aiModels || results.agenticGuide) {
+                const aiBlocks = [];
 
-                if (results.competitive.marketLandscape) {
-                    addSection([{ text: translations['pdf-market-landscape'] || 'Market Landscape:', style: 'subsectionHeader' }]);
-                    addSection([{ text: results.competitive.marketLandscape, style: 'bodyText' }]);
+                if (results.aiModels?.models?.length) {
+                    aiBlocks.push({ text: 'AI Model Recommendations:', style: 'subsectionHeader' });
+                    const modelBody = [[{ text: 'Capability', style: 'tableHeader' }, { text: 'Recommended Models', style: 'tableHeader' }, { text: 'Cost / Complexity', style: 'tableHeader' }]];
+                    results.aiModels.models.forEach(m => modelBody.push([{ text: m.capability || "", bold: true }, { text: (m.recommendations || []).join(', ') }, { text: `${results.aiModels.totalEstimatedCost || ''} | ${results.aiModels.rampUpComplexity || ''}` }]));
+                    aiBlocks.push({ table: { headerRows: 1, widths: ['25%', '40%', '35%'], body: modelBody }, layout: 'lightHorizontalLines', margin: [0, 10, 0, 15] });
                 }
 
-                if (results.competitive.competitors && results.competitive.competitors.length > 0) {
-                    const compBody = [
-                        [
-                            { text: translations['pdf-th-approach'] || 'Competitor / Approach', style: 'tableHeader' },
-                            { text: translations['label-strengths'] || 'Strengths', style: 'tableHeader' },
-                            { text: translations['label-weaknesses'] || 'Weaknesses / Gaps', style: 'tableHeader' }
-                        ]
-                    ];
-                    results.competitive.competitors.forEach(c => {
-                        compBody.push([
-                            { text: c.name || "", style: 'tableCell', bold: true },
-                            { text: (c.strengths || []).join(', '), style: 'tableCell' },
-                            { text: (c.weaknesses || []).join(', '), style: 'tableCell' }
-                        ]);
+                if (results.agenticGuide?.agents?.length) {
+                    aiBlocks.push({ text: 'Agentic Alternative:', style: 'subsectionHeader' });
+                    results.agenticGuide.agents.forEach(a => {
+                        aiBlocks.push({ text: a.agentName || "AI Agent", style: 'bodyText', bold: true });
+                        aiBlocks.push({ text: `Role: ${a.role || ""} - ${a.description || ""}`, style: 'bodyText', margin: [0, 0, 0, 4] });
+                        if (a.tools?.length) aiBlocks.push({ ul: a.tools, style: 'list', margin: [15, 0, 0, 10] });
                     });
+                    if (results.agenticGuide.humanInTheLoop) {
+                        aiBlocks.push({ text: `Human-in-the-Loop: ${results.agenticGuide.humanInTheLoop}`, style: 'bodyText', italics: true });
+                    }
+                }
 
-                    addSection([
-                        { text: translations['pdf-comp-compare'] || 'Competitive Comparison:', style: 'subsectionHeader' },
-                        {
-                            table: {
-                                headerRows: 1,
-                                widths: ['30%', '35%', '35%'],
-                                body: compBody
-                            },
-                            layout: 'lightHorizontalLines',
-                            margin: [0, 5, 0, 15]
+                if (aiBlocks.length > 0) addSection([{ text: '6. AI Models & Agentic Overlay', style: 'sectionHeader', pageBreak: 'before' }, ...aiBlocks]);
+            }
+
+            // 7. IMPLEMENTATION ROADMAP (Agent 6)
+            if (results.implementation) {
+                const impBlocks = [];
+
+                if (results.implementation.projectStructure) {
+                    impBlocks.push({ text: 'Project Structure:', style: 'subsectionHeader' }, { text: results.implementation.projectStructure, style: 'bodyText', margin: [0, 0, 0, 15] });
+                }
+
+                if (results.implementation.services?.length) {
+                    results.implementation.services.forEach(s => {
+                        impBlocks.push({ text: `Service: ${s.serviceName}`, style: 'subsectionHeader' });
+                        impBlocks.push({ ul: [`Effort: ${s.estimatedEffort || 'Unknown'}`, `Testing: ${s.testingStrategy || 'Unknown'}`, `Dependencies: ${(s.dependencies || s.prerequisites || []).join(', ')}`], style: 'list' });
+                        if (s.pseudoSteps?.length) {
+                            impBlocks.push({ text: 'Implementation Steps:', style: 'bodyText', bold: true, margin: [0, 0, 0, 5] });
+                            impBlocks.push({ ul: s.pseudoSteps.map(step => ({ text: step })), style: 'list' });
                         }
-                    ]);
+                    });
                 }
 
-                if (results.competitive.differentiation && results.competitive.differentiation.length > 0) {
-                    addSection([{ text: translations['pdf-vantiq-diff'] || 'Vantiq Spark Differentiators:', style: 'subsectionHeader' }]);
-                    addSection([{ ul: results.competitive.differentiation.map(d => ({ text: d, style: 'bodyText' })), style: 'list' }]);
-                }
-            }
-
-            // ==========================================
-            // FINAL SECTION: IMPLEMENTATION PLAN
-            // ==========================================
-            if (results.implementation && results.implementation.phases && results.implementation.phases.length > 0) {
-                addSection([{ text: translations['pdf-sec-roadmap'] || '8. Implementation Roadmap', style: 'sectionHeader', pageBreak: 'before' }]);
-
-                results.implementation.phases.forEach((p, idx) => {
-                    const phaseBlocks = [];
-                    if (p.phase) phaseBlocks.push({ text: `Phase ${idx + 1}: ${p.phase}`, style: 'subsectionHeader' });
-                    if (p.description) phaseBlocks.push({ text: p.description, style: 'bodyText' });
-
-                    if (p.tasks && p.tasks.length > 0) {
-                        const tasks = p.tasks.filter(t => t && t.task).map(t => {
-                            let tText = `[${t.role || 'Any'}] ${t.task}`;
-                            if (t.vantiqTool) tText += ` (Requires: ${t.vantiqTool})`;
-                            return { text: tText, style: 'bodyText' };
-                        });
-                        if (tasks.length > 0) phaseBlocks.push({ ul: tasks, style: 'list' });
+                const dNotes = results.implementation.deploymentNotes;
+                if (dNotes) {
+                    impBlocks.push({ text: 'Deployment Notes:', style: 'subsectionHeader' });
+                    if (typeof dNotes === 'string') {
+                        impBlocks.push({ text: dNotes, style: 'bodyText' });
+                    } else if (typeof dNotes === 'object') {
+                        const ulItems = [];
+                        if (dNotes.edgeConfig) ulItems.push({ text: `Edge Config: ${dNotes.edgeConfig}` });
+                        if (dNotes.cloudConfig || dNotes.namespaceSetup) ulItems.push({ text: `Cloud/Namespace: ${dNotes.cloudConfig || dNotes.namespaceSetup}` });
+                        if (dNotes.packaging) ulItems.push({ text: `Packaging: ${dNotes.packaging}` });
+                        if (ulItems.length > 0) impBlocks.push({ ul: ulItems, style: 'list' });
                     }
+                }
 
-                    if (phaseBlocks.length > 0) addSection(phaseBlocks);
-                });
+                if (impBlocks.length > 0) addSection([{ text: '7. Implementation Scaffolding', style: 'sectionHeader', pageBreak: 'before' }, ...impBlocks]);
             }
 
-            // 2. Generate and Download PDF
+            // 8. EXPANSION (Agents 12, 13, 14)
+            if (results.adjacentUseCases || results.roadmap || results.platformValue) {
+                const expBlocks = [];
+
+                if (results.roadmap?.timeline?.length) {
+                    expBlocks.push({ text: 'Product Roadmap:', style: 'subsectionHeader' });
+                    results.roadmap.timeline.forEach(quarter => {
+                        expBlocks.push({ text: quarter.quarter || 'Quarter', style: 'bodyText', bold: true });
+                        const ulItems = [];
+                        if (quarter.focus) ulItems.push({ text: `Focus: ${quarter.focus}` });
+                        if (quarter.successCriteria) ulItems.push({ text: `Success Criteria: ${quarter.successCriteria}` });
+                        if (quarter.deliverables?.length) ulItems.push({ text: `Deliverables: ${quarter.deliverables.join(', ')}` });
+                        expBlocks.push({ ul: ulItems, style: 'list', margin: [15, 0, 0, 10] });
+                    });
+                }
+
+                if (results.platformValue?.horizons) {
+                    expBlocks.push({ text: 'Platform Value Growth:', style: 'subsectionHeader' });
+                    const valBody = [[{ text: 'Horizon', style: 'tableHeader' }, { text: 'Key Value Driver', style: 'tableHeader' }, { text: 'ROI & Maturity', style: 'tableHeader' }]];
+                    ['month6', 'month12', 'month24'].forEach(key => {
+                        const h = results.platformValue.horizons[key];
+                        if (h) {
+                            valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: h.keyValueDriver || '' }, { text: `${h.cumulativeROI || 'ROI'}\n${h.platformMaturityLevel || 'Maturity'}` }]);
+                        }
+                    });
+                    if (valBody.length > 1) expBlocks.push({ table: { headerRows: 1, widths: ['20%', '50%', '30%'], body: valBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
+                }
+
+                if (results.adjacentUseCases?.cases?.length) {
+                    expBlocks.push({ text: 'Adjacent Use Cases:', style: 'subsectionHeader' });
+                    results.adjacentUseCases.cases.forEach(c => {
+                        expBlocks.push({ text: `${c.name || 'Use Case'} [${c.timeframe || 'TBD'}]`, style: 'bodyText', bold: true });
+                        expBlocks.push({ text: c.description || '', style: 'bodyText', margin: [15, 5, 0, 5] });
+                        if (c.reusedComponents?.length) expBlocks.push({ text: `Reused Components: ${c.reusedComponents.join(', ')}`, style: 'bodyText', italics: true, margin: [15, 0, 0, 10] });
+                    });
+                }
+
+                if (expBlocks.length > 0) addSection([{ text: '8. Future Expansion & Roadmap', style: 'sectionHeader', pageBreak: 'before' }, ...expBlocks]);
+            }
+
             const pdfName = projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_architecture.pdf';
             pdfMake.createPdf(docDefinition).download(pdfName);
         } catch (error) {
