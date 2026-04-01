@@ -309,6 +309,7 @@ body {
   display: none;
   gap: 4px;
   align-items: center;
+  justify-content: center;
   overflow-x: auto;
   height: var(--header-height);
 }

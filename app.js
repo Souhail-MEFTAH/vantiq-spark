@@ -1754,34 +1754,12 @@ function simplifyMermaid(code) {
 
 // ── Pipeline Progress ──
 function updatePipelineStep(agentKey, status) {
-    const phaseMap = {
-        interpreter: { phase: 'discovery', isLast: true },
-        business: { phase: 'value', isLast: false },
-        competitive: { phase: 'value', isLast: true },
-        domain: { phase: 'architecture', isLast: false },
-        architecture: { phase: 'architecture', isLast: false },
-        events: { phase: 'architecture', isLast: false },
-        linter: { phase: 'architecture', isLast: false },
-        visualizer: { phase: 'architecture', isLast: true },
-        aimodel: { phase: 'ai', isLast: false },
-        agentic: { phase: 'ai', isLast: true },
-        implementation: { phase: 'implementation', isLast: true },
-        adjacent: { phase: 'expansion', isLast: false },
-        roadmap: { phase: 'expansion', isLast: false },
-        valueGrowth: { phase: 'expansion', isLast: true }
-    };
-
-    const mapping = phaseMap[agentKey] || { phase: agentKey, isLast: true };
-    const step = document.getElementById('step-' + mapping.phase);
+    const step = document.getElementById('step-' + agentKey);
 
     if (step) {
-        if (status === 'active') {
-            step.classList.remove('completed');
-            step.classList.add('active');
-        } else if (status === 'completed' && mapping.isLast) {
-            step.classList.remove('active');
-            step.classList.add('completed');
-        }
+        step.classList.remove('active', 'completed');
+        if (status === 'active') step.classList.add('active');
+        if (status === 'completed') step.classList.add('completed');
     }
 
     // Update connectors
@@ -1799,6 +1777,35 @@ function updatePipelineStep(agentKey, status) {
         }
     });
 
+    // Update overlay text
+    const overlay = document.getElementById('generatingAgentName');
+
+    // Skip overlay update for linter as requested
+    if (agentKey === 'linter' || !overlay || status !== 'active') return;
+
+    const overlayMap = {
+        interpreter: { icon: '🔍', label: 'Sales Discovery', num: '1' },
+        useCaseScope: { icon: '🎯', label: 'Use Case Scope', num: '2' },
+        business: { icon: '💰', label: 'Business Value', num: '3' },
+        competitive: { icon: '🏆', label: 'Competitive Analysis', num: '4' },
+        domain: { icon: '🧩', label: 'Domain Model', num: '5' },
+        architecture: { icon: '🏗️', label: 'Architecture', num: '6' },
+        events: { icon: '⚡', label: 'Event System', num: '7' },
+        visualizer: { icon: '📊', label: 'Diagrams', num: '8' },
+        aimodel: { icon: '🤖', label: 'AI Models', num: '9' },
+        agentic: { icon: '🧠', label: 'Agentic Approach', num: '10' },
+        implementation: { icon: '🛠️', label: 'Implementation', num: '11' },
+        adjacent: { icon: '🔗', label: 'Adjacent Use Cases', num: '12' },
+        roadmap: { icon: '🗺️', label: 'Roadmap', num: '13' },
+        valueGrowth: { icon: '📈', label: 'Platform Value Growth', num: '14' }
+    };
+
+    const info = overlayMap[agentKey];
+    if (info) {
+        const lang = state.language || 'en';
+        const agentLabel = lang === 'ko' ? '에이전트' : lang === 'ja' ? 'エージェント' : lang === 'ar' ? 'الوكيل' : 'Agent';
+        overlay.textContent = `${info.icon} ${agentLabel} ${info.num} — ${info.label}`;
+    }
 }
 
 function enableNav(panelId) {
@@ -1928,9 +1935,10 @@ async function runPhase1Discovery(text) {
         enableNav('analysis');
 
         // Agent 1b: Use Case Scope
-        document.getElementById('generatingAgentName').textContent = '🎯 Agent 1b — Use Case Scope';
+        updatePipelineStep('useCaseScope', 'active');
         state.results.useCaseScope = await Agents.useCaseScope(text, state.results.analysis, "", null, state.language);
         Renderers.renderUseCaseScope(state.results.useCaseScope, document.getElementById('usecasescope-content'));
+        updatePipelineStep('useCaseScope', 'completed');
         enableNav('usecasescope');
 
         // Update browser tab title
@@ -2193,21 +2201,24 @@ async function runPhase6Expansion() {
         document.getElementById('generateBtn').disabled = true;
 
         // Adjacent Use Cases
-        document.getElementById('generatingAgentName').textContent = '🔗 Adjacent Use Cases';
+        updatePipelineStep('adjacent', 'active');
         state.results.adjacentUseCases = await Agents.adjacentUseCases(state.problemText + ctx, state.results.analysis, state.results.architecture, state.results.implementation, "", null, state.language);
         Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content'));
+        updatePipelineStep('adjacent', 'completed');
         enableNav('adjacent');
 
         // Roadmap
-        document.getElementById('generatingAgentName').textContent = '🗺️ 12-Month Roadmap';
+        updatePipelineStep('roadmap', 'active');
         state.results.roadmap = await Agents.roadmap(state.problemText + ctx, state.results.analysis, state.results.architecture, state.results.implementation, state.results.businessValue || null, "", null, state.language);
         Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content'));
+        updatePipelineStep('roadmap', 'completed');
         enableNav('roadmap');
 
         // Platform Value Growth
-        document.getElementById('generatingAgentName').textContent = '📈 Platform Value Growth';
+        updatePipelineStep('valueGrowth', 'active');
         state.results.platformValueGrowth = await Agents.platformValueGrowth(state.problemText + ctx, state.results.analysis, state.results.architecture, state.results.businessValue || null, "", null, state.language);
         Renderers.renderPlatformValueGrowth(state.results.platformValueGrowth, document.getElementById('valuegrowth-content'));
+        updatePipelineStep('valueGrowth', 'completed');
         enableNav('valuegrowth');
 
         // Save the full generation to history

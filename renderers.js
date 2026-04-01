@@ -408,12 +408,13 @@ window.Renderers = {
 
     const eventOrch = data.orchestration || {};
     container.innerHTML = `
+      ${eventOrch.pattern || eventOrch.description ? `
       <div class="glass-card accent-cyan">
         <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="label-orchestration">Orchestration Pattern</span></div>
-        <p style="font-size:14px;font-weight:600;color:var(--text-primary);margin:8px 0">${eventOrch.pattern || ''}</p>
+        <p style="font-size:14px;font-weight:600;color:var(--text-primary);margin:8px 0">${eventOrch.pattern || 'Pattern omitted'}</p>
         <p style="font-size:13px;color:var(--text-secondary)">${eventOrch.description || ''}</p>
-        <p style="font-size:12px;color:var(--text-tertiary);margin-top:8px">🛡️ ${eventOrch.errorHandling || ''}</p>
-      </div>
+        ${eventOrch.errorHandling ? `<p style="font-size:12px;color:var(--text-tertiary);margin-top:8px">🛡️ ${eventOrch.errorHandling}</p>` : ''}
+      </div>` : ''}
       <div class="glass-card accent-warm">
         <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-event-schemas">Event Schemas</span></div>
         ${schemasHTML}
@@ -426,10 +427,11 @@ window.Renderers = {
         <div class="card-title"><span class="card-icon">📥</span> <span data-i18n="label-consumers">Consumers</span></div>
         <table class="data-table"><thead><tr><th data-i18n="th-consumer">Consumer</th><th data-i18n="th-subscribes">Subscribes To</th><th data-i18n="th-action">Action</th><th>Error Strategy</th></tr></thead><tbody>${consumersHTML}</tbody></table>
       </div>
+      ${(data.flowDiagram || data.mermaidDiagram) ? `
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-event-flow">Event Flow Diagram</span></div>
-        ${(data.flowDiagram || data.mermaidDiagram) ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram || data.mermaidDiagram)}</pre></div>` : '<p style="font-size:12px;color:var(--text-tertiary)">Diagram omitted or failed to generate.</p>'}
-      </div>
+        <div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram || data.mermaidDiagram)}</pre></div>
+      </div>` : ''}
       ${(data.dataRetention && data.dataRetention.length) ? `
       <div class="glass-card accent-warm">
         <div class="card-title"><span class="card-icon">🗃️</span> Data Retention Policy</div>
@@ -903,7 +905,6 @@ window.Renderers = {
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
           <span class="tag tag-${uc.effort === 'Low' ? 'green' : uc.effort === 'Medium' ? 'warm' : 'rose'}">⏱ Effort: ${uc.effort}</span>
           <span class="tag tag-${uc.businessValue === 'High' ? 'green' : 'cyan'}">Value: ${uc.businessValue}</span>
-          ${uc.revenueImpact ? `<span class="tag tag-purple" style="font-weight:700">💰 ${uc.revenueImpact}</span>` : ''}
           <span class="tag tag-purple">📅 ${uc.estimatedTimeline}</span>
         </div>
         <div style="margin-top:8px">
@@ -932,13 +933,15 @@ window.Renderers = {
           <span class="tag tag-${m.type === 'Technical' ? 'cyan' : m.type === 'Business' ? 'green' : 'purple'}" style="font-size:10px">${m.type}</span>
           <span style="font-size:12px;color:var(--text-primary)">${m.milestone}</span>
         </div>`).join('');
+      const deliverablesHTML = (q.deliverables || []).map(d => `<li style="font-size:11px;color:var(--text-secondary);margin-bottom:2px">• ${d}</li>`).join('');
       return `
         <div class="glass-card accent-${['purple', 'cyan', 'green', 'warm'][i % 4]}" style="animation-delay:${i * 0.15}s">
           <div class="card-title" style="font-size:16px"><span class="card-icon">${['🌱', '🌿', '🌳', '🌟'][i % 4]}</span> ${q.quarter}</div>
           <p style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase;font-weight:600;margin:4px 0">${q.theme || ''}</p>
           <div style="margin:12px 0">${milestonesHTML}</div>
+          ${deliverablesHTML ? `<div style="margin-top:8px"><strong style="font-size:11px;color:var(--text-tertiary)">DELIVERABLES:</strong><ul style="margin:4px 0 0 12px;padding:0;list-style-type:none;">${deliverablesHTML}</ul></div>` : ''}
           <div style="margin-top:8px"><strong style="font-size:11px;color:var(--text-tertiary)">TEAM:</strong> <span style="font-size:12px;color:var(--text-secondary)">${q.teamNeeds || ''}</span></div>
-          <div class="glass-card accent-green" style="padding:8px 12px;margin-top:8px">
+          <div class="glass-card accent-green" style="padding:8px 12px;margin-top:8px;margin-bottom:0;">
             <span style="font-size:12px;color:var(--text-primary)">🎯 ${q.expectedOutcome || ''}</span>
           </div>
           ${q.successCriteria ? `<div style="font-size:11px;color:var(--text-tertiary);margin-top:6px;padding:6px 8px;border-radius:var(--radius-sm);background:rgba(255,255,255,0.05)">✅ Success: ${q.successCriteria}</div>` : ''}
@@ -974,23 +977,23 @@ window.Renderers = {
     const renderHorizon = (label, icon, horizon) => {
       if (!horizon) return '';
       const metricsHTML = (horizon.metrics || []).map(m => `
-        < div class="glass-card" style = "padding:10px;margin-bottom:6px" >
+        <div class="glass-card" style="padding:10px;margin-bottom:6px">
           <div style="display:flex;justify-content:space-between;align-items:center">
             <strong style="font-size:13px;color:var(--text-primary)">${m.metric}</strong>
             <span class="tag tag-${m.category === 'Cost Savings' ? 'green' : m.category === 'Revenue' ? 'purple' : m.category === 'Efficiency' ? 'cyan' : 'warm'}">${m.category}</span>
           </div>
           <p style="font-size:14px;font-weight:700;color:var(--brand-success);margin-top:4px">${m.value}</p>
-        </div > `).join('');
+        </div>`).join('');
       return `
-      < div class="glass-card accent-cyan" >
+      <div class="glass-card accent-cyan">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div class="card-title"><span class="card-icon">${icon}</span> ${label}</div>
           ${horizon.cumulativeROI ? `<span class="tag tag-green" style="font-size:12px;font-weight:700">📈 ROI: ${horizon.cumulativeROI}</span>` : ''}
         </div>
           ${horizon.platformMaturityLevel ? `<div class="tag tag-purple" style="margin:8px 0;font-size:11px">${horizon.platformMaturityLevel}</div>` : ''}
           ${metricsHTML}
-    <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;font-style:italic">${horizon.narrative || ''}</p>
-        </div > `;
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;font-style:italic">${horizon.narrative || ''}</p>
+      </div>`;
     };
 
     const strategicHTML = (data.strategicValue || []).map(s => `

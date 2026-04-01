@@ -575,7 +575,9 @@ YOUR TASK: Analyze the problem statement and generated architecture to identify 
 
 RULES:
 - Be highly specific to the provided use-case (e.g., if it's predictive maintenance, focus on downtime reduction).
-- MAXIMUMS for fast generation: Define exactly 2-3 Value Drivers, 1-2 Risk Mitigations, and exactly 2 Measurable KPIs. Keep all text very concise.
+- Define 3-4 clear Value Drivers (e.g., Revenue Increase, Cost Savings, Efficiency).
+- Define 2-3 Risk Mitigations (what happens if they do NOT build this).
+- Define 3 Measurable KPIs to track success.
 
 You MUST respond with ONLY valid JSON:
 {
@@ -589,17 +591,17 @@ You MUST respond with ONLY valid JSON:
   "valueDrivers": [
     {
       "category": "string — e.g. Cost Reduction, Operational Efficiency, Revenue Growth",
-      "impact": "string — very concise description",
+      "impact": "string — specific description of the impact",
       "quantification": "string — estimated dollar or percentage impact"
     }
   ],
   "industryBenchmarks": [
-    { "benchmark": "string", "source": "string" }
+    { "benchmark": "string — real industry stat", "source": "string — e.g. 'Gartner 2024', 'McKinsey', 'Industry average'" }
   ],
   "costOfInaction": {
-    "financialCost": "string",
-    "operationalRisk": "string",
-    "competitiveRisk": "string"
+    "financialCost": "string — estimated annual cost of doing nothing",
+    "operationalRisk": "string — risks of maintaining status quo",
+    "competitiveRisk": "string — how competitors will gain advantage"
   },
   "riskMitigations": [
     {
@@ -626,16 +628,16 @@ You MUST respond with ONLY valid JSON:
 
   ${VANTIQ_CONTEXT}
 
-YOUR TASK: Conduct a competitive analysis of Vantiq versus the top competitors for the given use case. If the user provides specific competitor names, analyze EXACTLY those competitors. Otherwise, analyze Vantiq plus ONLY 2 major competitors relevant to the use case.
+YOUR TASK: Conduct a competitive analysis of Vantiq versus the top competitors for the given use case. If the user provides specific competitor names, analyze EXACTLY those competitors. Otherwise, analyze Vantiq plus 5 major competitors relevant to the use case.
 
 RULES:
 - Always include Vantiq as the FIRST entry in every comparison.
 - Competitors must be REAL, well-known platforms (e.g., AWS IoT, Azure IoT, PTC ThingWorx). Do NOT invent fictional companies.
-- For each competitor, provide honest strengths AND weaknesses.
+- For each competitor, provide honest strengths AND weaknesses — do not be biased.
 - Differentiation positioning must highlight Vantiq's unique value: real-time event-driven architecture, edge-to-cloud, low-code assembly.
-- MAXIMUMS to ensure fast generation: Compare Vantiq + maximum 2 competitors.
-- Provide exactly 2-3 Vantiq differentiators with concise gap analysis.
-- Provide exactly 2-3 objection handling entries. Be extremely concise (1 sentence each).
+- Compare Vantiq + up to 5 competitors. Keep descriptions relatively brief.
+- Provide 4-6 Vantiq differentiators with detailed competitor gap analysis.
+- Provide 4-6 objection handling entries covering common sales objections.
 
 You MUST respond with ONLY valid JSON:
 {
