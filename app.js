@@ -1802,10 +1802,20 @@ function updatePipelineStep(agentKey, status) {
             interpreter: 1, domain: 2, architecture: 3, aimodel: 4,
             agentic: '4b', events: 5, implementation: 6, visualizer: 7,
             demo: 8, training: 9
-        }[agentKey];
+        }[agentKey] || 1;
 
         const agentLabel = lang === 'ko' ? '에이전트' : lang === 'ja' ? 'エージェント' : lang === 'ar' ? 'الوكيل' : 'Agent';
-        overlay.textContent = `${icon} ${agentLabel} ${agentNumber} — ${label}`;
+        const labelText = stepKeys[agentKey] && translations[stepKeys[agentKey]] ? translations[stepKeys[agentKey]] : (
+            agentKey === 'domain' ? 'Domain Model' :
+                agentKey === 'architecture' ? 'Architecture' :
+                    agentKey === 'aimodel' ? 'AI Models' :
+                        agentKey === 'agentic' ? 'Agentic Approach' :
+                            agentKey === 'events' ? 'Event System' :
+                                agentKey === 'implementation' ? 'Implementation' :
+                                    agentKey === 'visualizer' ? 'Diagrams' :
+                                        agentKey === 'interpreter' ? 'Sales Discovery' : agentKey
+        );
+        overlay.textContent = `${icon} ${agentLabel} ${agentNumber} — ${labelText}`;
     }
 }
 

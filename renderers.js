@@ -45,15 +45,10 @@ window.Renderers = {
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <div class="card-title" style="margin:0"><span class="card-icon">💼</span> Deal Snapshot</div>
             <div style="display:flex;gap:8px">
-              ${data.dealSize ? `<span class="tag tag-green" style="font-size:12px;font-weight:700">💰 ${data.dealSize}</span>` : ''}
               ${data.urgency ? `<span class="tag tag-${data.urgency.level === 'Urgent' ? 'rose' : data.urgency.level === 'High' ? 'warm' : 'cyan'}" style="font-size:11px">⏱️ ${data.urgency.level}</span>` : ''}
             </div>
           </div>
           ${data.urgency?.justification ? `<p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.urgency.justification}</p>` : ''}
-        </div>
-        <div class="glass-card accent-rose" style="animation-delay:0.08s; grid-column: span 2">
-          <div class="card-title"><span class="card-icon">🎯</span> <span data-i18n="label-core-problem">Core Problem</span></div>
-          <p style="font-size:14px;color:var(--text-primary);margin-top:8px">${data.coreProblem || ''}</p>
         </div>
         <div class="glass-card accent-warm" style="animation-delay:0.08s; grid-column: span 2">
           <div class="card-title"><span class="card-icon">🚨</span> Pain Points</div>
@@ -63,7 +58,7 @@ window.Renderers = {
           <div class="card-title"><span class="card-icon">👥</span> Key Stakeholders</div>
           ${stakeholdersHTML}
         </div>
-        <div class="glass-card accent-rose" style="animation-delay:0.16s; grid-column: span 2">
+        <div class="glass-card accent-rose" style="animation-delay:0.16s; grid-column: span 3">
           <div class="card-title"><span class="card-icon">🔄</span> Current State</div>
           <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.currentState || ''}</p>
           <div style="margin-top:12px;padding:12px;border-radius:var(--radius-md);background:rgba(255,107,129,0.1)">
@@ -71,48 +66,18 @@ window.Renderers = {
             <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.whyHardWithoutVantiq || ''}</p>
           </div>
         </div>
-        ${(data.competitiveThreats && data.competitiveThreats.length) ? `
-        <div class="glass-card accent-warm" style="animation-delay:0.18s; grid-column: span 3">
-          <div class="card-title"><span class="card-icon">⚔️</span> Competitive Threats</div>
-          ${data.competitiveThreats.map(ct => `
-            <div class="glass-card" style="padding:12px;margin-bottom:8px">
-              <strong style="color:var(--text-primary);font-size:13px">${ct.alternative}</strong>
-              <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">❌ ${ct.weakness}</p>
-            </div>`).join('')}
-        </div>` : ''}
-        <div class="glass-card accent-green" style="animation-delay:0.2s">
+        <div class="glass-card accent-green" style="animation-delay:0.2s; grid-column: span 1">
           <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-data-sources">Data Sources</span></div>
           <ul class="data-list">${(data.dataSources || []).map(d => `<li><span class="list-icon">◆</span>${d}</li>`).join('')}</ul>
         </div>
-        <div class="glass-card accent-warm" style="animation-delay:0.24s">
+        <div class="glass-card accent-warm" style="animation-delay:0.24s; grid-column: span 2">
           <div class="card-title"><span class="card-icon">⚡</span> <span data-i18n="label-events">Business Events</span></div>
           <div class="tag-list">${(data.events || []).map(e => `<span class="tag tag-warm">${e}</span>`).join('')}</div>
         </div>
-        <div class="glass-card accent-green" style="animation-delay:0.28s; grid-column: span 3">
-          <div class="card-title"><span class="card-icon">🚀</span> <span data-i18n="label-why-vantiq">Why Vantiq?</span></div>
-          <p style="font-size:14px;color:var(--text-primary);margin-top:8px; line-height: 1.5">${data.vantiqSuitability || ''}</p>
-        </div>
-        ${data.championProfile ? `
-        <div class="glass-card accent-purple" style="animation-delay:0.3s; grid-column: span 2">
-          <div class="card-title"><span class="card-icon">🏆</span> Champion Coaching</div>
-          <div style="display:flex;gap:12px;margin-top:8px">
-            <div class="tag tag-green" style="flex-shrink:0;font-size:12px">👤 ${data.championProfile.idealRole}</div>
-          </div>
-          <p style="font-size:12px;color:var(--text-secondary);margin-top:8px;line-height:1.5">${data.championProfile.coachingTips}</p>
-        </div>` : ''}
-        <div class="glass-card accent-cyan" style="animation-delay:0.32s">
+        <div class="glass-card accent-cyan" style="animation-delay:0.32s; grid-column: span 3">
           <div class="card-title"><span class="card-icon">❓</span> Qualifying Questions</div>
           <ol style="padding-left:0;list-style:none">${questionsHTML}</ol>
         </div>
-        ${(data.nextBestActions && data.nextBestActions.length) ? `
-        <div class="glass-card accent-green" style="animation-delay:0.34s; grid-column: span 3">
-          <div class="card-title"><span class="card-icon">✅</span> Recommended Next Steps</div>
-          <ol style="padding-left:0;list-style:none">${data.nextBestActions.map((a, i) => `
-            <li style="margin-bottom:8px;color:var(--text-primary);display:flex;align-items:flex-start;gap:8px">
-              <span class="tag tag-purple" style="flex-shrink:0;font-size:11px">${i + 1}</span>
-              <span>${a}</span>
-            </li>`).join('')}</ol>
-        </div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -234,11 +199,15 @@ window.Renderers = {
       ${(data.securityConsiderations && data.securityConsiderations.length) ? `
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">🔒</span> Security Considerations</div>
-        ${data.securityConsiderations.map(sc => `
+        ${data.securityConsiderations.map(sc => {
+      const area = typeof sc === 'string' ? sc : sc.area || sc.name || 'Security Area';
+      const desc = typeof sc === 'string' ? '' : sc.description || sc.measure || '';
+      return `
           <div class="glass-card" style="padding:12px;margin-bottom:8px">
-            <strong style="color:var(--text-primary);font-size:13px">${sc.area}</strong>
-            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${sc.description}</p>
-          </div>`).join('')}
+            <strong style="color:var(--text-primary);font-size:13px">${escapeHtml(area)}</strong>
+            ${desc ? `<p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${escapeHtml(desc)}</p>` : ''}
+          </div>`;
+    }).join('')}
       </div>` : ''}
       ${(data.deploymentTopology || data.latencyBudget) ? `
       <div class="card-grid">
@@ -449,19 +418,17 @@ window.Renderers = {
         <div class="card-title"><span class="card-icon">📋</span> <span data-i18n="label-event-schemas">Event Schemas</span></div>
         ${schemasHTML}
       </div>
-      <div class="card-grid">
-        <div class="glass-card accent-green">
-          <div class="card-title"><span class="card-icon">📤</span> <span data-i18n="label-producers">Producers</span></div>
-          <table class="data-table"><thead><tr><th data-i18n="th-producer">Producer</th><th data-i18n="th-events">Events</th><th data-i18n="th-protocol">Protocol</th><th data-i18n="th-frequency">Frequency</th><th>Throughput</th></tr></thead><tbody>${producersHTML}</tbody></table>
-        </div>
-        <div class="glass-card accent-purple">
-          <div class="card-title"><span class="card-icon">📥</span> <span data-i18n="label-consumers">Consumers</span></div>
-          <table class="data-table"><thead><tr><th data-i18n="th-consumer">Consumer</th><th data-i18n="th-subscribes">Subscribes To</th><th data-i18n="th-action">Action</th><th>Error Strategy</th></tr></thead><tbody>${consumersHTML}</tbody></table>
-        </div>
+      <div class="glass-card accent-green" style="overflow-x:auto">
+        <div class="card-title"><span class="card-icon">📤</span> <span data-i18n="label-producers">Producers</span></div>
+        <table class="data-table"><thead><tr><th data-i18n="th-producer">Producer</th><th data-i18n="th-events">Events</th><th data-i18n="th-protocol">Protocol</th><th data-i18n="th-frequency">Frequency</th><th>Throughput</th></tr></thead><tbody>${producersHTML}</tbody></table>
+      </div>
+      <div class="glass-card accent-purple" style="overflow-x:auto; margin-top: 16px;">
+        <div class="card-title"><span class="card-icon">📥</span> <span data-i18n="label-consumers">Consumers</span></div>
+        <table class="data-table"><thead><tr><th data-i18n="th-consumer">Consumer</th><th data-i18n="th-subscribes">Subscribes To</th><th data-i18n="th-action">Action</th><th>Error Strategy</th></tr></thead><tbody>${consumersHTML}</tbody></table>
       </div>
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-event-flow">Event Flow Diagram</span></div>
-        ${data.flowDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram)}</pre></div>` : ''}
+        ${(data.flowDiagram || data.mermaidDiagram) ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram || data.mermaidDiagram)}</pre></div>` : '<p style="font-size:12px;color:var(--text-tertiary)">Diagram omitted or failed to generate.</p>'}
       </div>
       ${(data.dataRetention && data.dataRetention.length) ? `
       <div class="glass-card accent-warm">
@@ -768,28 +735,7 @@ window.Renderers = {
         </div>`;
     }
 
-    // Competitive Landmines
-    if (data.landmines && data.landmines.length) {
-      const mineHTML = data.landmines.map(l => `
-        <div class="glass-card" style="padding:14px;margin-bottom:8px">
-          <div style="font-weight:600;font-size:13px;color:var(--brand-danger);margin-bottom:6px">💣 "${escapeHtml(l.claim)}"</div>
-          <div style="font-size:12px;color:var(--text-primary);padding-left:12px;border-left:2px solid var(--brand-success)">✅ ${escapeHtml(l.counter)}</div>
-        </div>`).join('');
-      html += `
-        <div class="glass-card accent-warm" style="margin-top:20px">
-          <div class="card-title"><span class="card-icon">⚠️</span> Competitive Landmines</div>
-          ${mineHTML}
-        </div>`;
-    }
-
-    // Customer References
-    if (data.customerReferences && data.customerReferences.length) {
-      html += `
-        <div class="glass-card accent-purple" style="margin-top:20px">
-          <div class="card-title"><span class="card-icon">📞</span> Reference Suggestions</div>
-          <ul class="data-list">${data.customerReferences.map(r => `<li><span class="list-icon">◆</span>${escapeHtml(r)}</li>`).join('')}</ul>
-        </div>`;
-    }
+    // Removed landmines and customerReferences segments
 
     if (container) container.innerHTML = html;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
@@ -905,14 +851,6 @@ window.Renderers = {
           <div class="card-title" style="font-size:18px"><span class="card-icon">🎯</span> ${data.useCaseTitle || 'Use Case'}</div>
           <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${data.elevator || ''}</p>
         </div>
-        ${(data.investmentEstimate || data.timeToValue) ? `
-        <div class="glass-card accent-cyan" style="grid-column: span 3">
-          <div class="card-title"><span class="card-icon">💰</span> Investment & Time to Value</div>
-          <div style="display:flex;gap:16px;margin-top:8px">
-            ${data.investmentEstimate ? `<div class="glass-card" style="flex:1;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Phase 1 Investment</div><div style="font-size:18px;font-weight:700;color:var(--brand-primary);margin-top:4px">${data.investmentEstimate}</div></div>` : ''}
-            ${data.timeToValue ? `<div class="glass-card" style="flex:1;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Time to Value</div><div style="font-size:18px;font-weight:700;color:var(--brand-success);margin-top:4px">${data.timeToValue}</div></div>` : ''}
-          </div>
-        </div>` : ''}
         <div class="glass-card accent-green">
           <div class="card-title"><span class="card-icon">✅</span> In Scope</div>
           <ul class="data-list">${(data.inScope || []).map(s => `<li><span class="list-icon">◆</span>${s}</li>`).join('')}</ul>
@@ -1019,7 +957,12 @@ window.Renderers = {
           <div class="card-title"><span class="card-icon">💰</span> Investment Summary</div>
           <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.investmentSummary}</p>
         </div>` : ''}
-      ${(data.keyDecisionPoints && data.keyDecisionPoints.length) ? '<div class=\"glass-card accent-rose\" style=\"margin-top:16px\"><div class=\"card-title\"><span class=\"card-icon\">🚦</span> Key Decision Points</div>' + data.keyDecisionPoints.map(dp => '<div class=\"glass-card\" style=\"padding:12px;margin-bottom:8px\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><strong style=\"color:var(--text-primary);font-size:13px\">' + dp.decision + '</strong><span class=\"tag tag-warm\" style=\"font-size:10px\">' + dp.timing + '</span></div><p style=\"font-size:12px;color:var(--text-secondary);margin-top:4px\">' + dp.criteria + '</p></div>').join('') + '</div>' : ''}`;
+      ${(data.keyDecisionPoints && data.keyDecisionPoints.length) ? '<div class=\"glass-card accent-rose\" style=\"margin-top:16px\"><div class=\"card-title\"><span class=\"card-icon\">🚦</span> Key Decision Points</div>' + data.keyDecisionPoints.map(dp => {
+      const dec = typeof dp === 'string' ? dp : dp.decision || dp.name || 'Decision';
+      const timing = typeof dp === 'string' ? 'TBD' : dp.timing || 'TBD';
+      const crit = typeof dp === 'string' ? '' : dp.criteria || dp.description || '';
+      return '<div class=\"glass-card\" style=\"padding:12px;margin-bottom:8px\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><strong style=\"color:var(--text-primary);font-size:13px\">' + escapeHtml(dec) + '</strong><span class=\"tag tag-warm\" style=\"font-size:10px\">' + escapeHtml(timing) + '</span></div><p style=\"font-size:12px;color:var(--text-secondary);margin-top:4px\">' + escapeHtml(crit) + '</p></div>';
+    }).join('') + '</div>' : ''}`;
 
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -1051,17 +994,17 @@ window.Renderers = {
     };
 
     const strategicHTML = (data.strategicValue || []).map(s => `
-      < div class="glass-card" style = "padding:12px;margin-bottom:8px" >
+      <div class="glass-card" style="padding:12px;margin-bottom:8px">
         <strong style="color:var(--text-primary)">${s.dimension}</strong>
         <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${s.description}</p>
-      </div > `).join('');
+      </div>`).join('');
 
     container.innerHTML = `
-      < div class="card-grid" >
+      <div class="card-grid">
         ${renderHorizon('6 Months', '📈', vp.month6)}
         ${renderHorizon('12 Months', '📊', vp.month12)}
         ${renderHorizon('24 Months', '🚀', vp.month24)}
-      </div >
+      </div>
       <div class="glass-card accent-purple" style="margin-top:16px">
         <div class="card-title"><span class="card-icon">🏆</span> Strategic Value</div>
         ${strategicHTML}
