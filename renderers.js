@@ -446,6 +446,20 @@ window.Renderers = {
         </table>
       </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
+
+    // Safely render mermaid diagrams with error containment
+    container.querySelectorAll('.mermaid').forEach(async (el) => {
+      try {
+        const id = 'mermaid-' + Math.random().toString(36).slice(2, 10);
+        const { svg } = await mermaid.render(id, el.textContent);
+        el.innerHTML = svg;
+        el.classList.remove('mermaid');
+      } catch (err) {
+        console.warn('Mermaid diagram render failed:', err);
+        el.innerHTML = '<div style="color:var(--text-tertiary);padding:12px;font-size:12px;display:flex;align-items:center;gap:8px">⚠️ Diagram could not be rendered due to invalid LLM output.</div>';
+        el.classList.remove('mermaid');
+      }
+    });
   },
 
   // ── Implementation (Agent 6) ──
