@@ -15,45 +15,14 @@ window.PDFGenerator = {
             const projectName = results.domainModel?.projectName || untitledName;
             const dateStr = new Date().toLocaleDateString(lang);
 
-            // 1. Configure Fonts
-            pdfMake.fonts = {
-                Roboto: {
-                    normal: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Regular.ttf',
-                    bold: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Medium.ttf',
-                    italics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-Italic.ttf',
-                    bolditalics: 'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/fonts/Roboto/Roboto-MediumItalic.ttf'
-                },
-                NotoSansArabic: {
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-arabic@latest/arabic-700-normal.ttf'
-                },
-                NotoSansJP: {
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-jp@latest/japanese-700-normal.ttf'
-                },
-                NotoSansKR: {
-                    normal: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
-                    bold: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf',
-                    italics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-400-normal.ttf',
-                    bolditalics: 'https://cdn.jsdelivr.net/fontsource/fonts/noto-sans-kr@latest/korean-700-normal.ttf'
-                }
-            };
-
-            let primaryFont = 'Roboto';
-            if (lang === 'ar') primaryFont = 'NotoSansArabic';
-            else if (lang === 'ja') primaryFont = 'NotoSansJP';
-            else if (lang === 'ko') primaryFont = 'NotoSansKR';
+            // Default pdfMake font is Roboto, mapped natively via vfs_fonts.js
 
             const docDefinition = {
                 info: { title: projectName, author: 'Vantiq Spark AI Solution Studio', subject: 'Architecture Blueprint' },
                 pageSize: 'A4',
                 pageOrientation: 'portrait',
                 pageMargins: [40, 60, 40, 60],
-                defaultStyle: { font: primaryFont, fontSize: 10, color: '#333333', lineHeight: 1.3, alignment: isArabic ? 'right' : 'left' },
+                defaultStyle: { fontSize: 10, color: '#333333', lineHeight: 1.3, alignment: isArabic ? 'right' : 'left' },
                 styles: {
                     title: { fontSize: 24, bold: true, color: '#00c389', margin: [0, 0, 0, 10] },
                     subtitle: { fontSize: 14, color: '#555555', margin: [0, 0, 0, 40] },
@@ -107,12 +76,12 @@ window.PDFGenerator = {
                             const tokens = line.match(/([a-zA-Z0-9](?:[\x20-\x7E]*[a-zA-Z0-9])?)|([\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]+)|(\s+)|([\x21-\x7E]+)|([^\x00-\x7F]+)/g) || [line];
                             tokens.reverse().forEach(token => {
                                 const hasArabicChars = /[\u0600-\u06FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(token);
-                                newTextRuns.push({ text: token, font: hasArabicChars ? 'NotoSansArabic' : 'Roboto' });
+                                newTextRuns.push({ text: token });
                             });
                             if (index < lines.length - 1) newTextRuns.push({ text: '\n' });
                         });
                         node.text = newTextRuns; node.alignment = node.alignment || 'right';
-                    } else { node.font = node.font || 'Roboto'; node.alignment = node.alignment || 'right'; }
+                    } else { node.alignment = node.alignment || 'right'; }
                 } else if (Array.isArray(node.text)) { node.text.reverse(); node.text.forEach(t => applyArabicRTL(t, depth + 1)); }
                 if (!node.alignment && (node.text || node.stack)) node.alignment = 'right';
             };
