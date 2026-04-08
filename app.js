@@ -1590,19 +1590,17 @@ function exportToPDF() {
     document.getElementById('generatingAgentName').textContent = translations['status-generating-pdf'] || 'Generating PDF...';
     document.getElementById('generatingOverlay').classList.add('visible');
 
-    // Use setTimeout to let the overlay paint, then await the async generator
-    setTimeout(async () => {
-        try {
-            await PDFGenerator.generate(state);
-        } catch (e) {
-            console.error("PDF Generation failed:", e);
-            alert(translations['pdf-error'] || "Failed to generate PDF. Check console for details.");
-        } finally {
-            document.getElementById('generatingOverlay').classList.remove('visible');
-            document.getElementById('generatingAgentName').setAttribute('data-i18n', 'gen-starting');
-            localizeUI();
-        }
-    }, 100);
+    // Generate directly in the exact call stack to prevent Chrome from blocking the auto-download
+    try {
+        PDFGenerator.generate(state);
+    } catch (e) {
+        console.error("PDF Generation failed:", e);
+        alert(translations['pdf-error'] || "Failed to generate PDF. Check console for details.");
+    } finally {
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        document.getElementById('generatingAgentName').setAttribute('data-i18n', 'gen-starting');
+        localizeUI();
+    }
 }
 
 function loadSession(id) {
@@ -1658,7 +1656,8 @@ function loadSession(id) {
     }
 
     // Switch to analysis panel
-    document.getElementById('btnExportPdf').style.display = 'block';
+    if (document.getElementById('btnExportPdfTop')) document.getElementById('btnExportPdfTop').style.display = 'inline-flex';
+    document.getElementById('btnExportPdf').style.display = 'inline-flex';
     switchPanel('analysis');
 }
 
@@ -2446,7 +2445,8 @@ async function runPhase6Expansion() {
         setTimeout(() => saveHistory(state), 100);
 
         document.getElementById('generatingOverlay').classList.remove('visible');
-        document.getElementById('btnExportPdf').style.display = 'block';
+        if (document.getElementById('btnExportPdfTop')) document.getElementById('btnExportPdfTop').style.display = 'inline-flex';
+        document.getElementById('btnExportPdf').style.display = 'inline-flex';
         switchPanel('valuegrowth');
 
     } catch (e) { showPipelineError(e); }
