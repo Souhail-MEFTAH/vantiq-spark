@@ -380,7 +380,9 @@ const I18N = {
         "l-decision-points": "Key Decision Points",
         "l-strategic-value": "Strategic Value",
         "l-compt-adv": "Competitive Advantage",
-        "l-exec-summary": "Executive Summary"
+        "l-exec-summary": "Executive Summary",
+        "l-expected-return": "Expected Return",
+        "l-payback-period": "Payback Period"
     },
     ko: {
         "app-subtitle": "솔루션 디자이너",
@@ -722,7 +724,9 @@ const I18N = {
         "l-decision-points": "주요 결정 지점",
         "l-strategic-value": "전략적 가치",
         "l-compt-adv": "경쟁 우위",
-        "l-exec-summary": "요약 보고서"
+        "l-exec-summary": "요약 보고서",
+        "l-expected-return": "기대 수익",
+        "l-payback-period": "투자 회수 기간"
     },
     ja: {
         "app-subtitle": "ソリューションデザイナー",
@@ -1032,7 +1036,9 @@ const I18N = {
         "l-decision-points": "重要な決定ポイント",
         "l-strategic-value": "戦略的価値",
         "l-compt-adv": "競争上の優位性",
-        "l-exec-summary": "エグゼクティブサマリー"
+        "l-exec-summary": "エグゼクティブサマリー",
+        "l-expected-return": "期待リターン",
+        "l-payback-period": "回収期間"
     },
     ar: {
         "app-subtitle": "مصمم الحلول",
@@ -1379,7 +1385,9 @@ const I18N = {
         "l-decision-points": "النقاط الرئيسية لاتخاذ القرار",
         "l-strategic-value": "القيمة الاستراتيجية",
         "l-compt-adv": "الميزة التنافسية",
-        "l-exec-summary": "الملخص التنفيذي"
+        "l-exec-summary": "الملخص التنفيذي",
+        "l-expected-return": "العائد المتوقع",
+        "l-payback-period": "فترة الاسترداد"
     }
 };
 
@@ -2806,7 +2814,12 @@ function getCoachPanelMap() {
             demo: { contextKey: 'demo', label: 'Demo Scenarios', suggestions: ["How would I demo this to a customer?", "What are the key wow moments?", "What data do I need for the demo?"] },
             training: { contextKey: 'training', label: 'Training Labs', suggestions: ["What skills will participants learn?", "What prerequisites are needed?", "How long should each lab take?"] },
             business: { contextKey: 'businessValue', label: 'Business Value Justifier', suggestions: ["Explain the ROI in simple terms", "How do I present this to executives?", "What KPIs should we track?"] },
-            competitive: { contextKey: 'competitive', label: 'Competitive Analysis', suggestions: ["Why choose Vantiq over competitor X?", "What are Vantiq's unique strengths?", "How do I handle pricing objections?"] }
+            competitive: { contextKey: 'competitive', label: 'Competitive Analysis', suggestions: ["Why choose Vantiq over competitor X?", "What are Vantiq's unique strengths?", "How do I handle pricing objections?"] },
+            usecasescope: { contextKey: 'useCaseScope', label: 'Use Case Scope', suggestions: ["What's in scope for this use case?", "What success metrics are defined?", "How is the scope prioritized?"] },
+            adjacent: { contextKey: 'adjacentUseCases', label: 'Adjacent Use Cases', suggestions: ["What other use cases could we expand into?", "Which components can be reused?", "How do these relate to the primary use case?"] },
+            roadmap: { contextKey: 'roadmap', label: 'Implementation Roadmap', suggestions: ["What should we deliver first?", "What are the key milestones?", "How long until full deployment?"] },
+            valuegrowth: { contextKey: 'platformValue', label: 'Platform Value Growth', suggestions: ["How does platform value compound over time?", "What maturity level are we targeting?", "What ROI can we expect at each stage?"] },
+            linter: { contextKey: 'linter', label: 'Architecture Linter', suggestions: ["What are the most critical findings?", "How do quick wins improve the score?", "What Vantiq best practices are being assessed?"] }
         },
         ko: {
             analysis: { contextKey: 'analysis', label: '문제 분석', welcome: "환영합니다! 저는 다음 섹션의 AI 코치입니다: ", sub: "생성된 내용을 이해하고, 기술적인 개념을 설명하며, 궁금한 점에 답변해 드립니다. 무엇이든 물어보세요!", hint: '💡 제안: "이 섹션을 쉽게 설명해 줘" 또는 "핵심 요점이 무엇인가요?"', suggestions: ['여기서 해결하려는 핵심 문제는 무엇인가요?', '이 사용 사례에 Vantiq가 적합한 이유는 무엇인가요?', '식별된 AI 작업을 설명해 주세요'] },
@@ -2820,7 +2833,12 @@ function getCoachPanelMap() {
             demo: { contextKey: 'demo', label: '데모 시나리오', suggestions: ['고객에게 이 데모를 어떻게 시연해야 하나요?', '가장 중요한 "와우 포인트(wow moments)"는 무엇인가요?', '데모에 필요한 데이터는 무엇인가요?'] },
             training: { contextKey: 'training', label: '교육 랩', suggestions: ['참가자들은 어떤 기술을 배우게 되나요?', '이 과정을 위해 필요한 사전 지식은 무엇인가요?', '각 실습 랩은 보통 얼마나 걸리나요?'] },
             business: { contextKey: 'businessValue', label: '비즈니스 가치 증명', suggestions: ['ROI를 쉽게 설명해 주세요', '경영진에게 이 솔루션을 어떻게 제안해야 하나요?', '어떤 KPI를 추적해야 하나요?'] },
-            competitive: { contextKey: 'competitive', label: '경쟁 분석', suggestions: ['경쟁사 X보다 Vantiq를 선택해야 하는 이유는 무엇인가요?', 'Vantiq만의 특별한 기능은 무엇인가요?', '비용에 대한 이의 제기에 어떻게 대처해야 하나요?'] }
+            competitive: { contextKey: 'competitive', label: '경쟁 분석', suggestions: ['경쟁사 X보다 Vantiq를 선택해야 하는 이유는 무엇인가요?', 'Vantiq만의 특별한 기능은 무엇인가요?', '비용에 대한 이의 제기에 어떻게 대처해야 하나요?'] },
+            usecasescope: { contextKey: 'useCaseScope', label: '유스케이스 범위', suggestions: ['이 유스케이스의 범위는 무엇인가요?', '정의된 성공 지표는 무엇인가요?', '범위의 우선순위는 어떻게 결정되나요?'] },
+            adjacent: { contextKey: 'adjacentUseCases', label: '인접 유스케이스', suggestions: ['어떤 다른 유스케이스로 확장할 수 있나요?', '어떤 컴포넌트를 재사용할 수 있나요?', '이 유스케이스들은 기본 유스케이스와 어떻게 관련되나요?'] },
+            roadmap: { contextKey: 'roadmap', label: '구현 로드맵', suggestions: ['무엇을 먼저 제공해야 하나요?', '핵심 마일스톤은 무엇인가요?', '전체 배포까지 얼마나 걸리나요?'] },
+            valuegrowth: { contextKey: 'platformValue', label: '플랫폼 가치 성장', suggestions: ['시간이 지남에 따라 플랫폼 가치는 어떻게 복합 성장하나요?', '목표 성숙도 수준은 무엇인가요?', '각 단계에서 기대할 수 있는 ROI는 무엇인가요?'] },
+            linter: { contextKey: 'linter', label: '아키텍처 린터', suggestions: ['가장 중요한 발견 사항은 무엇인가요?', '빠른 수정(Quick Wins)이 점수를 어떻게 개선하나요?', '어떤 Vantiq 모범 사례가 평가되고 있나요?'] }
         },
         ja: {
             analysis: { contextKey: 'analysis', label: '問題分析', welcome: "ようこそ！私は次のセクションのAIコーチです: ", sub: "ここで生成された内容を理解し、技術的な概念を説明し、質問にお答えします。何でも聞いてください！", hint: '💡 ヒント: "このセクションを簡単に説明して" または "重要なポイントは何ですか？"', suggestions: ['ここで解決すべき核となる問題は何ですか？', 'このユースケースにVantiqが適している理由は何ですか？', '特定されたAIタスクについて説明してください'] },
@@ -2834,7 +2852,12 @@ function getCoachPanelMap() {
             demo: { contextKey: 'demo', label: 'デモシナリオ', suggestions: ['これを顧客にどのようにデモすればよいですか？', '重要な「ワオ(Wow)」の瞬間は何ですか？', 'デモにはどのようなデータが必要ですか？'] },
             training: { contextKey: 'training', label: 'トレーニングラボ', suggestions: ['参加者はどのようなスキルを学びますか？', 'どのような前提知識が必要ですか？', '各ラボにはどのくらいの時間がかかりますか？'] },
             business: { contextKey: 'businessValue', label: 'ビジネス価値の証明', suggestions: ['ROIを簡単に説明してください', 'これを経営陣にどのようにプレゼンすればよいですか？', 'どのKPIを追跡すべきですか？'] },
-            competitive: { contextKey: 'competitive', label: '競合分析', suggestions: ['競合他社XではなくVantiqを選ぶ理由は何ですか？', 'Vantiq独自の卓越した強みは何ですか？', '価格に関する異議にどのように対処すべきですか？'] }
+            competitive: { contextKey: 'competitive', label: '競合分析', suggestions: ['競合他社XではなくVantiqを選ぶ理由は何ですか？', 'Vantiq独自の卓越した強みは何ですか？', '価格に関する異議にどのように対処すべきですか？'] },
+            usecasescope: { contextKey: 'useCaseScope', label: 'ユースケース範囲', suggestions: ['このユースケースの範囲は何ですか？', '定義された成功指標は何ですか？', '範囲の優先順位はどのように決定されますか？'] },
+            adjacent: { contextKey: 'adjacentUseCases', label: '隣接するユースケース', suggestions: ['他にどのようなユースケースに拡張できますか？', 'どのコンポーネントを再利用できますか？', 'これらはプライマリユースケースとどのように関連していますか？'] },
+            roadmap: { contextKey: 'roadmap', label: '実装ロードマップ', suggestions: ['最初に何を提供すべきですか？', '重要なマイルストーンは何ですか？', '完全な展開までどのくらいかかりますか？'] },
+            valuegrowth: { contextKey: 'platformValue', label: 'プラットフォーム価値の成長', suggestions: ['プラットフォームの価値は時間とともにどのように複利成長しますか？', '目標とする成熟度レベルは何ですか？', '各段階で期待できるROIは何ですか？'] },
+            linter: { contextKey: 'linter', label: 'アーキテクチャリンター', suggestions: ['最も重要な発見事項は何ですか？', 'クイックウィン(Quick Wins)はスコアをどのように改善しますか？', 'どのようなVantiqベストプラクティスが評価されていますか？'] }
         },
         ar: {
             analysis: { contextKey: 'analysis', label: 'تحليل المشكلة', welcome: "مرحباً! أنا مدرب الذكاء الاصطناعي الخاص بك لقسم", sub: "يمكنني مساعدتك في فهم ما تم إنشاؤه هنا، وشرح المفاهيم التقنية، والإجابة على أي أسئلة لديك. اسألني أي شيء!", hint: '💡 جرب أن تسأل: "اشرح هذا القسم بعبارات بسيطة" أو "ما هي النقاط الرئيسية؟"', suggestions: ['ما هي المشكلة الأساسية التي يتم حلها هنا؟', 'لماذا تعتبر منصة Vantiq مناسبة لحالة الاستخدام هذه؟', 'اشرح مهام الذكاء الاصطناعي المحددة في النظام'] },
@@ -2848,7 +2871,12 @@ function getCoachPanelMap() {
             demo: { contextKey: 'demo', label: 'سيناريوهات العرض التجريبي (Demo)', suggestions: ['كيف سأقوم بعرض وفكرة هذا النظام للعميل؟', 'ما هي اللحظات المبهرة (Wow moments) الرئيسية الممكنة؟', 'ما هي البيانات التي أحتاجها لعمل العرض التجريبي؟'] },
             training: { contextKey: 'training', label: 'مختبرات التدريب والتعليم', suggestions: ['ما هي المهارات الرئيسية التي سيتعلمها المشاركون؟', 'ما هي المتطلبات الأساسية اللازمة للبدء؟', 'كم يجب أن يستغرق إكمال كل مختبر؟'] },
             business: { contextKey: 'businessValue', label: 'مبرر قيمة الأعمال والتكلفة', suggestions: ['اشرح العائد على الاستثمار (ROI) بعبارات واضحة وبسيطة', 'كيف أعرض هذا النظام وفوائده على المديرين التنفيذيين؟', 'ما هي مؤشرات الأداء الرئيسية (KPIs) التي يجب تتبعها وتسجيلها؟'] },
-            competitive: { contextKey: 'competitive', label: 'التحليل التنافسي (Competitive Analysis)', suggestions: ['لماذا نختار Vantiq بدلاً من حلول المنافس X؟', 'ما هي نقاط القوة والميزات الفريدة لـ Vantiq؟', 'كيف أتعامل مع اعتراضات العملاء على الأسعار والتكاليف؟'] }
+            competitive: { contextKey: 'competitive', label: 'التحليل التنافسي (Competitive Analysis)', suggestions: ['لماذا نختار Vantiq بدلاً من حلول المنافس X؟', 'ما هي نقاط القوة والميزات الفريدة لـ Vantiq؟', 'كيف أتعامل مع اعتراضات العملاء على الأسعار والتكاليف؟'] },
+            usecasescope: { contextKey: 'useCaseScope', label: 'نطاق حالة الاستخدام', suggestions: ['ما هو نطاق حالة الاستخدام هذه؟', 'ما هي مقاييس النجاح المحددة؟', 'كيف يتم تحديد أولويات النطاق؟'] },
+            adjacent: { contextKey: 'adjacentUseCases', label: 'حالات الاستخدام المجاورة', suggestions: ['ما هي حالات الاستخدام الأخرى التي يمكننا التوسع فيها؟', 'ما هي المكونات التي يمكن إعادة استخدامها؟', 'كيف ترتبط هذه بحالة الاستخدام الأساسية؟'] },
+            roadmap: { contextKey: 'roadmap', label: 'خارطة طريق التنفيذ', suggestions: ['ما الذي يجب تقديمه أولاً؟', 'ما هي المعالم الرئيسية؟', 'كم من الوقت حتى النشر الكامل؟'] },
+            valuegrowth: { contextKey: 'platformValue', label: 'نمو قيمة المنصة', suggestions: ['كيف تتراكم قيمة المنصة بمرور الوقت؟', 'ما هو مستوى النضج المستهدف؟', 'ما هو العائد على الاستثمار المتوقع في كل مرحلة؟'] },
+            linter: { contextKey: 'linter', label: 'مدقق البنية التحتية', suggestions: ['ما هي أهم النتائج؟', 'كيف تحسن الإصلاحات السريعة الدرجة؟', 'ما هي أفضل ممارسات Vantiq التي يتم تقييمها؟'] }
         }
     };
 

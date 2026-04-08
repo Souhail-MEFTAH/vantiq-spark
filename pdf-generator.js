@@ -186,9 +186,9 @@ window.PDFGenerator = {
                 if (results.businessValue?.summary) bzBlocks.push({ text: results.businessValue.summary, style: 'bodyText', italics: true });
 
                 if (results.businessValue?.roiProjection) {
-                    bzBlocks.push({ text: 'ROI Projection:', style: 'subsectionHeader' });
+                    bzBlocks.push({ text: 'Expected Return:', style: 'subsectionHeader' });
                     const r = results.businessValue.roiProjection;
-                    bzBlocks.push({ ul: [`Investment: ${r.investmentRange || ''}`, `Expected Return: ${r.expectedReturn || ''}`, `Payback Period: ${r.paybackPeriod || ''}`, `ROI: ${r.roiPercentage || ''}`], style: 'list' });
+                    bzBlocks.push({ ul: [`Expected Return: ${r.expectedReturn || ''}`, `Payback Period: ${r.paybackPeriod || ''}`, `ROI: ${r.roiPercentage || ''}`].filter(x => !x.endsWith(': ')), style: 'list' });
                 }
 
                 if (results.businessValue?.costOfInaction) {
@@ -255,12 +255,14 @@ window.PDFGenerator = {
                     archBlocks.push({ text: 'Architecture Components', style: 'subsectionHeader' }, { table: { headerRows: 1, widths: ['25%', '50%', '25%'], body: compBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                 }
 
-                if (results.linter?.findings?.length) {
-                    archBlocks.push({ text: `Architecture Review Findings (Score: ${results.linter.overallGrade || 'N/A'}):`, style: 'subsectionHeader' });
-                    archBlocks.push({ ul: results.linter.findings.map(f => ({ text: `[${f.severity || 'INFO'}] ${f.finding}: ${f.recommendation || ""}` })), style: 'list' });
-                    if (results.linter.quickWins?.length) {
+                const linterWarnings = results.linter?.warnings || results.linter?.findings || [];
+                if (linterWarnings.length) {
+                    archBlocks.push({ text: `Architecture Review Findings (Score: ${results.linter.overallScore || results.linter.overallGrade || 'N/A'}):`, style: 'subsectionHeader' });
+                    archBlocks.push({ ul: linterWarnings.map(f => ({ text: `[${f.severity || 'INFO'}] ${f.component || f.finding || ''}: ${f.issue || f.recommendation || ""}` })), style: 'list' });
+                    const qwins = results.linter.quickWins || [];
+                    if (qwins.length) {
                         archBlocks.push({ text: 'Quick Wins:', style: 'subsectionHeader' });
-                        archBlocks.push({ ul: results.linter.quickWins.map(q => ({ text: q })), style: 'list' });
+                        archBlocks.push({ ul: qwins.map(q => ({ text: typeof q === 'string' ? q : `${q.fix || ''} (${q.impact || ''})` })), style: 'list' });
                     }
                 }
 
@@ -305,16 +307,18 @@ window.PDFGenerator = {
             if (results.aiModels || results.agenticGuide) {
                 const aiBlocks = [];
 
-                if (results.aiModels?.models?.length) {
+                const aiModelsList = results.aiModels?.models || results.aiModels?.recommendations || [];
+                if (aiModelsList.length) {
                     aiBlocks.push({ text: 'AI Model Recommendations:', style: 'subsectionHeader' });
                     const modelBody = [[{ text: 'Capability', style: 'tableHeader' }, { text: 'Recommended Models', style: 'tableHeader' }, { text: 'Cost / Complexity', style: 'tableHeader' }]];
-                    results.aiModels.models.forEach(m => modelBody.push([{ text: m.capability || "", bold: true }, { text: (m.recommendations || []).join(', ') }, { text: `${results.aiModels.totalEstimatedCost || ''} | ${results.aiModels.rampUpComplexity || ''}` }]));
+                    aiModelsList.forEach(m => modelBody.push([{ text: m.capability || "", bold: true }, { text: (m.recommendations || m.models || []).join(', ') }, { text: `${m.costEstimate || results.aiModels.totalEstimatedCost || ''} | ${m.complexity || results.aiModels.rampUpComplexity || ''}` }]));
                     aiBlocks.push({ table: { headerRows: 1, widths: ['25%', '40%', '35%'], body: modelBody }, layout: 'lightHorizontalLines', margin: [0, 10, 0, 15] });
                 }
 
-                if (results.agenticGuide?.agents?.length) {
+                const agenticAgents = results.agenticGuide?.llmAgents || results.agenticGuide?.aiAgents || results.agenticGuide?.agents || [];
+                if (agenticAgents.length) {
                     aiBlocks.push({ text: 'Agentic Alternative:', style: 'subsectionHeader' });
-                    results.agenticGuide.agents.forEach(a => {
+                    agenticAgents.forEach(a => {
                         aiBlocks.push({ text: a.agentName || "AI Agent", style: 'bodyText', bold: true });
                         aiBlocks.push({ text: `Role: ${a.role || ""} - ${a.description || ""}`, style: 'bodyText', margin: [0, 0, 0, 4] });
                         if (a.tools?.length) aiBlocks.push({ ul: a.tools, style: 'list', margin: [15, 0, 0, 10] });
@@ -364,12 +368,13 @@ window.PDFGenerator = {
             }
 
             // 8. EXPANSION (Agents 12, 13, 14)
-            if (results.adjacentUseCases || results.roadmap || results.platformValue) {
+            if (results.adjacentUseCases || results.roadmap || results.platformValueGrowth || results.platformValue) {
                 const expBlocks = [];
 
-                if (results.roadmap?.timeline?.length) {
+                const roadmapTimeline = results.roadmap?.timeline || results.roadmap?.quarters || [];
+                if (roadmapTimeline.length) {
                     expBlocks.push({ text: 'Product Roadmap:', style: 'subsectionHeader' });
-                    results.roadmap.timeline.forEach(quarter => {
+                    roadmapTimeline.forEach(quarter => {
                         expBlocks.push({ text: quarter.quarter || 'Quarter', style: 'bodyText', bold: true });
                         const ulItems = [];
                         if (quarter.focus) ulItems.push({ text: `Focus: ${quarter.focus}` });
@@ -379,21 +384,24 @@ window.PDFGenerator = {
                     });
                 }
 
-                if (results.platformValue?.horizons) {
+                const pvData = results.platformValueGrowth || results.platformValue;
+                if (pvData?.horizons || pvData?.valueProjection) {
                     expBlocks.push({ text: 'Platform Value Growth:', style: 'subsectionHeader' });
                     const valBody = [[{ text: 'Horizon', style: 'tableHeader' }, { text: 'Key Value Driver', style: 'tableHeader' }, { text: 'ROI & Maturity', style: 'tableHeader' }]];
+                    const horizons = pvData.horizons || pvData.valueProjection || {};
                     ['month6', 'month12', 'month24'].forEach(key => {
-                        const h = results.platformValue.horizons[key];
+                        const h = horizons[key];
                         if (h) {
-                            valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: h.keyValueDriver || '' }, { text: `${h.cumulativeROI || 'ROI'}\n${h.platformMaturityLevel || 'Maturity'}` }]);
+                            valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: h.keyValueDriver || h.focus || '' }, { text: `${h.cumulativeROI || h.roi || 'ROI'}\n${h.platformMaturityLevel || h.maturity || 'Maturity'}` }]);
                         }
                     });
                     if (valBody.length > 1) expBlocks.push({ table: { headerRows: 1, widths: ['20%', '50%', '30%'], body: valBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                 }
 
-                if (results.adjacentUseCases?.cases?.length) {
+                const adjCases = results.adjacentUseCases?.adjacentUseCases || results.adjacentUseCases?.cases || results.adjacentUseCases?.useCases || [];
+                if (adjCases.length) {
                     expBlocks.push({ text: 'Adjacent Use Cases:', style: 'subsectionHeader' });
-                    results.adjacentUseCases.cases.forEach(c => {
+                    adjCases.forEach(c => {
                         expBlocks.push({ text: `${c.name || 'Use Case'} [${c.timeframe || 'TBD'}]`, style: 'bodyText', bold: true });
                         expBlocks.push({ text: c.description || '', style: 'bodyText', margin: [15, 5, 0, 5] });
                         if (c.reusedComponents?.length) expBlocks.push({ text: `Reused Components: ${c.reusedComponents.join(', ')}`, style: 'bodyText', italics: true, margin: [15, 0, 0, 10] });

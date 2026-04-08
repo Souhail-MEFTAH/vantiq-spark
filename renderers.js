@@ -545,6 +545,19 @@ window.Renderers = {
         ${d.mermaid ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(d.mermaid)}</pre></div>` : '<p style="color:var(--text-tertiary)">No diagram data generated.</p>'}
       </div>`).join('');
     container.innerHTML = diagramsHTML || '<p style="color:var(--text-tertiary)">No diagrams generated.</p>';
+    // Safely render mermaid diagrams with error containment
+    container.querySelectorAll('.mermaid').forEach(async (el) => {
+      try {
+        const id = 'mermaid-' + Math.random().toString(36).slice(2, 10);
+        const { svg } = await mermaid.render(id, el.textContent);
+        el.innerHTML = svg;
+        el.classList.remove('mermaid');
+      } catch (err) {
+        console.warn('Mermaid diagram render failed:', err);
+        el.innerHTML = '<p style="color:var(--text-tertiary);font-style:italic;padding:12px">⚠️ Diagram could not be rendered. The generated syntax may be invalid.</p>';
+        el.classList.remove('mermaid');
+      }
+    });
   },
 
 
@@ -561,7 +574,7 @@ window.Renderers = {
 
     let html = `
       <div class="glass-card" style="margin-bottom:var(--space-4); display:flex; align-items:center; gap:20px;">
-        <div style="width:80px; height:80px; border-radius:50%; border: 4px solid ${scoreColor}; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:${scoreColor};">
+        <div style="width:80px; height:80px; min-width:80px; min-height:80px; aspect-ratio:1; flex-shrink:0; box-sizing:border-box; border-radius:50%; border: 4px solid ${scoreColor}; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:${scoreColor};">
           ${data.overallScore}
         </div>
         <div>
@@ -669,8 +682,9 @@ window.Renderers = {
       const compNames = (data.competitors || []).map(c => c.name);
       const headerCells = (compNames || []).map(n => `<th style="padding:8px 6px;font-size:11px;color:var(--text-secondary);white-space:nowrap">${escapeHtml(n)}</th>`).join('');
       const rows = (data.comparisonMatrix || []).map(row => {
-        const cells = (compNames || []).map(name => {
-          const r = (row.ratings || []).find(x => x.competitor === name);
+        const cells = (compNames || []).map((name, idx) => {
+          let r = (row.ratings || []).find(x => x.competitor === name);
+          if (!r) r = (row.ratings || [])[idx];
           if (!r) return '<td style="padding:6px;font-size:11px;color:var(--text-tertiary)">—</td>';
           const color = r.rating === 'Strong' ? 'var(--brand-success)' : r.rating === 'Moderate' ? 'var(--brand-warning)' : 'var(--brand-danger)';
           return `<td style="padding:6px;font-size:11px" title="${escapeHtml(r.note || '')}"><span style="color:${color};font-weight:600">${escapeHtml(r.rating)}</span></td>`;
@@ -749,17 +763,16 @@ window.Renderers = {
     if (!data) return;
     let html = '';
 
-    // ROI Snapshot Hero
+    // Expected Return Hero
     if (data.roiProjection) {
       const roi = data.roiProjection;
       html += `
         <div class="glass-card accent-green" style="margin-bottom:20px">
-          <div class="card-title"><span class="card-icon">📈</span> <span data-i18n="l-roi-snapshot">ROI Snapshot</span></div>
+          <div class="card-title"><span class="card-icon">📈</span> <span data-i18n="l-expected-return">Expected Return</span></div>
           <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap">
-            ${roi.investmentRange ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Investment</div><div style="font-size:18px;font-weight:700;color:var(--text-primary);margin-top:4px">${escapeHtml(roi.investmentRange)}</div></div>` : ''}
-            ${roi.expectedReturn ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Expected Return</div><div style="font-size:18px;font-weight:700;color:var(--brand-success);margin-top:4px">${escapeHtml(roi.expectedReturn)}</div></div>` : ''}
-            ${roi.paybackPeriod ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">Payback Period</div><div style="font-size:18px;font-weight:700;color:var(--brand-primary);margin-top:4px">${escapeHtml(roi.paybackPeriod)}</div></div>` : ''}
-            ${roi.roiPercentage ? `<div class="glass-card" style="flex:1;min-width:140px;padding:12px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">ROI</div><div style="font-size:22px;font-weight:700;color:var(--brand-success);margin-top:4px">${escapeHtml(roi.roiPercentage)}</div></div>` : ''}
+            ${roi.expectedReturn ? `<div class="glass-card" style="flex:1;min-width:180px;padding:16px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase" data-i18n="l-expected-return">Expected Return</div><div style="font-size:22px;font-weight:700;color:var(--brand-success);margin-top:6px">${escapeHtml(roi.expectedReturn)}</div></div>` : ''}
+            ${roi.paybackPeriod ? `<div class="glass-card" style="flex:1;min-width:180px;padding:16px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase" data-i18n="l-payback-period">Payback Period</div><div style="font-size:22px;font-weight:700;color:var(--brand-primary);margin-top:6px">${escapeHtml(roi.paybackPeriod)}</div></div>` : ''}
+            ${roi.roiPercentage ? `<div class="glass-card" style="flex:1;min-width:180px;padding:16px;text-align:center"><div style="font-size:11px;color:var(--text-tertiary);text-transform:uppercase">ROI</div><div style="font-size:22px;font-weight:700;color:var(--brand-success);margin-top:6px">${escapeHtml(roi.roiPercentage)}</div></div>` : ''}
           </div>
         </div>`;
     }

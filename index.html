@@ -526,6 +526,8 @@
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-adjacent" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('adjacent')" />
+              <button class="coach-toggle-btn" onclick="app.openCoach('adjacent')"><span class="coach-icon">🧠</span>
+                <span data-i18n="coach-btn">AI Coach</span></button>
               <button class="btn btn-regenerate" onclick="app.regenerate('adjacent')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
@@ -545,6 +547,8 @@
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-roadmap" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('roadmap')" />
+              <button class="coach-toggle-btn" onclick="app.openCoach('roadmap')"><span class="coach-icon">🧠</span>
+                <span data-i18n="coach-btn">AI Coach</span></button>
               <button class="btn btn-regenerate" onclick="app.regenerate('roadmap')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
@@ -565,6 +569,8 @@
             <div class="regenerate-group" style="display:flex; gap:8px; align-items:center">
               <input type="text" id="refine-valuegrowth" class="refine-input" data-i18n-placeholder="refine-placeholder"
                 onkeydown="if(event.key==='Enter') app.regenerate('valuegrowth')" />
+              <button class="coach-toggle-btn" onclick="app.openCoach('valuegrowth')"><span class="coach-icon">🧠</span>
+                <span data-i18n="coach-btn">AI Coach</span></button>
               <button class="btn btn-regenerate" onclick="app.regenerate('valuegrowth')">
                 ↻ <span data-i18n="btn-regenerate">Regenerate</span>
               </button>
