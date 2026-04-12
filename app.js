@@ -2029,6 +2029,9 @@ function updatePipelineStep(agentKey, status) {
 function enableNav(panelId) {
     const nav = document.getElementById('nav-' + panelId);
     if (nav) nav.classList.remove('disabled');
+
+    const btnExportPdf = document.getElementById('btnExportPdf');
+    if (btnExportPdf) btnExportPdf.style.display = 'inline-flex';
 }
 
 // ── Show Error in Panel ──
