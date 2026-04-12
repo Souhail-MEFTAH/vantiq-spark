@@ -360,16 +360,16 @@ window.PDFGenerator = {
                 if (roadmapTimeline.length) {
                     expBlocks.push({ text: 'Product Roadmap:', style: 'subsectionHeader' });
                     roadmapTimeline.forEach(quarter => {
-                        expBlocks.push({ text: quarter.quarter || 'Quarter', style: 'bodyText', bold: true });
+                        expBlocks.push({ text: String(quarter.quarter || 'Quarter'), style: 'bodyText', bold: true });
                         const ulItems = [];
-                        if (quarter.focus || quarter.theme) ulItems.push({ text: `Focus: ${quarter.focus || quarter.theme}` });
-                        if (quarter.successCriteria) ulItems.push({ text: `Success Criteria: ${quarter.successCriteria}` });
+                        if (quarter.focus || quarter.theme) ulItems.push({ text: `Focus: ${String(quarter.focus || quarter.theme)}` });
+                        if (quarter.successCriteria) ulItems.push({ text: `Success Criteria: ${String(quarter.successCriteria)}` });
 
                         if (quarter.deliverables && Array.isArray(quarter.deliverables) && quarter.deliverables.length) {
-                            ulItems.push({ text: `Deliverables: ${quarter.deliverables.join(', ')}` });
+                            ulItems.push({ text: `Deliverables: ${quarter.deliverables.map(String).join(', ')}` });
                         } else if (quarter.milestones && Array.isArray(quarter.milestones) && quarter.milestones.length) {
                             quarter.milestones.forEach(m => {
-                                ulItems.push({ text: `Milestone: ${m.milestone || m.name || m} (${m.type || 'General'})` });
+                                ulItems.push({ text: `Milestone: ${String(m.milestone || m.name || m)} (${String(m.type || 'General')})` });
                             });
                         }
 
@@ -387,10 +387,18 @@ window.PDFGenerator = {
                         if (h) {
                             if (h.metrics && Array.isArray(h.metrics)) {
                                 h.metrics.forEach(m => {
-                                    valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: m.metric || m.category || '' }, { text: m.value || '' }]);
+                                    valBody.push([
+                                        { text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true },
+                                        { text: String(m.metric || m.category || '') },
+                                        { text: String(m.value || '') }
+                                    ]);
                                 });
                             } else {
-                                valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: h.keyValueDriver || h.focus || h.narrative || '' }, { text: `${h.cumulativeROI || h.roi || 'ROI'}\n${h.platformMaturityLevel || h.maturity || 'Maturity'}` }]);
+                                valBody.push([
+                                    { text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true },
+                                    { text: String(h.keyValueDriver || h.focus || h.narrative || '') },
+                                    { text: `${String(h.cumulativeROI || h.roi || 'ROI')}\n${String(h.platformMaturityLevel || h.maturity || 'Maturity')}` }
+                                ]);
                             }
                         }
                     });
@@ -401,13 +409,13 @@ window.PDFGenerator = {
                 if (adjCases.length) {
                     expBlocks.push({ text: 'Adjacent Use Cases:', style: 'subsectionHeader' });
                     adjCases.forEach(c => {
-                        expBlocks.push({ text: `${c.name || c.title || 'Use Case'} [${c.timeframe || c.estimatedTimeline || 'TBD'}]`, style: 'bodyText', bold: true });
-                        expBlocks.push({ text: c.description || '', style: 'bodyText', margin: [15, 5, 0, 5] });
+                        expBlocks.push({ text: `${String(c.name || c.title || 'Use Case')} [${String(c.timeframe || c.estimatedTimeline || 'TBD')}]`, style: 'bodyText', bold: true });
+                        expBlocks.push({ text: String(c.description || ''), style: 'bodyText', margin: [15, 5, 0, 5] });
 
                         let reused = c.reusedComponents;
                         if (typeof reused === 'string') reused = [reused];
                         if (Array.isArray(reused) && reused.length) {
-                            expBlocks.push({ text: `Reused Components: ${reused.join(', ')}`, style: 'bodyText', italics: true, margin: [15, 0, 0, 10] });
+                            expBlocks.push({ text: `Reused Components: ${reused.map(String).join(', ')}`, style: 'bodyText', italics: true, margin: [15, 0, 0, 10] });
                         }
                     });
                 }
