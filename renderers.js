@@ -692,10 +692,11 @@ window.Renderers = {
     html += `<div class="card-grid">${competitorsHTML}</div>`;
 
     // Comparison matrix
-    if (data.comparisonMatrix && data.comparisonMatrix.length) {
-      const compNames = (data.competitors || []).map(c => c.name);
+    const matrixData = data.featureComparison || data.competitiveMatrix || data.comparisonMatrix || [];
+    if (matrixData.length) {
+      const compNames = (data.competitors || []).map(c => c.name || "Competitor");
       const headerCells = (compNames || []).map(n => `<th style="padding:8px 6px;font-size:11px;color:var(--text-secondary);white-space:nowrap">${escapeHtml(n)}</th>`).join('');
-      const rows = (data.comparisonMatrix || []).map(row => {
+      const rows = matrixData.map(row => {
         const cells = (compNames || []).map((name, idx) => {
           let r = (row.ratings || []).find(x => x.competitor === name);
           if (!r) r = (row.ratings || [])[idx];
@@ -716,8 +717,9 @@ window.Renderers = {
     }
 
     // Differentiators
-    if (data.differentiators && data.differentiators.length) {
-      const diffHTML = (data.differentiators || []).map(d => `
+    const diffsData = data.vantiqDifferentiators || data.differentiators || [];
+    if (diffsData.length) {
+      const diffHTML = diffsData.map(d => `
         <div class="glass-card" style="padding:14px;margin-bottom:8px">
           <div style="font-weight:600;font-size:14px;color:var(--brand-primary);margin-bottom:4px">✦ ${escapeHtml(d.feature)}</div>
           <p style="font-size:12px;color:var(--text-primary);margin:4px 0">${escapeHtml(d.description)}</p>

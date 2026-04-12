@@ -362,10 +362,18 @@ window.PDFGenerator = {
                     roadmapTimeline.forEach(quarter => {
                         expBlocks.push({ text: quarter.quarter || 'Quarter', style: 'bodyText', bold: true });
                         const ulItems = [];
-                        if (quarter.focus) ulItems.push({ text: `Focus: ${quarter.focus}` });
+                        if (quarter.focus || quarter.theme) ulItems.push({ text: `Focus: ${quarter.focus || quarter.theme}` });
                         if (quarter.successCriteria) ulItems.push({ text: `Success Criteria: ${quarter.successCriteria}` });
-                        if (quarter.deliverables?.length) ulItems.push({ text: `Deliverables: ${quarter.deliverables.join(', ')}` });
-                        expBlocks.push({ ul: ulItems, style: 'list', margin: [15, 0, 0, 10] });
+
+                        if (quarter.deliverables && Array.isArray(quarter.deliverables) && quarter.deliverables.length) {
+                            ulItems.push({ text: `Deliverables: ${quarter.deliverables.join(', ')}` });
+                        } else if (quarter.milestones && Array.isArray(quarter.milestones) && quarter.milestones.length) {
+                            quarter.milestones.forEach(m => {
+                                ulItems.push({ text: `Milestone: ${m.milestone || m.name || m} (${m.type || 'General'})` });
+                            });
+                        }
+
+                        if (ulItems.length > 0) expBlocks.push({ ul: ulItems, style: 'list', margin: [15, 0, 0, 10] });
                     });
                 }
 
@@ -377,7 +385,13 @@ window.PDFGenerator = {
                     ['month6', 'month12', 'month24'].forEach(key => {
                         const h = horizons[key];
                         if (h) {
-                            valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: h.keyValueDriver || h.focus || '' }, { text: `${h.cumulativeROI || h.roi || 'ROI'}\n${h.platformMaturityLevel || h.maturity || 'Maturity'}` }]);
+                            if (h.metrics && Array.isArray(h.metrics)) {
+                                h.metrics.forEach(m => {
+                                    valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: m.metric || m.category || '' }, { text: m.value || '' }]);
+                                });
+                            } else {
+                                valBody.push([{ text: key === 'month6' ? '6 Months' : key === 'month12' ? '12 Months' : '24 Months', bold: true }, { text: h.keyValueDriver || h.focus || h.narrative || '' }, { text: `${h.cumulativeROI || h.roi || 'ROI'}\n${h.platformMaturityLevel || h.maturity || 'Maturity'}` }]);
+                            }
                         }
                     });
                     if (valBody.length > 1) expBlocks.push({ table: { headerRows: 1, widths: ['20%', '50%', '30%'], body: valBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
@@ -387,9 +401,14 @@ window.PDFGenerator = {
                 if (adjCases.length) {
                     expBlocks.push({ text: 'Adjacent Use Cases:', style: 'subsectionHeader' });
                     adjCases.forEach(c => {
-                        expBlocks.push({ text: `${c.name || 'Use Case'} [${c.timeframe || 'TBD'}]`, style: 'bodyText', bold: true });
+                        expBlocks.push({ text: `${c.name || c.title || 'Use Case'} [${c.timeframe || c.estimatedTimeline || 'TBD'}]`, style: 'bodyText', bold: true });
                         expBlocks.push({ text: c.description || '', style: 'bodyText', margin: [15, 5, 0, 5] });
-                        if (c.reusedComponents?.length) expBlocks.push({ text: `Reused Components: ${c.reusedComponents.join(', ')}`, style: 'bodyText', italics: true, margin: [15, 0, 0, 10] });
+
+                        let reused = c.reusedComponents;
+                        if (typeof reused === 'string') reused = [reused];
+                        if (Array.isArray(reused) && reused.length) {
+                            expBlocks.push({ text: `Reused Components: ${reused.join(', ')}`, style: 'bodyText', italics: true, margin: [15, 0, 0, 10] });
+                        }
                     });
                 }
 
