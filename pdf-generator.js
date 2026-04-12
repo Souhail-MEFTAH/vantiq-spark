@@ -93,6 +93,14 @@ window.PDFGenerator = {
                 }
             };
 
+            const getSvgForPdf = (containerSelector) => {
+                const el = document.querySelector(containerSelector);
+                if (el && el.tagName.toLowerCase() === 'svg') {
+                    return { svg: el.outerHTML, width: 500, margin: [0, 15, 0, 15] };
+                }
+                return null;
+            };
+
             // TITLE PAGE
             addSection([
                 { text: projectName, style: 'title' },
@@ -235,7 +243,11 @@ window.PDFGenerator = {
                     }
                 }
 
-                if (archBlocks.length > 0) addSection([{ text: '4. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
+                if (archBlocks.length > 0) {
+                    addSection([{ text: '4. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
+                    const archSvg = getSvgForPdf('#architecture-content .diagram-container svg');
+                    if (archSvg) addSection([archSvg]);
+                }
             }
 
             // 5. EVENT SYSTEM (Agent 5)
@@ -269,7 +281,11 @@ window.PDFGenerator = {
                     evBlocks.push({ text: 'Data Retention Policy', style: 'subsectionHeader' }, { table: { headerRows: 1, widths: ['30%', '25%', '45%'], body: retBody }, layout: 'lightHorizontalLines', margin: [0, 0, 0, 15] });
                 }
 
-                if (evBlocks.length > 0) addSection([{ text: '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }, ...evBlocks]);
+                if (evBlocks.length > 0) {
+                    addSection([{ text: '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }, ...evBlocks]);
+                    const eventSvg = getSvgForPdf('#events-content .diagram-container svg');
+                    if (eventSvg) addSection([eventSvg]);
+                }
             }
 
             // 6. AI MODELS & AGENTIC (Agents 4 & 4b)
@@ -286,7 +302,7 @@ window.PDFGenerator = {
 
                 const agenticAgents = results.agenticGuide?.llmAgents || results.agenticGuide?.aiAgents || results.agenticGuide?.agents || [];
                 if (agenticAgents.length) {
-                    aiBlocks.push({ text: 'Agentic Alternative:', style: 'subsectionHeader' });
+                    aiBlocks.push({ text: 'Agentic Augmentation:', style: 'subsectionHeader' });
                     agenticAgents.forEach(a => {
                         aiBlocks.push({ text: a.agentName || "AI Agent", style: 'bodyText', bold: true });
                         aiBlocks.push({ text: `Role: ${a.role || ""} - ${a.description || ""}`, style: 'bodyText', margin: [0, 0, 0, 4] });

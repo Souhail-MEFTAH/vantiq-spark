@@ -67,7 +67,7 @@ const I18N = {
         "nav-architecture": "Architecture",
         "nav-architecture-tab": "Architecture",
         "nav-aimodels": "AI Models",
-        "nav-agentic": "Agentic Alternative",
+        "nav-agentic": "Agentic Augmentation",
         "nav-events": "Event System",
         "nav-build": "Build",
         "nav-implementation": "Implementation",
@@ -137,7 +137,7 @@ const I18N = {
         "architecture-subtitle": "Agent 3 — Blueprint & Infrastructure",
         "aimodels-title": "AI Models",
         "aimodels-subtitle": "Agent 4 — Model Advisory",
-        "agentic-title": "Agentic Alternative",
+        "agentic-title": "Agentic Augmentation",
         "agentic-subtitle": "Agent 4b — LLM Agent Augmentation Guide",
         "events-title": "Event System",
         "events-subtitle": "Agent 5 — Real-time Orchestration",
@@ -325,7 +325,7 @@ const I18N = {
         "pdf-sec-aimodels": "4. AI Model Recommendations",
         "pdf-infra-guardrails": "Infrastructure & Guardrails:",
         "pdf-sec-events": "5. Event System & Orchestration",
-        "pdf-sec-agentic": "6. Agentic Alternative",
+        "pdf-sec-agentic": "6. Agentic Augmentation",
         "pdf-market-landscape": "Market Landscape:",
         "pdf-th-approach": "Competitor / Approach",
         "pdf-sec-compete": "7. Competitive Strategy",
@@ -343,7 +343,7 @@ const I18N = {
         "reg-domain": "Agent 2 — Domain",
         "reg-architecture": "Agent 3 — Architecture",
         "reg-aimodel": "Agent 4 — AI Models",
-        "reg-agentic": "Agent 4b — Agentic Alt",
+        "reg-agentic": "Agent 4b — Agentic Augmentation",
         "reg-events": "Agent 5 — Events",
         "reg-implementation": "Agent 6 — Implement",
         "reg-visualizer": "Agent 7 — Visualizer",
@@ -1581,8 +1581,8 @@ function renameSession(id) {
 }
 
 function exportToPDF() {
-    if (!state.results || !state.results.analysis) {
-        alert("Please generate a solution first before exporting.");
+    if (!state.results || Object.keys(state.results).length === 0) {
+        alert("Please generate at least one solution component before exporting.");
         return;
     }
     const lang = state.language || 'en';
@@ -1656,7 +1656,6 @@ function loadSession(id) {
     }
 
     // Switch to analysis panel
-    if (document.getElementById('btnExportPdfTop')) document.getElementById('btnExportPdfTop').style.display = 'inline-flex';
     document.getElementById('btnExportPdf').style.display = 'inline-flex';
     switchPanel('analysis');
 }
@@ -2445,7 +2444,6 @@ async function runPhase6Expansion() {
         setTimeout(() => saveHistory(state), 100);
 
         document.getElementById('generatingOverlay').classList.remove('visible');
-        if (document.getElementById('btnExportPdfTop')) document.getElementById('btnExportPdfTop').style.display = 'inline-flex';
         document.getElementById('btnExportPdf').style.display = 'inline-flex';
         switchPanel('valuegrowth');
 

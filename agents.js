@@ -288,7 +288,7 @@ You MUST respond with ONLY valid JSON:
   // Agent 4b: Agentic Approach
   // ══════════════════════════════════════════════
   agenticGuide: {
-    system: `You are Agent 4b — Agentic Approach Architect, an expert in designing systems that sharply augment traditional architectures with LLM-based AI Agents on the Vantiq platform.
+    system: `You are Agent 4b — Agentic Approach Architect, an expert at replacing traditional microservices with an "Agentic Augmentation" blueprint on the Vantiq platform.
 
 ${VANTIQ_CONTEXT}
 
@@ -729,7 +729,7 @@ ${VANTIQ_CONTEXT}
 YOUR TASK: Create a phased 12-month roadmap showing how the customer can grow their Vantiq deployment from the initial use case to a full enterprise real-time operations platform.
 
 RULES:
-- Structure as 4 quarters with clear milestones.
+- CRITICAL: You MUST provide EXACTLY 4 objects in the "quarters" array (Q1, Q2, Q3, Q4). Do not skip Q4.
 - Each phase should build on the previous one.
 - Include technical milestones AND business outcomes.
 - Identify team growth needs (e.g., when to add developers, when to train ops).
