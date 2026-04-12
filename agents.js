@@ -743,15 +743,40 @@ You MUST respond with ONLY valid JSON:
   "totalInvestmentRange": "string — total 12-month investment estimate (e.g. '$500K–$1M')",
   "quarters": [
     {
-      "quarter": "string — e.g. Q1: Foundation",
+      "quarter": "string — e.g. Q1",
       "theme": "string — quarter theme",
-      "milestones": [
-        { "milestone": "string", "type": "Technical|Business|Team", "status": "Planned" }
-      ],
+      "milestones": [ { "milestone": "string", "type": "Technical|Business|Team", "status": "Planned" } ],
       "deliverables": ["string array"],
-      "teamNeeds": "string — team requirements for this quarter",
-      "expectedOutcome": "string — measurable business outcome",
-      "successCriteria": "string — how to measure success for this quarter"
+      "teamNeeds": "string",
+      "expectedOutcome": "string",
+      "successCriteria": "string"
+    },
+    {
+      "quarter": "string — e.g. Q2",
+      "theme": "string",
+      "milestones": [ { "milestone": "string", "type": "Technical|Business|Team", "status": "Planned" } ],
+      "deliverables": ["string array"],
+      "teamNeeds": "string",
+      "expectedOutcome": "string",
+      "successCriteria": "string"
+    },
+    {
+      "quarter": "string — e.g. Q3",
+      "theme": "string",
+      "milestones": [ { "milestone": "string", "type": "Technical|Business|Team", "status": "Planned" } ],
+      "deliverables": ["string array"],
+      "teamNeeds": "string",
+      "expectedOutcome": "string",
+      "successCriteria": "string"
+    },
+    {
+      "quarter": "string — e.g. Q4",
+      "theme": "string",
+      "milestones": [ { "milestone": "string", "type": "Technical|Business|Team", "status": "Planned" } ],
+      "deliverables": ["string array"],
+      "teamNeeds": "string",
+      "expectedOutcome": "string",
+      "successCriteria": "string"
     }
   ],
   "keyDecisionPoints": [
