@@ -690,18 +690,13 @@ You MUST respond with ONLY valid JSON:
 
 ${VANTIQ_CONTEXT}
 
-YOUR TASK: Based on the current solution architecture, identify 4-6 adjacent use cases the customer could build on the SAME Vantiq platform using shared components. Focus on realistic expansion opportunities that increase platform stickiness and deal size.
+YOUR TASK: Based on the current solution architecture, identify 4-6 adjacent use cases the customer could build on the SAME Vantiq platform using shared components. Focus on quick wins that increase platform stickiness and deal size.
 
 RULES:
 - Each use case should REUSE at least 50% of the existing architecture (Sources, Types, Services, VEH flows).
 - Show explicitly which existing components are reused vs. what's new.
 - Estimate relative effort (Low/Medium/High) and business value (High/Medium).
 - Order by ROI (highest first).
-- TIMELINE REALISM: Timelines MUST reflect realistic enterprise operations including requirements gathering, procurement cycles, security review, integration testing, UAT, stakeholder alignment, and change management. Use these minimums:
-  - Low effort: 2-4 months
-  - Medium effort: 4-8 months
-  - High effort: 8-14 months
-  Do NOT use weeks. Enterprise deployments take months.
 - TRANSLATION RULE: All content MUST be in the user's target language.
 
 You MUST respond with ONLY valid JSON:
@@ -714,9 +709,8 @@ You MUST respond with ONLY valid JSON:
       "newComponents": ["string array — new components needed"],
       "effort": "Low|Medium|High",
       "businessValue": "High|Medium",
-      "revenueImpact": "string — estimated additional deal value (e.g. '$150K–$300K')",
-      "estimatedTimeline": "string — e.g. '3-6 months' (enterprise timelines, NOT weeks)",
-      "estimatedFTE": "string — e.g. '2-3 FTE for 4 months'",
+      "revenueImpact": "string — estimated additional deal value (e.g. '$50K–$100K')",
+      "estimatedTimeline": "string — e.g. 2-3 weeks",
       "synergy": "string — how this enhances the primary use case",
       "championPitch": "string — 1-2 sentence pitch that an internal champion could use to sell this use case internally"
     }
@@ -738,7 +732,6 @@ RULES:
 - CRITICAL: You MUST provide EXACTLY 4 objects in the "quarters" array (Q1, Q2, Q3, Q4). Do not skip Q4.
 - Each phase should build on the previous one.
 - Include technical milestones AND business outcomes.
-- REALISTIC PACING: Enterprise deployments take time. Q1 should focus on foundational setup, PoC/MVP, and initial security reviews. Full production rollouts typically happen in Q2/Q3. Do not rush the timeline.
 - Identify team growth needs (e.g., when to add developers, when to train ops).
 - Show increasing platform maturity (PoV → Production → Multi-Use-Case → Enterprise Platform).
 - TRANSLATION RULE: All content MUST be in the user's target language.
@@ -1092,3 +1085,5 @@ window.Agents = {
   roadmap: agentRoadmap,
   platformValueGrowth: agentPlatformValueGrowth
 };
+
+module.exports = { AGENT_PROMPTS, buildUserMessage };

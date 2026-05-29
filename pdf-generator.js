@@ -1,5 +1,5 @@
 window.PDFGenerator = {
-    generate: function (state) {
+    generate: function (state, config = {}) {
         const lang = state.language || 'en';
         const isArabic = lang === 'ar';
         const translations = I18N[lang] || I18N.en;
@@ -9,6 +9,8 @@ window.PDFGenerator = {
                 console.error("No valid state to generate PDF");
                 return;
             }
+            
+            const includeSec = (id) => !config.sections || config.sections[id] !== false;
 
             const results = state.results;
             const untitledName = translations['untitled-project'] || "Vantiq AI Project";
@@ -86,10 +88,48 @@ window.PDFGenerator = {
                 if (!node.alignment && (node.text || node.stack)) node.alignment = 'right';
             };
 
+            const deepStringCoerce = (val) => {
+                if (val === null || val === undefined) return '';
+                if (typeof val === 'string') return val;
+                if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+                if (Array.isArray(val)) return val.map(deepStringCoerce).join(', ');
+                if (typeof val === 'object') {
+                    const vals = Object.values(val).filter(v => v !== null && v !== undefined);
+                    return vals.map(deepStringCoerce).join(', ');
+                }
+                return '';
+            };
+
+            const sanitizePdfNode = (node) => {
+                if (node === null || node === undefined) return '';
+                if (typeof node === 'string' || typeof node === 'number') return String(node);
+                if (Array.isArray(node)) return node.map(sanitizePdfNode).filter(n => n !== null && n !== undefined && n !== '');
+                if (typeof node === 'object') {
+                    const clean = { ...node };
+                    if ('text' in clean) {
+                        if (Array.isArray(clean.text)) {
+                            clean.text = sanitizePdfNode(clean.text);
+                        } else {
+                            clean.text = deepStringCoerce(clean.text);
+                        }
+                    }
+                    if (clean.ul) clean.ul = sanitizePdfNode(clean.ul);
+                    if (clean.ol) clean.ol = sanitizePdfNode(clean.ol);
+                    if (clean.table && clean.table.body) {
+                        clean.table.body = clean.table.body.map(row => row.map(sanitizePdfNode));
+                    }
+                    if (clean.columns) clean.columns = sanitizePdfNode(clean.columns);
+                    if (clean.stack) clean.stack = sanitizePdfNode(clean.stack);
+                    return clean;
+                }
+                return node;
+            };
+
             const addSection = (contentArray) => {
                 if (contentArray && Array.isArray(contentArray)) {
-                    if (isArabic) contentArray.forEach(item => applyArabicRTL(item, 0));
-                    docDefinition.content.push(...contentArray);
+                    const safeArray = sanitizePdfNode(contentArray);
+                    if (isArabic) safeArray.forEach(item => applyArabicRTL(item, 0));
+                    docDefinition.content.push(...safeArray);
                 }
             };
 
@@ -102,94 +142,141 @@ window.PDFGenerator = {
             };
 
             // TITLE PAGE
-            addSection([
+            const titleBlocks = [
                 { text: projectName, style: 'title' },
-                { text: `${translations['pdf-blueprint'] || 'Architecture Blueprint'} — ${dateStr}`, style: 'subtitle' },
+                { text: `${translations['pdf-blueprint'] || 'Architecture Blueprint'} — ${dateStr}`, style: 'subtitle' }
+            ];
+            if (config.customerName) titleBlocks.push({ text: `Prepared for: ${config.customerName}`, style: 'bodyText', italics: true, bold: true, fontSize: 12, margin: [0, 0, 0, 5] });
+            if (config.salesRepName) titleBlocks.push({ text: `Prepared by: ${config.salesRepName}`, style: 'bodyText', italics: true, fontSize: 11, margin: [0, 0, 0, 20] });
+            
+            titleBlocks.push(
                 { text: translations['pdf-problem-stmt'] || 'Problem Statement:', style: 'subsectionHeader' },
                 { text: state.problemText || translations['pdf-no-problem'] || "No problem statement provided.", style: 'bodyText', italics: true },
                 { text: '', pageBreak: 'after' }
-            ]);
+            );
+            addSection(titleBlocks);
 
             // 1. PROBLEM ANALYSIS (Phases 1 & 1b)
-            if (results.analysis || results.useCaseScope) {
-                const analysisBlocks = [];
-                if (results.analysis?.domain) analysisBlocks.push({ text: translations['pdf-industry'] || 'Industry Domain:', style: 'subsectionHeader' }, { text: results.analysis.domain, style: 'bodyText' });
-                if (results.analysis?.summary) analysisBlocks.push({ text: translations['pdf-summary'] || 'System Summary:', style: 'subsectionHeader' }, { text: results.analysis.summary, style: 'bodyText' });
-                if (results.analysis?.coreProblem) analysisBlocks.push({ text: translations['label-core-problem'] || 'Core Problem:', style: 'subsectionHeader' }, { text: results.analysis.coreProblem, style: 'bodyText' });
+            try {
+                if (includeSec('sec1') && (results.analysis || results.useCaseScope)) {
+                    const analysisBlocks = [];
+                    if (results.analysis?.domain) analysisBlocks.push({ text: translations['pdf-industry'] || 'Industry Domain:', style: 'subsectionHeader' }, { text: results.analysis.domain, style: 'bodyText' });
+                    if (results.analysis?.summary) analysisBlocks.push({ text: translations['pdf-summary'] || 'System Summary:', style: 'subsectionHeader' }, { text: results.analysis.summary, style: 'bodyText' });
+                    if (results.analysis?.coreProblem) analysisBlocks.push({ text: translations['label-core-problem'] || 'Core Problem:', style: 'subsectionHeader' }, { text: results.analysis.coreProblem, style: 'bodyText' });
 
-                if (results.analysis?.dealSize) {
-                    analysisBlocks.push({ text: 'Deal Snapshot:', style: 'subsectionHeader' });
-                    analysisBlocks.push({
-                        ul: [
-                            { text: `Deal Size: ${results.analysis.dealSize}` },
-                            { text: `Urgency: ${results.analysis.urgency?.level || 'Unknown'} - ${results.analysis.urgency?.justification || ''}` }
-                        ], style: 'list'
-                    });
+                    if (results.analysis?.dealSize) {
+                        analysisBlocks.push({ text: 'Deal Snapshot:', style: 'subsectionHeader' });
+                        analysisBlocks.push({
+                            ul: [
+                                { text: `Deal Size: ${results.analysis.dealSize}` },
+                                { text: `Urgency: ${results.analysis.urgency?.level || 'Unknown'} - ${results.analysis.urgency?.justification || ''}` }
+                            ], style: 'list'
+                        });
+                    }
+
+                    if (results.useCaseScope) {
+                        analysisBlocks.push({ text: 'Use Case Scope & Investment:', style: 'subsectionHeader' });
+                        analysisBlocks.push({
+                            ul: [
+                                ...(results.useCaseScope.investmentEstimate ? [{ text: `Investment: ${results.useCaseScope.investmentEstimate}` }] : []),
+                                ...(results.useCaseScope.timeToValue ? [{ text: `Time to Value: ${results.useCaseScope.timeToValue}` }] : [])
+                            ], style: 'list'
+                        });
+                    }
+
+                    if (results.analysis?.painPoints?.length) {
+                        analysisBlocks.push({ text: 'Pain Points:', style: 'subsectionHeader' });
+                        analysisBlocks.push({ ul: results.analysis.painPoints.map(p => ({ text: `${p.pain} [${p.severity}]: ${p.impact}` })), style: 'list' });
+                    }
+
+                    if (results.analysis?.actors?.length) {
+                        analysisBlocks.push({ text: translations['pdf-actors'] || 'Primary Actors:', style: 'subsectionHeader' }, { ul: results.analysis.actors.map(a => ({ text: a })), style: 'list' });
+                    }
+
+                    if (results.analysis?.events?.length) {
+                        analysisBlocks.push({ text: translations['pdf-principal-events'] || 'Principal Events:', style: 'subsectionHeader' }, { ul: results.analysis.events.map(e => ({ text: e })), style: 'list' });
+                    }
+
+                    if (results.analysis?.aiTasks?.length) {
+                        analysisBlocks.push({ text: translations['pdf-ai-tasks'] || 'AI / ML Tasks:', style: 'subsectionHeader' }, { ul: results.analysis.aiTasks.map(t => ({ text: `${t.task} (${t.type}) — Models: ${(t.models || []).join(', ')}` })), style: 'list' });
+                    }
+
+                    if (analysisBlocks.length > 0) addSection([{ text: '1. Problem Analysis & Discovery', style: 'sectionHeader', pageBreak: 'before' }, ...analysisBlocks]);
                 }
-
-                if (results.useCaseScope) {
-                    analysisBlocks.push({ text: 'Use Case Scope & Investment:', style: 'subsectionHeader' });
-                    analysisBlocks.push({
-                        ul: [
-                            ...(results.useCaseScope.investmentEstimate ? [{ text: `Investment: ${results.useCaseScope.investmentEstimate}` }] : []),
-                            ...(results.useCaseScope.timeToValue ? [{ text: `Time to Value: ${results.useCaseScope.timeToValue}` }] : [])
-                        ], style: 'list'
-                    });
-                }
-
-                if (results.analysis?.painPoints?.length) {
-                    analysisBlocks.push({ text: 'Pain Points:', style: 'subsectionHeader' });
-                    analysisBlocks.push({ ul: results.analysis.painPoints.map(p => ({ text: `${p.pain} [${p.severity}]: ${p.impact}` })), style: 'list' });
-                }
-
-                if (results.analysis?.actors?.length) {
-                    analysisBlocks.push({ text: translations['pdf-actors'] || 'Primary Actors:', style: 'subsectionHeader' }, { ul: results.analysis.actors.map(a => ({ text: a })), style: 'list' });
-                }
-
-                if (results.analysis?.events?.length) {
-                    analysisBlocks.push({ text: translations['pdf-principal-events'] || 'Principal Events:', style: 'subsectionHeader' }, { ul: results.analysis.events.map(e => ({ text: e })), style: 'list' });
-                }
-
-                if (results.analysis?.aiTasks?.length) {
-                    analysisBlocks.push({ text: translations['pdf-ai-tasks'] || 'AI / ML Tasks:', style: 'subsectionHeader' }, { ul: results.analysis.aiTasks.map(t => ({ text: `${t.task} (${t.type}) — Models: ${(t.models || []).join(', ')}` })), style: 'list' });
-                }
-
-                if (analysisBlocks.length > 0) addSection([{ text: '1. Problem Analysis & Discovery', style: 'sectionHeader' }, ...analysisBlocks]);
-            }
+            } catch (e) { console.error("PDF Section 1 Error", e); }
 
             // 2. BUSINESS VALUE & COMPETITIVE (Phases 11 & 10)
-            if (results.businessValue || results.competitive) {
-                const bzBlocks = [];
-                if (results.businessValue?.summary) bzBlocks.push({ text: results.businessValue.summary, style: 'bodyText', italics: true });
+            try {
+                if (includeSec('sec2') && (results.businessValue || results.competitive)) {
+                    const bzBlocks = [];
+                    if (results.businessValue?.summary) bzBlocks.push({ text: results.businessValue.summary, style: 'bodyText', italics: true });
 
-                if (results.businessValue?.roiProjection) {
-                    bzBlocks.push({ text: 'Expected Return:', style: 'subsectionHeader' });
-                    const r = results.businessValue.roiProjection;
-                    bzBlocks.push({ ul: [`Expected Return: ${r.expectedReturn || ''}`, `Payback Period: ${r.paybackPeriod || ''}`, `ROI: ${r.roiPercentage || ''}`].filter(x => !x.endsWith(': ')), style: 'list' });
+                    if (results.businessValue?.roiProjection) {
+                        bzBlocks.push({ text: 'Expected Return:', style: 'subsectionHeader' });
+                        const r = results.businessValue.roiProjection;
+                        bzBlocks.push({ ul: [`Expected Return: ${r.expectedReturn || ''}`, `Payback Period: ${r.paybackPeriod || ''}`, `ROI: ${r.roiPercentage || ''}`].filter(x => !x.endsWith(': ')), style: 'list' });
+                    }
+
+                    if (results.businessValue?.costOfInaction) {
+                        bzBlocks.push({ text: 'Cost of Inaction:', style: 'subsectionHeader' });
+                        const coi = results.businessValue.costOfInaction;
+                        if (typeof coi === 'string') {
+                            bzBlocks.push({ text: coi, style: 'bodyText' });
+                        } else if (typeof coi === 'object') {
+                            bzBlocks.push({ ul: [
+                                coi.financialCost ? `Financial: ${coi.financialCost}` : null,
+                                coi.operationalRisk ? `Operational: ${coi.operationalRisk}` : null,
+                                coi.competitiveRisk ? `Competitive: ${coi.competitiveRisk}` : null
+                            ].filter(Boolean), style: 'list' });
+                        }
+                    }
+
+                    if (results.competitive?.competitors?.length) {
+                        bzBlocks.push({ text: 'Competitive Comparison:', style: 'subsectionHeader' });
+                        const compBody = [[{ text: 'Competitor / Approach', style: 'tableHeader' }, { text: 'Strengths', style: 'tableHeader' }, { text: 'Weaknesses / Gaps', style: 'tableHeader' }]];
+                        results.competitive.competitors.forEach(c => compBody.push([{ text: c.name || "", bold: true }, { text: (c.strengths || []).join(', ') }, { text: (c.weaknesses || []).join(', ') }]));
+                        bzBlocks.push({ table: { headerRows: 1, widths: ['30%', '35%', '35%'], body: compBody }, layout: 'lightHorizontalLines', margin: [0, 5, 0, 15] });
+                    }
+
+                    const matrixData = results.competitive?.featureComparison || results.competitive?.competitiveMatrix || [];
+                    if (matrixData.length) {
+                        bzBlocks.push({ text: 'Feature Comparison Matrix:', style: 'subsectionHeader' });
+                        const compNames = (results.competitive.competitors || []).map(c => c.name || "Competitor");
+                        if (compNames.length) {
+                            const mBody = [[{ text: 'Criterion', style: 'tableHeader' }, ...compNames.map(n => ({ text: n, style: 'tableHeader' }))]];
+                            matrixData.forEach(row => {
+                                const cells = compNames.map((name, idx) => {
+                                    let r = (row.ratings || []).find(x => x.competitor === name);
+                                    if (!r) r = (row.ratings || [])[idx];
+                                    return r ? r.rating : '—';
+                                });
+                                mBody.push([{ text: row.criterion || '', bold: true }, ...cells]);
+                            });
+                            bzBlocks.push({ table: { headerRows: 1, body: mBody }, layout: 'lightHorizontalLines', margin: [0, 5, 0, 15] });
+                        }
+                    }
+
+                    const diffs = results.competitive?.vantiqDifferentiators || results.competitive?.differentiators || [];
+                    if (diffs.length) {
+                        bzBlocks.push({ text: 'Vantiq Differentiators:', style: 'subsectionHeader' });
+                        diffs.forEach(d => {
+                            bzBlocks.push({ text: `✦ ${d.feature || d.name}`, bold: true, style: 'bodyText' });
+                            bzBlocks.push({ text: d.description || '', style: 'bodyText', margin: [10, 0, 0, 5] });
+                        });
+                    }
+
+                    if (results.competitive?.winStrategy?.length) {
+                        bzBlocks.push({ text: 'Win Strategy:', style: 'subsectionHeader' });
+                        bzBlocks.push({ ul: results.competitive.winStrategy.map(w => ({ text: w })), style: 'list' });
+                    }
+
+                    if (bzBlocks.length > 0) addSection([{ text: '2. Business Value & Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }, ...bzBlocks]);
                 }
-
-                if (results.businessValue?.costOfInaction) {
-                    bzBlocks.push({ text: 'Cost of Inaction:', style: 'subsectionHeader' });
-                    bzBlocks.push({ text: results.businessValue.costOfInaction, style: 'bodyText' });
-                }
-
-                if (results.competitive?.competitors?.length) {
-                    bzBlocks.push({ text: 'Competitive Comparison:', style: 'subsectionHeader' });
-                    const compBody = [[{ text: 'Competitor / Approach', style: 'tableHeader' }, { text: 'Strengths', style: 'tableHeader' }, { text: 'Weaknesses / Gaps', style: 'tableHeader' }]];
-                    results.competitive.competitors.forEach(c => compBody.push([{ text: c.name || "", bold: true }, { text: (c.strengths || []).join(', ') }, { text: (c.weaknesses || []).join(', ') }]));
-                    bzBlocks.push({ table: { headerRows: 1, widths: ['30%', '35%', '35%'], body: compBody }, layout: 'lightHorizontalLines', margin: [0, 5, 0, 15] });
-                }
-
-                if (results.competitive?.winStrategy?.length) {
-                    bzBlocks.push({ text: 'Win Strategy:', style: 'subsectionHeader' });
-                    bzBlocks.push({ ul: results.competitive.winStrategy.map(w => ({ text: w })), style: 'list' });
-                }
-
-                if (bzBlocks.length > 0) addSection([{ text: '2. Business Value & Competitive Strategy', style: 'sectionHeader', pageBreak: 'before' }, ...bzBlocks]);
-            }
+            } catch(e) { console.error("PDF Section 2 Error", e); }
 
             // 3. DOMAIN MODEL (Agent 2)
-            if (results.domainModel) {
+            try {
+                if (includeSec('sec3') && results.domainModel) {
                 const dmBlocks = [];
                 if (results.domainModel.domain) dmBlocks.push({ text: results.domainModel.domain, style: 'bodyText', margin: [0, 0, 0, 15] });
 
@@ -210,9 +297,11 @@ window.PDFGenerator = {
 
                 if (dmBlocks.length > 0) addSection([{ text: '3. Domain Model', style: 'sectionHeader', pageBreak: 'before' }, ...dmBlocks]);
             }
+            } catch(e) { console.error("PDF Section 3 Error", e); }
 
-            // 4. SYSTEM ARCHITECTURE & LINTER (Agent 3 & 11)
-            if (results.architecture) {
+            // 4. ARCHITECTURE (Agent 3)
+            try {
+                if (includeSec('sec4') && results.architecture) {
                 const archBlocks = [];
                 if (results.architecture.description) archBlocks.push({ text: results.architecture.description, style: 'bodyText' });
 
@@ -249,9 +338,11 @@ window.PDFGenerator = {
                     if (archSvg) addSection([archSvg]);
                 }
             }
+            } catch(e) { console.error("PDF Section 4 Error", e); }
 
-            // 5. EVENT SYSTEM (Agent 5)
-            if (results.eventSystem) {
+            // 5. EVENT SYSTEM & ORCHESTRATION (Agent 6)
+            try {
+                if (includeSec('sec5') && results.eventSystem) {
                 const evBlocks = [];
 
                 if (results.eventSystem.orchestrationPattern) {
@@ -287,9 +378,30 @@ window.PDFGenerator = {
                     if (eventSvg) addSection([eventSvg]);
                 }
             }
+            } catch(e) { console.error("PDF Section 5 Error", e); }
 
-            // 6. AI MODELS & AGENTIC (Agents 4 & 4b)
-            if (results.aiModels || results.agenticGuide) {
+            // 6. ARCHITECTURE DIAGRAMS (Agent 7 - HTML Scraping)
+            try {
+                if (includeSec('sec6') && (results.diagrams?.diagrams?.length)) {
+                const diagBlocks = [];
+                results.diagrams.diagrams.forEach(d => {
+                    diagBlocks.push({ text: d.title || 'Diagram', style: 'subsectionHeader' });
+                    diagBlocks.push({ text: d.description || '', style: 'bodyText' });
+                });
+                if (diagBlocks.length > 0) {
+                    addSection([{ text: 'Additional System Flow Diagrams', style: 'sectionHeader', pageBreak: 'before' }, ...diagBlocks]);
+                    // Pull SVGs from DOM
+                    const svgs = document.querySelectorAll('#diagrams-content .diagram-container svg');
+                    svgs.forEach(svgEl => {
+                        addSection([{ svg: svgEl.outerHTML, width: 500, margin: [0, 15, 0, 15] }]);
+                    });
+                }
+            }
+            } catch(e) { console.error("PDF Section 6 Error", e); }
+
+            // 7. AI MODELS & AGENTIC OVERLAY (Agents 4 & 5)
+            try {
+                if (includeSec('sec7') && (results.aiModels || results.agenticGuide)) {
                 const aiBlocks = [];
 
                 const aiModelsList = results.aiModels?.models || results.aiModels?.recommendations || [];
@@ -313,11 +425,13 @@ window.PDFGenerator = {
                     }
                 }
 
-                if (aiBlocks.length > 0) addSection([{ text: '6. AI Models & Agentic Overlay', style: 'sectionHeader', pageBreak: 'before' }, ...aiBlocks]);
+                if (aiBlocks.length > 0) addSection([{ text: '7. AI Models & Agentic Overlay', style: 'sectionHeader', pageBreak: 'before' }, ...aiBlocks]);
             }
+            } catch(e) { console.error("PDF Section 7 Error", e); }
 
-            // 7. IMPLEMENTATION ROADMAP (Agent 6)
-            if (results.implementation) {
+            // 8. IMPLEMENTATION & DEPLOYMENT (Agents 8)
+            try {
+                if (includeSec('sec8') && results.implementation) {
                 const impBlocks = [];
 
                 if (results.implementation.projectStructure) {
@@ -349,11 +463,13 @@ window.PDFGenerator = {
                     }
                 }
 
-                if (impBlocks.length > 0) addSection([{ text: '7. Implementation Scaffolding', style: 'sectionHeader', pageBreak: 'before' }, ...impBlocks]);
+                if (impBlocks.length > 0) addSection([{ text: '8. Implementation Scaffolding', style: 'sectionHeader', pageBreak: 'before' }, ...impBlocks]);
             }
+            } catch(e) { console.error("PDF Section 8 Error", e); }
 
-            // 8. EXPANSION (Agents 12, 13, 14)
-            if (results.adjacentUseCases || results.roadmap || results.platformValueGrowth || results.platformValue) {
+            // 9. EXPANSION ROADMAP (Agents 12 & 13 & 14)
+            try {
+                if (includeSec('sec9') && (results.adjacentUseCases || results.roadmap || results.platformValueGrowth || results.platformValue)) {
                 const expBlocks = [];
 
                 const roadmapTimeline = results.roadmap?.timeline || results.roadmap?.quarters || [];
@@ -420,8 +536,9 @@ window.PDFGenerator = {
                     });
                 }
 
-                if (expBlocks.length > 0) addSection([{ text: '8. Future Expansion & Roadmap', style: 'sectionHeader', pageBreak: 'before' }, ...expBlocks]);
+                if (expBlocks.length > 0) addSection([{ text: '9. Expansion Roadmap', style: 'sectionHeader', pageBreak: 'before' }, ...expBlocks]);
             }
+            } catch(e) { console.error("PDF Section 9 Error", e); }
 
             const pdfName = projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_architecture.pdf';
             pdfMake.createPdf(docDefinition).download(pdfName);

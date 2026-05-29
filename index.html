@@ -121,13 +121,27 @@
       <div class="sidebar-footer" style="display: flex; align-items: center; gap: 8px;">
         <span class="status-dot" id="statusDot"></span>
         <span id="statusText" data-i18n="status-configure">Configure API Key</span>
-        <div style="margin-left:auto; display: flex; gap: 4px;">
-          <button class="btn-ghost" onclick="app.showHistory()" id="btnHistory" style="font-size:14px"
-            data-i18n-title="title-history">🕒</button>
-          <button class="btn-ghost" onclick="app.exportToPDF()" id="btnExportPdf" style="display:none;font-size:14px"
-            data-i18n-title="title-export">📄</button>
-          <button class="btn-ghost" onclick="app.showSettings()" style="font-size:14px"
-            data-i18n-title="title-settings">⚙️</button>
+        
+        <div style="margin-left:auto; position:relative;" id="footerMenuContainer">
+          <button class="btn-ghost" onclick="app.toggleFooterMenu()" id="btnFooterMenu" style="font-size:16px" title="Menu">⋮</button>
+          
+          <div class="dropdown-menu" id="footerDropdown" style="display:none; position:absolute; bottom:100%; right:0; margin-bottom:8px; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:0 10px 25px rgba(0,0,0,0.5); padding:8px; min-width:180px; z-index:100; flex-direction:column; gap:4px;">
+            <button class="dropdown-item" onclick="app.showHistory(); app.toggleFooterMenu()" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
+              <span style="font-size:16px">🕒</span> <span data-i18n="title-history">Session History</span>
+            </button>
+            <button class="dropdown-item" onclick="app.importBlueprint(); app.toggleFooterMenu()" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
+              <span style="font-size:16px">📥</span> <span data-i18n="title-import">Import Blueprint</span>
+            </button>
+            <button class="dropdown-item" onclick="app.exportBlueprint(); app.toggleFooterMenu()" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
+              <span style="font-size:16px">📤</span> <span data-i18n="title-export-json">Export JSON</span>
+            </button>
+            <button class="dropdown-item" onclick="app.exportToPDF(); app.toggleFooterMenu()" id="menuExportPdf" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
+              <span style="font-size:16px">📄</span> <span data-i18n="title-export-pdf">Export PDF</span>
+            </button>
+            <button class="dropdown-item" onclick="app.showSettings(); app.toggleFooterMenu()" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
+              <span style="font-size:16px">⚙️</span> <span data-i18n="title-settings">Settings</span>
+            </button>
+          </div>
         </div>
       </div>
     </aside>
@@ -711,6 +725,40 @@
             <button class="btn btn-secondary" onclick="app.hideSettings()" data-i18n="btn-cancel">Cancel</button>
             <button class="btn btn-primary" onclick="app.saveSettings()">💾 <span data-i18n="btn-save">Save
                 Settings</span></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PDF Config Modal -->
+      <div class="modal-overlay" id="pdfConfigModal">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2 data-i18n="pdf-config-title">📄 Export PDF Settings</h2>
+            <button class="btn-ghost" onclick="app.hidePdfConfig()" style="font-size:18px">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="input-label" data-i18n="pdf-cust-name">Customer Name</div>
+            <input type="text" class="modal-input" id="pdfCustomerName" placeholder="e.g. Acme Corp" />
+            
+            <div class="input-label" style="margin-top:20px" data-i18n="pdf-rep-name">Sales Rep Name</div>
+            <input type="text" class="modal-input" id="pdfSalesRepName" placeholder="e.g. Jane Doe" />
+            
+            <div class="input-label" style="margin-top:20px" data-i18n="pdf-sections">Sections to Include</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec1" checked> 1. Problem Analysis & Discovery</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec2" checked> 2. Business Value & Competitive</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec3" checked> 3. Domain Model</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec4" checked> 4. System Architecture</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec5" checked> 5. Event System & Orchestration</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec6" checked> 6. System Flow Diagrams</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec7" checked> 7. AI Models & Agentic Overlay</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec8" checked> 8. Implementation Scaffolding</label>
+              <label style="color:var(--text-primary);font-size:13px;display:flex;align-items:center;gap:8px"><input type="checkbox" id="pdfSec9" checked> 9. Expansion & Roadmap</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="app.hidePdfConfig()" data-i18n="btn-cancel">Cancel</button>
+            <button class="btn btn-primary" onclick="app.executePdfExport()">📄 <span data-i18n="btn-generate-pdf">Generate PDF</span></button>
           </div>
         </div>
       </div>

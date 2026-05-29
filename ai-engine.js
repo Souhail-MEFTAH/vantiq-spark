@@ -89,20 +89,34 @@ class AIEngine {
                     await this._sleep(delay);
                     return this.callAgent(agentName, systemPrompt, userMessage, retryCount + 1);
                 }
-                if (response.status === 401) {
-                    throw new Error('Invalid API key. Please check your OpenAI API key in Settings.');
+                let err;
+                if (response.status === 429) {
+                    err = new Error('Rate limit exceeded. Please wait a moment and try again.');
+                    err.type = 'rate_limit';
+                } else if (response.status === 401) {
+                    err = new Error('Invalid API key. Please check your OpenAI API key in Settings.');
+                    err.type = 'auth';
+                } else if (response.status === 404) {
+                    err = new Error(`Model "${this.model}" not found. Try a different model in Settings.`);
+                    err.type = 'model_not_found';
+                } else if (response.status === 400) {
+                    err = new Error(`API error (400 Bad Request). The request may be too large or contain invalid characters.`);
+                    err.type = 'bad_request';
+                    err.details = errorBody;
+                } else {
+                    err = new Error(`API error (${response.status}): ${errorBody}`);
+                    err.type = 'api_error';
                 }
-                if (response.status === 404) {
-                    throw new Error(`Model "${this.model}" not found. Try a different model in Settings.`);
-                }
-                throw new Error(`API error (${response.status}): ${errorBody}`);
+                throw err;
             }
 
             const data = await response.json();
             const content = data.choices?.[0]?.message?.content;
 
             if (!content || !data.choices || data.choices.length === 0) {
-                throw new Error(`[${agentName}] Empty response from API (no choices returned)`);
+                const err = new Error(`[${agentName}] Empty response from API (no choices returned)`);
+                err.type = 'empty_response';
+                throw err;
             }
 
             // Log usage info
@@ -111,7 +125,14 @@ class AIEngine {
             }
 
             try {
-                const parsed = JSON.parse(content);
+                let sanitizedContent = content;
+                // Pre-parse sanitization
+                sanitizedContent = sanitizedContent.replace(/[\u200B-\u200D\uFEFF]/g, ''); // strip zero-width chars
+                sanitizedContent = sanitizedContent.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, ''); // remove JS comments
+                sanitizedContent = sanitizedContent.replace(/,\s*([}\]])/g, '$1'); // fix trailing commas
+                sanitizedContent = sanitizedContent.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":'); // quote unquoted keys
+                
+                const parsed = JSON.parse(sanitizedContent);
                 console.log(`[${agentName}] ✓ Response received`);
                 return parsed;
             } catch (parseErr) {
@@ -152,7 +173,9 @@ class AIEngine {
                     console.warn(`[${agentName}] JSON parse failed, retrying...`);
                     return this.callAgent(agentName, systemPrompt, userMessage, retryCount + 1);
                 }
-                throw new Error(`[${agentName}] Failed to parse JSON: ${parseErr.message}`);
+                const err = new Error(`[${agentName}] Failed to parse JSON: ${parseErr.message}`);
+                err.type = 'parse_error';
+                throw err;
             }
 
         } catch (err) {
@@ -169,7 +192,12 @@ class AIEngine {
             }
 
             if (err.name === 'AbortError') {
-                throw new Error(`[${agentName}] Request timed out after ${this.timeout / 1000}s`);
+                const timeoutErr = new Error(`[${agentName}] Request timed out after ${this.timeout / 1000}s`);
+                timeoutErr.type = 'timeout';
+                throw timeoutErr;
+            }
+            if (isNetworkError && !err.type) {
+                err.type = 'network';
             }
             throw err;
         }

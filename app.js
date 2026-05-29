@@ -1490,6 +1490,178 @@ function saveSettings() {
     hideSettings();
 }
 
+// ── Session Import / Export ──
+function exportBlueprint() {
+    if (!state.results || Object.keys(state.results).length === 0) {
+        alert(I18N[state.language || 'en']?.['export-no-data'] || "No completed blueprint to export.");
+        return;
+    }
+    const dataStr = JSON.stringify({
+        timestamp: new Date().toISOString(),
+        version: "1.0",
+        state: state
+    }, null, 2);
+    
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const projName = state.results.domainModel?.projectName || 'vantiq_blueprint';
+    a.download = `${projName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.spark.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importBlueprint() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = e => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = event => {
+            try {
+                const parsed = JSON.parse(event.target.result);
+                if (!parsed.state) throw new Error("Invalid blueprint format. Missing 'state' object.");
+                
+                Object.assign(state, parsed.state);
+                
+                const langSelect = document.getElementById('langSelect');
+                if (langSelect) langSelect.value = state.language || 'en';
+                localizeUI();
+                
+                if (state.results) {
+                    if (state.results.analysis) window.Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
+                    if (state.results.useCaseScope) window.Renderers.renderUseCaseScope(state.results.useCaseScope, document.getElementById('usecasescope-content'));
+                    if (state.results.businessValue) window.Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
+                    if (state.results.competitive) window.Renderers.renderCompetitiveAnalysis(state.results.competitive, document.getElementById('competitive-content'));
+                    if (state.results.domainModel) window.Renderers.renderDomainModel(state.results.domainModel, document.getElementById('domain-content'));
+                    if (state.results.architecture) window.Renderers.renderArchitecture(state.results.architecture, document.getElementById('architecture-content'));
+                    if (state.results.eventSystem) window.Renderers.renderEventSystem(state.results.eventSystem, document.getElementById('events-content'));
+                    if (state.results.diagrams) window.Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
+                    if (state.results.aiModels) window.Renderers.renderAIModels(state.results.aiModels, document.getElementById('aimodels-content'));
+                    if (state.results.agenticGuide) window.Renderers.renderAgenticGuide(state.results.agenticGuide, document.getElementById('agentic-content'));
+                    if (state.results.implementation) window.Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
+                    if (state.results.adjacentUseCases) window.Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content'));
+                    if (state.results.roadmap) window.Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content'));
+                    if (state.results.platformValueGrowth || state.results.platformValue) window.Renderers.renderPlatformValueGrowth(state.results.platformValueGrowth || state.results.platformValue, document.getElementById('valuegrowth-content'));
+                    
+                    const tabs = ['analysis', 'usecasescope', 'business', 'competitive', 'domain', 'architecture', 'events', 'diagrams', 'aimodels', 'agentic', 'implementation', 'adjacent', 'roadmap', 'valuegrowth'];
+                    tabs.forEach(tab => {
+                        const key = tab === 'valuegrowth' ? (state.results.platformValueGrowth ? 'platformValueGrowth' : 'platformValue') : tab;
+                        if (state.results[key]) {
+                            document.getElementById(`nav-${tab}`)?.classList.remove('disabled');
+                            document.getElementById(`step-${tab}`)?.classList.add('active');
+                        }
+                    });
+                    const menuPdf = document.getElementById('menuExportPdf');
+                    if (menuPdf) menuPdf.style.display = 'flex';
+                }
+                
+                switchPanel('input');
+                const problemInput = document.getElementById('problemText');
+                if (problemInput) problemInput.value = state.problemText || '';
+                
+            } catch (err) {
+                console.error("Import failed:", err);
+                alert("Failed to import blueprint: " + err.message);
+            }
+        };
+        reader.readAsText(file);
+    };
+    input.click();
+}
+
+// ── PDF Export Config Modal ──
+function exportToPDF() {
+    if (!state.results || Object.keys(state.results).length === 0) {
+        alert(I18N[state.language || 'en']?.['export-no-data'] || "No completed blueprint to export.");
+        return;
+    }
+    const modal = document.getElementById('pdfConfigModal');
+    if (modal) {
+        const cName = sessionStorage.getItem('vantiq_pdf_customer') || '';
+        const sName = sessionStorage.getItem('vantiq_pdf_sales_rep') || '';
+        const customerInput = document.getElementById('pdfCustomerName');
+        const salesRepInput = document.getElementById('pdfSalesRepName');
+        if (customerInput) customerInput.value = cName;
+        if (salesRepInput) salesRepInput.value = sName;
+        
+        const checkDisable = (id, condition) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.disabled = !condition;
+                if (!condition) el.checked = false;
+            }
+        };
+        
+        checkDisable('pdfSec1', state.results.analysis || state.results.useCaseScope);
+        checkDisable('pdfSec2', state.results.businessValue || state.results.competitive);
+        checkDisable('pdfSec3', state.results.domainModel);
+        checkDisable('pdfSec4', state.results.architecture);
+        checkDisable('pdfSec5', state.results.eventSystem);
+        checkDisable('pdfSec6', state.results.diagrams);
+        checkDisable('pdfSec7', state.results.aiModels || state.results.agenticGuide);
+        checkDisable('pdfSec8', state.results.implementation);
+        checkDisable('pdfSec9', state.results.adjacentUseCases || state.results.roadmap || state.results.platformValueGrowth || state.results.platformValue);
+
+        modal.classList.add('visible');
+    } else if (window.PDFGenerator) {
+        window.PDFGenerator.generate(state);
+    }
+}
+
+function hidePdfConfig() {
+    const modal = document.getElementById('pdfConfigModal');
+    if (modal) modal.classList.remove('visible');
+}
+
+function executePdfExport() {
+    const customerName = document.getElementById('pdfCustomerName')?.value || '';
+    const salesRepName = document.getElementById('pdfSalesRepName')?.value || '';
+    
+    sessionStorage.setItem('vantiq_pdf_customer', customerName);
+    sessionStorage.setItem('vantiq_pdf_sales_rep', salesRepName);
+    
+    const config = {
+        customerName,
+        salesRepName,
+        sections: {
+            sec1: document.getElementById('pdfSec1')?.checked,
+            sec2: document.getElementById('pdfSec2')?.checked,
+            sec3: document.getElementById('pdfSec3')?.checked,
+            sec4: document.getElementById('pdfSec4')?.checked,
+            sec5: document.getElementById('pdfSec5')?.checked,
+            sec6: document.getElementById('pdfSec6')?.checked,
+            sec7: document.getElementById('pdfSec7')?.checked,
+            sec8: document.getElementById('pdfSec8')?.checked,
+            sec9: document.getElementById('pdfSec9')?.checked
+        }
+    };
+    
+    hidePdfConfig();
+    if (window.PDFGenerator) window.PDFGenerator.generate(state, config);
+}
+
+// ── Dropdown Menu ──
+function toggleFooterMenu() {
+    const menu = document.getElementById('footerDropdown');
+    if (menu) {
+        menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+    }
+}
+// Close menu if clicked outside
+document.addEventListener('click', (e) => {
+    const container = document.getElementById('footerMenuContainer');
+    const menu = document.getElementById('footerDropdown');
+    if (container && menu && menu.style.display !== 'none' && !container.contains(e.target)) {
+        menu.style.display = 'none';
+    }
+});
+
 // ── Session History ──
 const HISTORY_KEY = 'vantiq_spark_history';
 
@@ -1656,7 +1828,8 @@ function loadSession(id) {
     }
 
     // Switch to analysis panel
-    document.getElementById('btnExportPdf').style.display = 'inline-flex';
+    const menuPdf = document.getElementById('menuExportPdf');
+    if (menuPdf) menuPdf.style.display = 'flex';
     switchPanel('analysis');
 }
 
@@ -1935,10 +2108,37 @@ async function renderMermaidDiagrams() {
         try {
             const id = 'mermaid-' + Math.random().toString(36).substr(2, 9);
             const hardenedCode = preprocessMermaid(rawCode);
+            let svg;
 
             console.log(`[Mermaid] Rendering ${id}:`, hardenedCode.substring(0, 200) + '...');
 
-            const { svg } = await mermaid.render(id, hardenedCode);
+            try {
+                const res = await mermaid.render(id, hardenedCode);
+                svg = res.svg;
+            } catch (err1) {
+                console.warn(`[Mermaid] Pass 1 failed. Stripping styles...`);
+                try {
+                    // Pass 2: Strip styles and subgraphs
+                    const pass2Code = hardenedCode.replace(/^.*(?:style|classDef|class|click|linkStyle|direction|subgraph|end).*\n?/gmi, '');
+                    const res2 = await mermaid.render(id, pass2Code);
+                    svg = res2.svg;
+                } catch (err2) {
+                    console.warn(`[Mermaid] Pass 2 failed. Attempting extreme simplification...`);
+                    // Pass 3: Just extract basic edges
+                    const edgeRegex = /([a-zA-Z0-9_]+)(?:\[.*?\])?\s*(?:-->|-.->|==>)\s*(?:\|.*?\|)?\s*([a-zA-Z0-9_]+)/g;
+                    let pass3Code = 'graph TD\n';
+                    let match;
+                    while ((match = edgeRegex.exec(hardenedCode)) !== null) {
+                        pass3Code += `  ${match[1]} --> ${match[2]}\n`;
+                    }
+                    if (pass3Code.length > 10) {
+                        const res3 = await mermaid.render(id, pass3Code);
+                        svg = res3.svg;
+                    } else {
+                        throw new Error('Could not salvage diagram structure');
+                    }
+                }
+            }
 
             if (!svg || svg.length < 50) {
                 console.warn(`[Mermaid] SVG appears empty. Retrying...`);
@@ -1948,15 +2148,65 @@ async function renderMermaidDiagrams() {
             el.innerHTML = svg;
             el.dataset.rendered = 'true';
         } catch (e) {
-            console.warn('[Mermaid] render failed:', e.message);
-            // Show raw code so the user at least sees something useful
-            const escaped = (rawCode || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            el.innerHTML = `
-                <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
-                    <div style="color:var(--brand-warning);margin-bottom:8px;font-weight:600">⚠️ Diagram could not be rendered</div>
-                    <div style="color:var(--text-tertiary);margin-bottom:12px;font-size:11px">The AI generated Mermaid syntax that could not be parsed. You can copy the code below and test it at <a href="https://mermaid.live" target="_blank" style="color:var(--brand-primary)">mermaid.live</a></div>
-                    <pre style="background:var(--bg-primary);padding:12px;border-radius:var(--radius-md);color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap">${escaped}</pre>
-                </div>`;
+            console.warn('[Mermaid] Complete render failure. Falling back to HTML view:', e.message);
+            // Pass 4: HTML/CSS structural fallback
+            const edges = [];
+            // Regex to extract Source[Label] --> |Edge| Target[Label]
+            const edgeRegex = /([a-zA-Z0-9_]+)(?:\["(.*?)"\]|\[(.*?)\])?\s*(?:-->|-.->|==>)\s*(?:\|"(.*?)"\||\|(.*?)\|)?\s*([a-zA-Z0-9_]+)(?:\["(.*?)"\]|\[(.*?)\])?/g;
+            let match;
+            const nodes = new Map();
+            
+            while ((match = edgeRegex.exec(rawCode)) !== null) {
+                const fromId = match[1];
+                const fromLabel = match[2] || match[3] || fromId;
+                const edgeLabel = match[4] || match[5] || '';
+                const toId = match[6];
+                const toLabel = match[7] || match[8] || toId;
+                
+                nodes.set(fromId, fromLabel);
+                nodes.set(toId, toLabel);
+                edges.push({ from: fromId, to: toId, label: edgeLabel });
+            }
+
+            if (edges.length > 0) {
+                let html = '<div class="mermaid-fallback-flow" style="display:flex; flex-direction:column; gap:16px; padding:20px; background:var(--bg-elevated); border:1px solid var(--border-default); border-radius:var(--radius-lg); overflow-x:auto;">';
+                html += '<div style="color:var(--brand-warning); font-size:12px; margin-bottom:8px; display:flex; align-items:center; gap:8px"><span style="font-size:16px">⚠️</span> <span>Graphic render failed. Showing structural view.</span></div>';
+                
+                const grouped = {};
+                for (const edge of edges) {
+                    if (!grouped[edge.from]) grouped[edge.from] = [];
+                    grouped[edge.from].push(edge);
+                }
+                
+                for (const [fromId, targets] of Object.entries(grouped)) {
+                    html += `<div style="display:flex; align-items:flex-start; gap:16px;">`;
+                    html += `<div style="padding:10px 16px; background:var(--bg-glass-strong); border:1px solid var(--border-strong); border-radius:var(--radius-md); font-weight:600; font-size:13px; color:var(--text-primary); white-space:nowrap; min-width:140px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1)">${nodes.get(fromId).substring(0, 40)}</div>`;
+                    
+                    html += `<div style="display:flex; flex-direction:column; gap:8px;">`;
+                    for (const target of targets) {
+                        html += `<div style="display:flex; align-items:center; gap:8px;">`;
+                        html += `<div style="color:var(--text-tertiary); font-size:18px;">→</div>`;
+                        if (target.label) {
+                            html += `<div style="font-size:11px; color:var(--brand-primary); background:rgba(0,195,137,0.1); padding:2px 8px; border-radius:10px; font-weight:500">${target.label.substring(0, 30)}</div>`;
+                            html += `<div style="color:var(--text-tertiary); font-size:18px;">→</div>`;
+                        }
+                        html += `<div style="padding:10px 16px; background:var(--bg-surface); border:1px solid var(--border-default); border-radius:var(--radius-md); font-size:13px; color:var(--text-secondary); white-space:nowrap;">${nodes.get(target.to).substring(0, 40)}</div>`;
+                        html += `</div>`;
+                    }
+                    html += `</div></div>`;
+                }
+                html += '</div>';
+                el.innerHTML = html;
+            } else {
+                // Total failure
+                const escaped = (rawCode || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                el.innerHTML = `
+                    <div style="background:var(--bg-elevated);border:1px solid var(--border-default);border-radius:var(--radius-lg);padding:16px;font-size:12px">
+                        <div style="color:var(--brand-warning);margin-bottom:8px;font-weight:600">⚠️ Diagram could not be rendered</div>
+                        <div style="color:var(--text-tertiary);margin-bottom:12px;font-size:11px">The AI generated Mermaid syntax that could not be parsed.</div>
+                        <pre style="background:var(--bg-primary);padding:12px;border-radius:var(--radius-md);color:var(--text-secondary);font-family:'JetBrains Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap">${escaped}</pre>
+                    </div>`;
+            }
             el.dataset.rendered = 'true';
         }
     }
@@ -2030,8 +2280,8 @@ function enableNav(panelId) {
     const nav = document.getElementById('nav-' + panelId);
     if (nav) nav.classList.remove('disabled');
 
-    const btnExportPdf = document.getElementById('btnExportPdf');
-    if (btnExportPdf) btnExportPdf.style.display = 'inline-flex';
+    const menuPdf = document.getElementById('menuExportPdf');
+    if (menuPdf) menuPdf.style.display = 'flex';
 }
 
 // ── Show Error in Panel ──
@@ -2108,36 +2358,73 @@ function getPhaseContext() {
 // ── Error display helper for pipeline ──
 function showPipelineError(e) {
     console.error('Pipeline error:', e);
-    document.getElementById('generatingOverlay').classList.remove('visible');
+    const overlay = document.getElementById('generatingOverlay');
+    if (overlay) overlay.classList.remove('visible');
 
     const errorMsg = e.message || 'An unexpected error occurred';
     let technicalAdvice = 'The pipeline was halted. Please check your model selection or API key permissions in Settings.';
+    let errorTitle = 'Generation Failed';
+    let errorIcon = '⚠️';
 
-    if (errorMsg.includes('API key') || errorMsg.includes('401')) {
-        showSettings();
-        return;
-    } else if (errorMsg.toLowerCase().includes('fetch') || errorMsg.includes('NetworkError')) {
-        technicalAdvice = 'A network error occurred while reaching OpenAI. Please check your internet connection or try again shortly.';
-    } else if (errorMsg.includes('timed out')) {
-        technicalAdvice = 'The request took too long. Try a faster model or try again.';
-    } else if (errorMsg.includes('429')) {
+    if (e.type === 'rate_limit' || errorMsg.includes('429')) {
+        errorTitle = 'Rate Limit Exceeded';
+        errorIcon = '⏱️';
         technicalAdvice = 'You have been rate limited by OpenAI. Please wait a few moments before trying again.';
+    } else if (e.type === 'auth' || errorMsg.includes('API key') || errorMsg.includes('401')) {
+        errorTitle = 'Authentication Error';
+        errorIcon = '🔑';
+        technicalAdvice = 'Please check your OpenAI API key in Settings.';
+    } else if (e.type === 'network' || errorMsg.toLowerCase().includes('fetch') || errorMsg.includes('NetworkError')) {
+        errorTitle = 'Network Error';
+        errorIcon = '🌐';
+        technicalAdvice = 'A network error occurred while reaching OpenAI. Please check your internet connection or try again shortly.';
+    } else if (e.type === 'timeout' || errorMsg.includes('timed out')) {
+        errorTitle = 'Request Timeout';
+        errorIcon = '⌛';
+        technicalAdvice = 'The request took too long. Try a faster model or try again.';
+    } else if (e.type === 'parse_error') {
+        errorTitle = 'JSON Parse Error';
+        errorIcon = '🧩';
+        technicalAdvice = 'The AI generated invalid JSON that could not be recovered. Try regenerating.';
     }
 
-    const el = document.getElementById('analysis-content');
-    if (el) {
-        el.innerHTML = `
-          <div class="glass-card accent-rose" style="margin-top: 20px;">
-            <div class="card-title"><span class="card-icon">⚠️</span> <span data-i18n="error-gen-failed">Generation Failed</span></div>
-            <p style="font-size:14px;color:var(--text-primary);margin:12px 0">${errorMsg}</p>
-            <p style="font-size:12px;color:var(--text-tertiary)">${technicalAdvice}</p>
-          </div>`;
-        localizeUI();
-        switchPanel('analysis');
+    // Check if error drawer exists, else create it
+    let drawer = document.getElementById('errorDrawer');
+    if (!drawer) {
+        drawer = document.createElement('div');
+        drawer.id = 'errorDrawer';
+        drawer.className = 'error-drawer';
+        document.body.appendChild(drawer);
     }
+
+    drawer.innerHTML = `
+        <div class="error-drawer-header">
+            <div style="display:flex; align-items:center; gap:12px">
+                <span class="error-drawer-icon">${errorIcon}</span>
+                <div class="error-drawer-title">${errorTitle}</div>
+            </div>
+            <button class="error-drawer-close" onclick="document.getElementById('errorDrawer').classList.remove('visible')">✕</button>
+        </div>
+        <div class="error-drawer-body">
+            <p>${technicalAdvice}</p>
+            <details class="error-drawer-details">
+                <summary>Technical Details</summary>
+                <div class="error-drawer-code">${errorMsg}</div>
+            </details>
+        </div>
+        <div class="error-drawer-footer">
+            <button class="btn btn-secondary" onclick="document.getElementById('errorDrawer').classList.remove('visible')">Dismiss</button>
+            ${e.type === 'auth' ? `<button class="btn btn-primary" onclick="document.getElementById('errorDrawer').classList.remove('visible'); app.showSettings()">Open Settings</button>` : ``}
+        </div>
+    `;
+
+    // Force reflow and show
+    void drawer.offsetWidth;
+    drawer.classList.add('visible');
 
     state.generating = false;
-    document.getElementById('generateBtn').disabled = false;
+    const genBtn = document.getElementById('generateBtn');
+    if (genBtn) genBtn.disabled = false;
 }
 
 // ══════════════════════════════════════════════
@@ -2447,7 +2734,8 @@ async function runPhase6Expansion() {
         setTimeout(() => saveHistory(state), 100);
 
         document.getElementById('generatingOverlay').classList.remove('visible');
-        document.getElementById('btnExportPdf').style.display = 'inline-flex';
+        const menuPdf = document.getElementById('menuExportPdf');
+        if (menuPdf) menuPdf.style.display = 'flex';
         switchPanel('valuegrowth');
 
     } catch (e) { showPipelineError(e); }
@@ -3168,6 +3456,7 @@ function askCoachSuggestion(text) {
 
 // ── Public API ──
 window.app = {
+    getState: () => state,
     generate,
     regenerate,
     loadExample,
@@ -3183,6 +3472,11 @@ window.app = {
     showHistory,
     renameSession,
     exportToPDF,
+    exportBlueprint,
+    importBlueprint,
+    hidePdfConfig,
+    executePdfExport,
+    toggleFooterMenu,
     openCoach,
     closeCoach,
     sendCoachMessage,

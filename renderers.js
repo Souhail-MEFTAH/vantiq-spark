@@ -10,6 +10,36 @@ function escapeHtml(str) {
 
 window.Renderers = {
 
+  // ── Utility: Inline Editing ──
+  makeEditable(el, statePath) {
+    if (!el || !statePath) return;
+    el.classList.add('editable-element');
+    el.title = "Double click to edit";
+    el.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      el.contentEditable = "true";
+      el.focus();
+    });
+    el.addEventListener('blur', () => {
+      el.contentEditable = "false";
+      const parts = statePath.split('.');
+      let obj = window.app && window.app.getState && window.app.getState() ? window.app.getState().results : null;
+      if (obj) {
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!obj[parts[i]]) obj[parts[i]] = {};
+          obj = obj[parts[i]];
+        }
+        obj[parts[parts.length - 1]] = el.innerText;
+      }
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        el.blur();
+      }
+    });
+  },
+
   // ── Sales Discovery Analysis (Agent 1) ──
   renderAnalysis(data, container) {
     if (!data || !container) return;
@@ -38,8 +68,8 @@ window.Renderers = {
       <div class="card-grid">
         <div class="glass-card accent-purple" style="animation-delay:0s">
           <div class="card-title"><span class="card-icon">${data.domainIcon || '🏢'}</span> <span data-i18n="label-domain">Domain</span></div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin:8px 0">${data.domain || ''}</div>
-          <p style="font-size:13px;color:var(--text-secondary)">${data.summary || ''}</p>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);margin:8px 0" id="edit-domain">${data.domain || ''}</div>
+          <p style="font-size:13px;color:var(--text-secondary)" id="edit-summary">${data.summary || ''}</p>
         </div>
         <div class="glass-card accent-cyan" style="animation-delay:0.04s; grid-column: span 2">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -60,10 +90,10 @@ window.Renderers = {
         </div>
         <div class="glass-card accent-rose" style="animation-delay:0.16s; grid-column: span 3">
           <div class="card-title"><span class="card-icon">🔄</span> <span data-i18n="l-current-state">Current State</span></div>
-          <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.currentState || ''}</p>
+          <p style="font-size:13px;color:var(--text-primary);margin-top:8px" id="edit-current-state">${data.currentState || ''}</p>
           <div style="margin-top:12px;padding:12px;border-radius:var(--radius-md);background:rgba(255,107,129,0.1)">
             <strong style="color:var(--brand-danger)" data-i18n="l-why-hard">Why Hard Without Vantiq:</strong>
-            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.whyHardWithoutVantiq || ''}</p>
+            <p style="font-size:12px;color:var(--text-secondary);margin-top:4px" id="edit-why-hard">${data.whyHardWithoutVantiq || ''}</p>
           </div>
         </div>
         <div class="glass-card accent-green" style="animation-delay:0.2s; grid-column: span 1">
@@ -79,6 +109,11 @@ window.Renderers = {
           <ol style="padding-left:0;list-style:none">${questionsHTML}</ol>
         </div>
       </div>`;
+    
+    this.makeEditable(container.querySelector('#edit-domain'), 'analysis.domain');
+    this.makeEditable(container.querySelector('#edit-summary'), 'analysis.summary');
+    this.makeEditable(container.querySelector('#edit-current-state'), 'analysis.currentState');
+    this.makeEditable(container.querySelector('#edit-why-hard'), 'analysis.whyHardWithoutVantiq');
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -170,9 +205,9 @@ window.Renderers = {
     container.innerHTML = `
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">📝</span> <span data-i18n="label-arch-overview">Architecture Overview</span></div>
-        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0">${data.description || ''}</p>
+        <p style="font-size:14px;color:var(--text-secondary);margin:8px 0" id="edit-arch-desc">${data.description || ''}</p>
         <div style="margin-top:12px">
-          <div class="code-block" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-accent)">${data.dataFlow || ''}</div>
+          <div class="code-block" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-accent)" id="edit-data-flow">${data.dataFlow || ''}</div>
         </div>
         <div class="tag-list" style="margin-top:12px">${(data.principles || []).map(p => `<span class="tag tag-green">${p}</span>`).join('')}</div>
       </div>
@@ -224,6 +259,9 @@ window.Renderers = {
           <p style="font-size:12px;color:var(--text-secondary);margin-top:4px">${data.latencyBudget.breakdown}</p>
         </div>` : ''}
       </div>` : ''}`;
+      
+    this.makeEditable(container.querySelector('#edit-arch-desc'), 'architecture.description');
+    this.makeEditable(container.querySelector('#edit-data-flow'), 'architecture.dataFlow');
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -447,19 +485,12 @@ window.Renderers = {
       </div>` : ''}`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
 
-    // Safely render mermaid diagrams with error containment
-    container.querySelectorAll('.mermaid').forEach(async (el) => {
-      try {
-        const id = 'mermaid-' + Math.random().toString(36).slice(2, 10);
-        const { svg } = await mermaid.render(id, el.textContent);
-        el.innerHTML = svg;
-        el.classList.remove('mermaid');
-      } catch (err) {
-        console.warn('Mermaid diagram render failed:', err);
-        el.innerHTML = '<div style="color:var(--text-tertiary);padding:12px;font-size:12px;display:flex;align-items:center;gap:8px">⚠️ Diagram could not be rendered due to invalid LLM output.</div>';
-        el.classList.remove('mermaid');
+    // Let the centralized progressive-degradation renderer in app.js handle this
+    setTimeout(() => {
+      if (typeof renderMermaidDiagrams === 'function') {
+        renderMermaidDiagrams();
       }
-    });
+    }, 10);
   },
 
   // ── Implementation (Agent 6) ──
@@ -559,19 +590,12 @@ window.Renderers = {
         ${d.mermaid ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(d.mermaid)}</pre></div>` : '<p style="color:var(--text-tertiary)">No diagram data generated.</p>'}
       </div>`).join('');
     container.innerHTML = diagramsHTML || '<p style="color:var(--text-tertiary)">No diagrams generated.</p>';
-    // Safely render mermaid diagrams with error containment
-    container.querySelectorAll('.mermaid').forEach(async (el) => {
-      try {
-        const id = 'mermaid-' + Math.random().toString(36).slice(2, 10);
-        const { svg } = await mermaid.render(id, el.textContent);
-        el.innerHTML = svg;
-        el.classList.remove('mermaid');
-      } catch (err) {
-        console.warn('Mermaid diagram render failed:', err);
-        el.innerHTML = '<p style="color:var(--text-tertiary);font-style:italic;padding:12px">⚠️ Diagram could not be rendered. The generated syntax may be invalid.</p>';
-        el.classList.remove('mermaid');
+    // Let the centralized progressive-degradation renderer in app.js handle this
+    setTimeout(() => {
+      if (typeof renderMermaidDiagrams === 'function') {
+        renderMermaidDiagrams();
       }
-    });
+    }, 10);
   },
 
 
@@ -734,15 +758,31 @@ window.Renderers = {
 
     // Objection handling
     if (data.objectionHandling && data.objectionHandling.length) {
-      const objHTML = (data.objectionHandling || []).map(o => `
-        <div class="glass-card" style="padding:14px;margin-bottom:8px">
-          <div style="font-weight:600;font-size:13px;color:var(--brand-danger);margin-bottom:6px">❓ "${escapeHtml(o.objection)}"</div>
-          <div style="font-size:12px;color:var(--text-primary);padding-left:12px;border-left:2px solid var(--brand-success)">${escapeHtml(o.response)}</div>
+      const objHTML = (data.objectionHandling || []).map((o, idx) => `
+        <div class="objection-card glass-card" onclick="this.classList.toggle('expanded')" data-search="${escapeHtml(o.objection.toLowerCase())} ${escapeHtml(o.response.toLowerCase())}">
+          <div class="objection-header">
+            <span style="font-weight:600;font-size:13px;color:var(--brand-danger);">❓ "${escapeHtml(o.objection)}"</span>
+            <span class="objection-toggle">▼</span>
+          </div>
+          <div class="objection-body">
+            <div style="font-size:12px;color:var(--text-primary);padding-left:12px;border-left:2px solid var(--brand-success);margin-top:8px">${escapeHtml(o.response)}</div>
+            <button class="btn-ghost" style="margin-top:8px;font-size:11px" onclick="event.stopPropagation(); navigator.clipboard.writeText(\`${escapeHtml(o.response).replace(/`/g, '\\`')}\`); const t=this.innerText; this.innerText='Copied!'; setTimeout(()=>this.innerText=t, 2000);">📋 Copy Response</button>
+          </div>
         </div>`).join('');
       html += `
-        <div class="glass-card accent-rose" style="margin-top:20px">
-          <div class="card-title"><span class="card-icon">🛡️</span> <span data-i18n="label-objection-handling">Objection Handling</span></div>
+        <div class="glass-card accent-rose" style="margin-top:20px" id="objection-playbook">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;width:100%">
+             <div><span class="card-icon">🛡️</span> <span data-i18n="label-objection-handling">Objection Handling Playbook</span></div>
+             <input type="text" class="objection-search" placeholder="Search objections..." onkeyup="
+                const val = this.value.toLowerCase();
+                this.closest('#objection-playbook').querySelectorAll('.objection-card').forEach(c => {
+                  c.style.display = c.dataset.search.includes(val) ? 'block' : 'none';
+                });
+             ">
+          </div>
+          <div style="margin-top:12px">
           ${objHTML}
+          </div>
         </div>`;
     }
 
@@ -796,8 +836,8 @@ window.Renderers = {
     if (data.summary) {
       html += `
         <div class="glass-card accent-cyan" style="margin-bottom:20px">
-          <div class="card-title"><span class="card-icon">🎯</span> Executive Summary</div>
-          <p style="font-size:14px;color:var(--text-primary);line-height:1.6">${escapeHtml(data.summary)}</p>
+          <div class="card-title"><span class="card-icon">📈</span> <span data-i18n="label-business-summary">Business Value Summary</span></div>
+          <p style="font-size:14px;color:var(--text-primary);margin-top:8px" id="edit-bz-summary">${escapeHtml(data.summary || '')}</p>
         </div>`;
     }
 
@@ -844,7 +884,8 @@ window.Renderers = {
         </div>`;
     }
 
-    if (container) container.innerHTML = html;
+    container.innerHTML = html;
+    this.makeEditable(container.querySelector('#edit-bz-summary'), 'businessValue.summary');
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -881,7 +922,7 @@ window.Renderers = {
       <div class="card-grid">
         <div class="glass-card accent-purple" style="grid-column: span 3">
           <div class="card-title" style="font-size:18px"><span class="card-icon">🎯</span> ${data.useCaseTitle || 'Use Case'}</div>
-          <p style="font-size:14px;color:var(--text-primary);margin:8px 0">${data.elevator || ''}</p>
+          <p style="font-size:14px;color:var(--text-primary);margin:8px 0" id="edit-elevator">${data.elevator || ''}</p>
         </div>
         <div class="glass-card accent-green">
           <div class="card-title"><span class="card-icon">✅</span> <span data-i18n="l-in-scope">In Scope</span></div>
@@ -922,6 +963,7 @@ window.Renderers = {
           <ul class="data-list">${(data.assumptions || []).map(a => `<li><span class="list-icon">◆</span>${a}</li>`).join('')}</ul>
         </div>
       </div>`;
+    this.makeEditable(container.querySelector('#edit-elevator'), 'implementation.elevator');
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -936,6 +978,7 @@ window.Renderers = {
           <span class="tag tag-${uc.effort === 'Low' ? 'green' : uc.effort === 'Medium' ? 'warm' : 'rose'}">⏱ Effort: ${uc.effort}</span>
           <span class="tag tag-${uc.businessValue === 'High' ? 'green' : 'cyan'}">Value: ${uc.businessValue}</span>
           <span class="tag tag-purple">📅 ${uc.estimatedTimeline}</span>
+          ${uc.estimatedFTE ? `<span class="tag tag-warm">👥 ${uc.estimatedFTE}</span>` : ''}
         </div>
         <div style="margin-top:8px">
           <strong style="font-size:11px;color:var(--text-tertiary)" data-i18n="l-reused">♻️ REUSED:</strong>
