@@ -32,9 +32,9 @@ window.PPTXGenerator = {
         const addListSlide = (title, listItems) => {
             if (!listItems || listItems.length === 0) return;
             const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-            slide.addText(title, { x: 0.5, y: 1, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
+            slide.addText(title, { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
             slide.addText(listItems.map(t => ({ text: String(t), options: { bullet: true } })), {
-                x: 0.5, y: 2, w: '90%', h: 4, fontSize: 14, color: '333333', valign: 'top'
+                x: 0.5, y: 1.6, w: '90%', h: 3.5, fontSize: 16, color: '333333', valign: 'top'
             });
         };
 
@@ -51,15 +51,15 @@ window.PPTXGenerator = {
         // 3. Architecture Overview
         if (results.architecture) {
             const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-            slide.addText('Architecture Overview', { x: 0.5, y: 1, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
-            slide.addText(results.architecture.description || '', { x: 0.5, y: 1.8, w: '90%', h: 1, fontSize: 14, color: '333333' });
+            slide.addText('Architecture Overview', { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
+            slide.addText(results.architecture.description || '', { x: 0.5, y: 1.5, w: '90%', h: 1.5, fontSize: 14, color: '333333', valign: 'top' });
             
             try {
                 const el = document.querySelector('#architecture-content .diagram-container');
                 if (el) {
                     const canvas = await window.html2canvas(el, { scale: 1.5, useCORS: true, logging: false });
                     const dataUrl = canvas.toDataURL('image/png');
-                    slide.addImage({ data: dataUrl, x: 1, y: 2.8, w: 8, h: 4, sizing: { type: 'contain', w: 8, h: 4 } });
+                    slide.addImage({ data: dataUrl, x: 0.5, y: 3.2, w: 9, h: 4, sizing: { type: 'contain', w: 9, h: 4 } });
                 }
             } catch(e) { console.error('html2canvas pptx error', e); }
         }
@@ -67,15 +67,15 @@ window.PPTXGenerator = {
         // 4. Event System
         if (results.eventSystem) {
             const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-            slide.addText('Event System', { x: 0.5, y: 1, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
-            slide.addText(results.eventSystem.orchestrationPattern || 'Event Orchestration', { x: 0.5, y: 1.8, w: '90%', h: 0.6, fontSize: 14, color: '333333' });
+            slide.addText('Event System', { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
+            slide.addText(results.eventSystem.orchestrationPattern || 'Event Orchestration', { x: 0.5, y: 1.5, w: '90%', h: 0.6, fontSize: 14, color: '333333', valign: 'top' });
             
             try {
                 const el = document.querySelector('#events-content .diagram-container');
                 if (el) {
                     const canvas = await window.html2canvas(el, { scale: 1.5, useCORS: true, logging: false });
                     const dataUrl = canvas.toDataURL('image/png');
-                    slide.addImage({ data: dataUrl, x: 1, y: 2.6, w: 8, h: 4.2, sizing: { type: 'contain', w: 8, h: 4.2 } });
+                    slide.addImage({ data: dataUrl, x: 0.5, y: 2.3, w: 9, h: 4.8, sizing: { type: 'contain', w: 9, h: 4.8 } });
                 }
             } catch(e) { console.error('html2canvas pptx error', e); }
         }
@@ -87,11 +87,11 @@ window.PPTXGenerator = {
                 const container = containers[i];
                 const dTitle = results.diagrams.diagrams[i]?.title || 'System Diagram';
                 const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-                slide.addText(dTitle, { x: 0.5, y: 1, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
+                slide.addText(dTitle, { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
                 try {
                     const canvas = await window.html2canvas(container, { scale: 1.5, useCORS: true, logging: false });
                     const dataUrl = canvas.toDataURL('image/png');
-                    slide.addImage({ data: dataUrl, x: 1, y: 2, w: 8, h: 5, sizing: { type: 'contain', w: 8, h: 5 } });
+                    slide.addImage({ data: dataUrl, x: 0.5, y: 1.6, w: 9, h: 5.5, sizing: { type: 'contain', w: 9, h: 5.5 } });
                 } catch(e) { console.error('html2canvas pptx error', e); }
             }
         }

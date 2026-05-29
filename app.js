@@ -25,7 +25,7 @@ mermaid.initialize({
         edgeLabelBackground: '#0c0c14',
         nodeTextColor: '#e8eaed'
     },
-    flowchart: { curve: 'basis', padding: 30, nodeSpacing: 60, rankSpacing: 70, htmlLabels: true },
+    flowchart: { curve: 'basis', padding: 30, nodeSpacing: 60, rankSpacing: 70, htmlLabels: false },
     sequence: { actorMargin: 120, messageFontSize: 14, actorFontSize: 14, noteFontSize: 13, width: 200 }
 });
 
