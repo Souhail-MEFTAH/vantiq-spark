@@ -96,7 +96,10 @@ const I18N = {
         "btn-cancel": "Cancel",
         "btn-save": "Save Settings",
         "title-history": "Session History",
-        "title-export": "Export Solution to PDF",
+        "title-export-pdf": "Export PDF",
+        "title-export-pptx": "Export PPTX",
+        "title-import": "Import Blueprint",
+        "title-export-json": "Export JSON",
         "title-settings": "Settings",
         "step-interpreter": "Interpreter",
         "step-domain": "Domain",
@@ -157,6 +160,10 @@ const I18N = {
         "competitive-subtitle": "Agent 10 — Market Analysis & Differentiators",
         "gen-main-status": "Generating Solution...",
         "gen-starting": "Starting pipeline...",
+        "diagram-editor-title": "⚙️ Interactive Diagram Editor",
+        "btn-save-diagram": "Save Changes",
+        "status-generating-pdf": "Generating PDF...",
+        "status-generating-pptx": "Generating PowerPoint...",
         "settings-title": "⚙️ AI Engine Settings",
         "settings-key": "🔑 OpenAI API Key",
         "key-placeholder": "sk-...",
@@ -429,6 +436,11 @@ const I18N = {
         "chat-example-3": "실시간 비디오 분석을 지원하는 Vantiq 기능은 무엇인가요?",
         "history-title": "세션 기록",
         "history-subtitle": "이전 AI 생성 세션 재개",
+        "status-generating": "솔루션 생성 중...",
+        "status-generating-pdf": "PDF 생성 중...",
+        "status-generating-pptx": "PowerPoint 생성 중...",
+        "diagram-editor-title": "⚙️ 인터랙티브 다이어그램 편집기",
+        "btn-save-diagram": "변경 사항 저장",
         "settings-model": "모델",
         "settings-language": "언어",
         "btn-cancel": "취소",
@@ -773,6 +785,11 @@ const I18N = {
         "chat-example-3": "リアルタイムビデオ分析をサポートするVantiqの機能は何ですか？",
         "history-title": "セッション履歴",
         "history-subtitle": "以前のAI生成セッションを再開",
+        "status-generating": "ソリューションを生成中...",
+        "status-generating-pdf": "📄 PDFドキュメントを生成中...",
+        "status-generating-pptx": "📊 PowerPointドキュメントを生成中...",
+        "diagram-editor-title": "⚙️ インタラクティブな図面エディタ",
+        "btn-save-diagram": "変更を保存",
         "settings-model": "モデル",
         "settings-language": "言語",
         "btn-cancel": "キャンセル",
@@ -1619,7 +1636,7 @@ function hidePdfConfig() {
     if (modal) modal.classList.remove('visible');
 }
 
-function executePdfExport() {
+async function executePdfExport() {
     const customerName = document.getElementById('pdfCustomerName')?.value || '';
     const salesRepName = document.getElementById('pdfSalesRepName')?.value || '';
     
@@ -1643,7 +1660,50 @@ function executePdfExport() {
     };
     
     hidePdfConfig();
-    if (window.PDFGenerator) window.PDFGenerator.generate(state, config);
+    
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
+    document.getElementById('generatingAgentName').textContent = translations['status-generating-pdf'] || 'Generating PDF...';
+    document.getElementById('generatingOverlay').classList.add('visible');
+    
+    try {
+        if (window.PDFGenerator) {
+            await window.PDFGenerator.generate(state, config);
+        }
+    } catch (e) {
+        console.error("PDF Generation failed:", e);
+        alert(translations['pdf-error'] || "Failed to generate PDF. Check console for details.");
+    } finally {
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        document.getElementById('generatingAgentName').setAttribute('data-i18n', 'gen-starting');
+        localizeUI();
+    }
+}
+
+async function exportToPPTX() {
+    if (!state.results || Object.keys(state.results).length === 0) {
+        alert(I18N[state.language || 'en']?.['export-no-data'] || "No completed blueprint to export.");
+        return;
+    }
+    const lang = state.language || 'en';
+    const translations = I18N[lang] || I18N.en;
+    document.getElementById('generatingAgentName').textContent = translations['status-generating-pptx'] || 'Generating PowerPoint...';
+    document.getElementById('generatingOverlay').classList.add('visible');
+
+    try {
+        if (window.PPTXGenerator) {
+            await window.PPTXGenerator.generate(state);
+        } else {
+            alert("PPTXGenerator not loaded.");
+        }
+    } catch (e) {
+        console.error("PPTX Generation failed:", e);
+        alert("Failed to generate PPTX. Check console for details.");
+    } finally {
+        document.getElementById('generatingOverlay').classList.remove('visible');
+        document.getElementById('generatingAgentName').setAttribute('data-i18n', 'gen-starting');
+        localizeUI();
+    }
 }
 
 // ── Dropdown Menu ──
@@ -1758,28 +1818,7 @@ function renameSession(id) {
     }
 }
 
-function exportToPDF() {
-    if (!state.results || Object.keys(state.results).length === 0) {
-        alert("Please generate at least one solution component before exporting.");
-        return;
-    }
-    const lang = state.language || 'en';
-    const translations = I18N[lang] || I18N.en;
-    document.getElementById('generatingAgentName').textContent = translations['status-generating-pdf'] || 'Generating PDF...';
-    document.getElementById('generatingOverlay').classList.add('visible');
 
-    // Generate directly in the exact call stack to prevent Chrome from blocking the auto-download
-    try {
-        PDFGenerator.generate(state);
-    } catch (e) {
-        console.error("PDF Generation failed:", e);
-        alert(translations['pdf-error'] || "Failed to generate PDF. Check console for details.");
-    } finally {
-        document.getElementById('generatingOverlay').classList.remove('visible');
-        document.getElementById('generatingAgentName').setAttribute('data-i18n', 'gen-starting');
-        localizeUI();
-    }
-}
 
 function loadSession(id) {
     const history = loadHistory();
@@ -3460,6 +3499,92 @@ function askCoachSuggestion(text) {
     }
 }
 
+// ── Diagram Editor ──
+let activeDiagramRenderer = null;
+let activeDiagramContainer = null;
+let activeDiagramStatePath = null;
+
+function showDiagramEditor(containerId, statePath, rendererFn) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Find the current mermaid code in state
+    const parts = statePath.split('.');
+    let obj = state.results;
+    for (let i = 0; i < parts.length; i++) {
+        if (!obj) break;
+        obj = obj[parts[i]];
+    }
+    const currentCode = typeof obj === 'string' ? obj : '';
+    
+    document.getElementById('diagramSourceCode').value = currentCode;
+    activeDiagramContainer = containerId;
+    activeDiagramStatePath = statePath;
+    activeDiagramRenderer = rendererFn;
+    
+    document.getElementById('diagramEditorModal').classList.add('visible');
+    updateDiagramPreview();
+}
+
+function hideDiagramEditor() {
+    document.getElementById('diagramEditorModal').classList.remove('visible');
+    activeDiagramRenderer = null;
+    activeDiagramContainer = null;
+    activeDiagramStatePath = null;
+}
+
+async function updateDiagramPreview() {
+    const code = document.getElementById('diagramSourceCode').value;
+    const previewArea = document.getElementById('diagramLivePreview');
+    if (!code.trim()) {
+        previewArea.innerHTML = '<p style="color:var(--text-tertiary)">No diagram code.</p>';
+        return;
+    }
+    
+    previewArea.innerHTML = `<pre class="mermaid" id="previewMermaidNode">${escapeHtml(code)}</pre>`;
+    try {
+        if (window.mermaid) {
+            // Need to uniquely identify the node for mermaid to render it properly
+            const id = `mermaid-preview-${Date.now()}`;
+            const { svg } = await window.mermaid.render(id, code);
+            previewArea.innerHTML = svg;
+        }
+    } catch(e) {
+        // Syntax error in mermaid, show partial text or error
+        previewArea.innerHTML = `<p style="color:var(--brand-danger);font-size:12px;">Syntax Error: ${e.message}</p>`;
+    }
+}
+
+function saveDiagramEditor() {
+    if (!activeDiagramStatePath) {
+        hideDiagramEditor();
+        return;
+    }
+    const code = document.getElementById('diagramSourceCode').value;
+    
+    // Update state
+    const parts = activeDiagramStatePath.split('.');
+    let obj = state.results;
+    for (let i = 0; i < parts.length - 1; i++) {
+        if (!obj[parts[i]]) obj[parts[i]] = {};
+        obj = obj[parts[i]];
+    }
+    obj[parts[parts.length - 1]] = code;
+    
+    // Re-render the specific panel
+    if (activeDiagramRenderer && typeof window.Renderers[activeDiagramRenderer] === 'function') {
+        // Hack to get the right top-level data node based on renderer
+        let dataNode = state.results;
+        if (activeDiagramRenderer === 'renderArchitecture') dataNode = state.results.architecture;
+        if (activeDiagramRenderer === 'renderEvents') dataNode = state.results.eventSystem;
+        if (activeDiagramRenderer === 'renderDiagrams') dataNode = state.results.diagrams;
+        
+        window.Renderers[activeDiagramRenderer](dataNode, document.getElementById(activeDiagramContainer));
+    }
+    
+    hideDiagramEditor();
+}
+
 // ── Public API ──
 window.app = {
     getState: () => state,
@@ -3477,11 +3602,16 @@ window.app = {
     clearHistory,
     showHistory,
     renameSession,
-    exportToPDF,
+    exportToPDF: executePdfExport,
+    exportToPPTX,
     exportBlueprint,
     importBlueprint,
     hidePdfConfig,
     executePdfExport,
+    showDiagramEditor,
+    hideDiagramEditor,
+    updateDiagramPreview,
+    saveDiagramEditor,
     toggleFooterMenu,
     openCoach,
     closeCoach,

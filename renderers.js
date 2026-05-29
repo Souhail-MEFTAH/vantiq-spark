@@ -178,8 +178,9 @@ window.Renderers = {
       ${data.eventFlowSummary ? `
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">🌊</span> <span data-i18n="l-event-flow-sum">Event Flow</span></div>
-        <p style="font-size:13px;color:var(--text-primary);margin-top:8px;line-height:1.6">${data.eventFlowSummary}</p>
+        <p style="font-size:13px;color:var(--text-primary);margin-top:8px;line-height:1.6" id="edit-event-flow-sum">${data.eventFlowSummary}</p>
       </div>` : ''}`;
+    this.makeEditable(container.querySelector('#edit-event-flow-sum'), 'domainModel.eventFlowSummary');
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -224,12 +225,12 @@ window.Renderers = {
       </div>
       <div class="glass-card accent-green">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-arch-diagram">Architecture Diagram</span></div>
-      ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.mermaidDiagram)}</pre></div>` : ''}
+      ${data.mermaidDiagram ? `<button class="btn btn-secondary" style="margin-bottom:8px;font-size:12px;" onclick="app.showDiagramEditor('architecture-content', 'architecture.mermaidDiagram', 'renderArchitecture')">⚙️ Edit Diagram</button><div class="diagram-container"><pre class="mermaid">${escapeHtml(data.mermaidDiagram)}</pre></div>` : ''}
       </div>
       ${data.scalabilityNotes ? `
       <div class="glass-card accent-cyan">
         <div class="card-title"><span class="card-icon">📈</span> <span data-i18n="l-scalability">Scalability</span></div>
-        <p style="font-size:13px;color:var(--text-primary);margin-top:8px">${data.scalabilityNotes}</p>
+        <p style="font-size:13px;color:var(--text-primary);margin-top:8px" id="edit-arch-scale">${data.scalabilityNotes}</p>
       </div>` : ''}
       ${(data.securityConsiderations && data.securityConsiderations.length) ? `
       <div class="glass-card accent-rose">
@@ -262,6 +263,7 @@ window.Renderers = {
       
     this.makeEditable(container.querySelector('#edit-arch-desc'), 'architecture.description');
     this.makeEditable(container.querySelector('#edit-data-flow'), 'architecture.dataFlow');
+    this.makeEditable(container.querySelector('#edit-arch-scale'), 'architecture.scalabilityNotes');
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
 
@@ -410,7 +412,7 @@ window.Renderers = {
       </div>
       <div class="glass-card accent-purple">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-hybrid-diagram">Hybrid Architecture Flow</span></div>
-        ${data.mermaidDiagram ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(data.mermaidDiagram)}</pre></div>` : ''}
+        ${data.mermaidDiagram ? `<button class="btn btn-secondary" style="margin-bottom:8px;font-size:12px;" onclick="app.showDiagramEditor('events-content', 'eventSystem.mermaidDiagram', 'renderEvents')">⚙️ Edit Diagram</button><div class="diagram-container"><pre class="mermaid">${escapeHtml(data.mermaidDiagram)}</pre></div>` : ''}
       </div>`;
     if (window.app && window.app.localizeUI) window.app.localizeUI();
   },
@@ -468,7 +470,7 @@ window.Renderers = {
       ${(data.flowDiagram || data.mermaidDiagram) ? `
       <div class="glass-card accent-rose">
         <div class="card-title"><span class="card-icon">📊</span> <span data-i18n="label-event-flow">Event Flow Diagram</span></div>
-        <div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram || data.mermaidDiagram)}</pre></div>
+        <button class="btn btn-secondary" style="margin-bottom:8px;font-size:12px;" onclick="app.showDiagramEditor('implementation-content', 'implementation.${data.flowDiagram ? 'flowDiagram' : 'mermaidDiagram'}', 'renderImplementation')">⚙️ Edit Diagram</button><div class="diagram-container"><pre class="mermaid">${escapeHtml(data.flowDiagram || data.mermaidDiagram)}</pre></div>
       </div>` : ''}
       ${(data.dataRetention && data.dataRetention.length) ? `
       <div class="glass-card accent-warm">
@@ -587,7 +589,7 @@ window.Renderers = {
       <div class="glass-card accent-${['purple', 'cyan', 'green'][i % 3]}">
         <div class="card-title"><span class="card-icon">${d.type === 'architecture' ? '🏗️' : d.type === 'component' ? '🧩' : '☁️'}</span> ${d.title}</div>
         <p style="font-size:12px;color:var(--text-secondary);margin:6px 0 16px">${d.description}</p>
-        ${d.mermaid ? `<div class="diagram-container"><pre class="mermaid">${escapeHtml(d.mermaid)}</pre></div>` : '<p style="color:var(--text-tertiary)">No diagram data generated.</p>'}
+        ${d.mermaid ? `<button class="btn btn-secondary" style="margin-bottom:8px;font-size:12px;" onclick="app.showDiagramEditor('diagrams-content', 'diagrams.diagrams.${i}.mermaid', 'renderDiagrams')">⚙️ Edit Diagram</button><div class="diagram-container"><pre class="mermaid">${escapeHtml(d.mermaid)}</pre></div>` : '<p style="color:var(--text-tertiary)">No diagram data generated.</p>'}
       </div>`).join('');
     container.innerHTML = diagramsHTML || '<p style="color:var(--text-tertiary)">No diagrams generated.</p>';
     // Let the centralized progressive-degradation renderer in app.js handle this

@@ -1,5 +1,5 @@
 window.PDFGenerator = {
-    generate: function (state, config = {}) {
+    generate: async function (state, config = {}) {
         const lang = state.language || 'en';
         const isArabic = lang === 'ar';
         const translations = I18N[lang] || I18N.en;
@@ -133,10 +133,17 @@ window.PDFGenerator = {
                 }
             };
 
-            const getSvgForPdf = (containerSelector) => {
+            const getDiagramImageForPdf = async (containerSelector) => {
                 const el = document.querySelector(containerSelector);
-                if (el && el.tagName.toLowerCase() === 'svg') {
-                    return { svg: el.outerHTML, width: 500, margin: [0, 15, 0, 15] };
+                if (el) {
+                    try {
+                        const canvas = await window.html2canvas(el, { scale: 2, useCORS: true, logging: false });
+                        const dataUrl = canvas.toDataURL('image/png');
+                        return { image: dataUrl, width: 500, margin: [0, 15, 0, 15] };
+                    } catch(e) {
+                        console.error('html2canvas error', e);
+                        return null;
+                    }
                 }
                 return null;
             };
@@ -151,8 +158,7 @@ window.PDFGenerator = {
             
             titleBlocks.push(
                 { text: translations['pdf-problem-stmt'] || 'Problem Statement:', style: 'subsectionHeader' },
-                { text: state.problemText || translations['pdf-no-problem'] || "No problem statement provided.", style: 'bodyText', italics: true },
-                { text: '', pageBreak: 'after' }
+                { text: state.problemText || translations['pdf-no-problem'] || "No problem statement provided.", style: 'bodyText', italics: true }
             );
             addSection(titleBlocks);
 
@@ -334,8 +340,8 @@ window.PDFGenerator = {
 
                 if (archBlocks.length > 0) {
                     addSection([{ text: '4. System Architecture', style: 'sectionHeader', pageBreak: 'before' }, ...archBlocks]);
-                    const archSvg = getSvgForPdf('#architecture-content .diagram-container svg');
-                    if (archSvg) addSection([archSvg]);
+                    const archImg = await getDiagramImageForPdf('#architecture-content .diagram-container');
+                    if (archImg) addSection([archImg]);
                 }
             }
             } catch(e) { console.error("PDF Section 4 Error", e); }
@@ -374,8 +380,8 @@ window.PDFGenerator = {
 
                 if (evBlocks.length > 0) {
                     addSection([{ text: '5. Event System & Orchestration', style: 'sectionHeader', pageBreak: 'before' }, ...evBlocks]);
-                    const eventSvg = getSvgForPdf('#events-content .diagram-container svg');
-                    if (eventSvg) addSection([eventSvg]);
+                    const eventImg = await getDiagramImageForPdf('#events-content .diagram-container');
+                    if (eventImg) addSection([eventImg]);
                 }
             }
             } catch(e) { console.error("PDF Section 5 Error", e); }
@@ -391,10 +397,11 @@ window.PDFGenerator = {
                 if (diagBlocks.length > 0) {
                     addSection([{ text: 'Additional System Flow Diagrams', style: 'sectionHeader', pageBreak: 'before' }, ...diagBlocks]);
                     // Pull SVGs from DOM
-                    const svgs = document.querySelectorAll('#diagrams-content .diagram-container svg');
-                    svgs.forEach(svgEl => {
-                        addSection([{ svg: svgEl.outerHTML, width: 500, margin: [0, 15, 0, 15] }]);
-                    });
+                    const containers = document.querySelectorAll('#diagrams-content .diagram-container');
+                    for (const container of containers) {
+                        const img = await getDiagramImageForPdf('#' + (container.id || 'diagrams-content') + ' .diagram-container');
+                        if (img) addSection([img]);
+                    }
                 }
             }
             } catch(e) { console.error("PDF Section 6 Error", e); }

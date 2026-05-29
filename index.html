@@ -11,6 +11,9 @@
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/libs/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 
 <body>
@@ -137,6 +140,9 @@
             </button>
             <button class="dropdown-item" onclick="app.exportToPDF(); app.toggleFooterMenu()" id="menuExportPdf" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
               <span style="font-size:16px">📄</span> <span data-i18n="title-export-pdf">Export PDF</span>
+            </button>
+            <button class="dropdown-item" onclick="app.exportToPPTX(); app.toggleFooterMenu()" id="menuExportPptx" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
+              <span style="font-size:16px">📊</span> <span data-i18n="title-export-pptx">Export PPTX</span>
             </button>
             <button class="dropdown-item" onclick="app.showSettings(); app.toggleFooterMenu()" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
               <span style="font-size:16px">⚙️</span> <span data-i18n="title-settings">Settings</span>
@@ -762,6 +768,31 @@
           </div>
         </div>
       </div>
+      <!-- Interactive Diagram Editor Modal -->
+      <div class="modal-overlay" id="diagramEditorModal">
+        <div class="modal-card" style="max-width:800px; width:90vw;">
+          <div class="modal-header">
+            <h2 data-i18n="diagram-editor-title">⚙️ Interactive Diagram Editor</h2>
+            <button class="btn-ghost" onclick="app.hideDiagramEditor()" style="font-size:18px">✕</button>
+          </div>
+          <div class="modal-body" style="display:flex; gap:16px; min-height:400px;">
+            <div style="flex:1; display:flex; flex-direction:column;">
+              <div class="input-label">Mermaid Source Code</div>
+              <textarea class="modal-input" id="diagramSourceCode" style="flex:1; font-family:monospace; font-size:12px; resize:none; white-space:pre;" oninput="app.updateDiagramPreview()"></textarea>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column;">
+              <div class="input-label">Live Preview</div>
+              <div id="diagramLivePreview" style="flex:1; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:16px; overflow:auto; display:flex; align-items:center; justify-content:center;">
+                <!-- Preview renders here -->
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="app.hideDiagramEditor()" data-i18n="btn-cancel">Cancel</button>
+            <button class="btn btn-primary" onclick="app.saveDiagramEditor()">💾 <span data-i18n="btn-save-diagram">Save Changes</span></button>
+          </div>
+        </div>
+      </div>
     </main>
   </div>
 
@@ -769,6 +800,7 @@
   <script src="agents.js"></script>
   <script src="renderers.js"></script>
   <script src="pdf-generator.js"></script>
+  <script src="pptx-generator.js"></script>
   <script src="app.js"></script>
 </body>
 
