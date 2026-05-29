@@ -1647,18 +1647,24 @@ function executePdfExport() {
 }
 
 // ── Dropdown Menu ──
-function toggleFooterMenu() {
+function toggleFooterMenu(e) {
+    if (e) e.stopPropagation();
     const menu = document.getElementById('footerDropdown');
     if (menu) {
-        menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+        const isHidden = menu.style.display === 'none' || window.getComputedStyle(menu).display === 'none';
+        menu.style.display = isHidden ? 'flex' : 'none';
     }
 }
 // Close menu if clicked outside
 document.addEventListener('click', (e) => {
-    const container = document.getElementById('footerMenuContainer');
     const menu = document.getElementById('footerDropdown');
-    if (container && menu && menu.style.display !== 'none' && !container.contains(e.target)) {
-        menu.style.display = 'none';
+    const container = document.getElementById('footerMenuContainer');
+    
+    // Only close if it's currently visible and the click was outside the container
+    if (menu && menu.style.display !== 'none') {
+        if (!container || !container.contains(e.target)) {
+            menu.style.display = 'none';
+        }
     }
 });
 

@@ -123,7 +123,7 @@
         <span id="statusText" data-i18n="status-configure">Configure API Key</span>
         
         <div style="margin-left:auto; position:relative;" id="footerMenuContainer">
-          <button class="btn-ghost" onclick="app.toggleFooterMenu()" id="btnFooterMenu" style="font-size:16px" title="Menu">⋮</button>
+          <button class="btn-ghost" onclick="app.toggleFooterMenu(event)" id="btnFooterMenu" style="font-size:16px" title="Menu">⋮</button>
           
           <div class="dropdown-menu" id="footerDropdown" style="display:none; position:absolute; bottom:100%; right:0; margin-bottom:8px; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:var(--radius-md); box-shadow:0 10px 25px rgba(0,0,0,0.5); padding:8px; min-width:180px; z-index:100; flex-direction:column; gap:4px;">
             <button class="dropdown-item" onclick="app.showHistory(); app.toggleFooterMenu()" style="background:transparent; border:none; color:var(--text-primary); padding:8px 12px; text-align:left; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; gap:8px; width:100%;">
