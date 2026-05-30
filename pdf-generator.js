@@ -134,18 +134,39 @@ window.PDFGenerator = {
             };
 
             const getDiagramImageForPdf = async (containerSelector) => {
-                const el = document.querySelector(containerSelector);
-                if (el) {
+                const svgEl = document.querySelector(containerSelector + ' svg');
+                if (!svgEl) return null;
+                return new Promise((resolve) => {
                     try {
-                        const canvas = await window.html2canvas(el, { scale: 2, useCORS: true, logging: false });
-                        const dataUrl = canvas.toDataURL('image/png');
-                        return { image: dataUrl, width: 500, margin: [0, 15, 0, 15] };
+                        const svgString = new XMLSerializer().serializeToString(svgEl);
+                        const canvas = document.createElement("canvas");
+                        const ctx = canvas.getContext("2d");
+                        const DOMURL = window.URL || window.webkitURL || window;
+                        const img = new Image();
+                        const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+                        const url = DOMURL.createObjectURL(svg);
+                        img.onload = function() {
+                            const scale = 2;
+                            canvas.width = img.width * scale;
+                            canvas.height = img.height * scale;
+                            ctx.scale(scale, scale);
+                            ctx.fillStyle = '#1a1a2e'; 
+                            ctx.fillRect(0, 0, img.width, img.height);
+                            ctx.drawImage(img, 0, 0);
+                            const dataUrl = canvas.toDataURL("image/png");
+                            DOMURL.revokeObjectURL(url);
+                            resolve({ image: dataUrl, width: 500, margin: [0, 15, 0, 15] });
+                        };
+                        img.onerror = function() {
+                            console.error('SVG to Image error');
+                            resolve(null);
+                        };
+                        img.src = url;
                     } catch(e) {
-                        console.error('html2canvas error', e);
-                        return null;
+                        console.error('SVG conversion error', e);
+                        resolve(null);
                     }
-                }
-                return null;
+                });
             };
 
             // TITLE PAGE

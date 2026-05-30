@@ -38,6 +38,37 @@ window.PPTXGenerator = {
             });
         };
 
+        // Helper to get SVG as PNG data url natively
+        const getDiagramImageDataUrl = async (containerSelector) => {
+            const svgEl = document.querySelector(containerSelector + ' svg');
+            if (!svgEl) return null;
+            return new Promise((resolve) => {
+                try {
+                    const svgString = new XMLSerializer().serializeToString(svgEl);
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+                    const DOMURL = window.URL || window.webkitURL || window;
+                    const img = new Image();
+                    const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
+                    const url = DOMURL.createObjectURL(svg);
+                    img.onload = function() {
+                        const scale = 2;
+                        canvas.width = img.width * scale;
+                        canvas.height = img.height * scale;
+                        ctx.scale(scale, scale);
+                        ctx.fillStyle = '#1a1a2e'; 
+                        ctx.fillRect(0, 0, img.width, img.height);
+                        ctx.drawImage(img, 0, 0);
+                        const dataUrl = canvas.toDataURL("image/png");
+                        DOMURL.revokeObjectURL(url);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = function() { resolve(null); };
+                    img.src = url;
+                } catch(e) { resolve(null); }
+            });
+        };
+
         // 2. Analysis
         if (results.analysis) {
             addListSlide('Problem Analysis', [
@@ -55,13 +86,11 @@ window.PPTXGenerator = {
             slide.addText(results.architecture.description || '', { x: 0.5, y: 1.5, w: '90%', h: 1.5, fontSize: 14, color: '333333', valign: 'top' });
             
             try {
-                const el = document.querySelector('#architecture-content .diagram-container');
-                if (el) {
-                    const canvas = await window.html2canvas(el, { scale: 1.5, useCORS: true, logging: false });
-                    const dataUrl = canvas.toDataURL('image/png');
+                const dataUrl = await getDiagramImageDataUrl('#architecture-content .diagram-container');
+                if (dataUrl) {
                     slide.addImage({ data: dataUrl, x: 0.5, y: 3.2, w: 9, h: 4, sizing: { type: 'contain', w: 9, h: 4 } });
                 }
-            } catch(e) { console.error('html2canvas pptx error', e); }
+            } catch(e) { console.error('SVG to PPTX error', e); }
         }
 
         // 4. Event System
@@ -71,13 +100,11 @@ window.PPTXGenerator = {
             slide.addText(results.eventSystem.orchestrationPattern || 'Event Orchestration', { x: 0.5, y: 1.5, w: '90%', h: 0.6, fontSize: 14, color: '333333', valign: 'top' });
             
             try {
-                const el = document.querySelector('#events-content .diagram-container');
-                if (el) {
-                    const canvas = await window.html2canvas(el, { scale: 1.5, useCORS: true, logging: false });
-                    const dataUrl = canvas.toDataURL('image/png');
+                const dataUrl = await getDiagramImageDataUrl('#events-content .diagram-container');
+                if (dataUrl) {
                     slide.addImage({ data: dataUrl, x: 0.5, y: 2.3, w: 9, h: 4.8, sizing: { type: 'contain', w: 9, h: 4.8 } });
                 }
-            } catch(e) { console.error('html2canvas pptx error', e); }
+            } catch(e) { console.error('SVG to PPTX error', e); }
         }
 
         // 5. Additional Diagrams
@@ -89,10 +116,11 @@ window.PPTXGenerator = {
                 const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
                 slide.addText(dTitle, { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
                 try {
-                    const canvas = await window.html2canvas(container, { scale: 1.5, useCORS: true, logging: false });
-                    const dataUrl = canvas.toDataURL('image/png');
-                    slide.addImage({ data: dataUrl, x: 0.5, y: 1.6, w: 9, h: 5.5, sizing: { type: 'contain', w: 9, h: 5.5 } });
-                } catch(e) { console.error('html2canvas pptx error', e); }
+                    const dataUrl = await getDiagramImageDataUrl('#' + (container.id || 'diagrams-content') + ' .diagram-container');
+                    if (dataUrl) {
+                        slide.addImage({ data: dataUrl, x: 0.5, y: 1.6, w: 9, h: 5.5, sizing: { type: 'contain', w: 9, h: 5.5 } });
+                    }
+                } catch(e) { console.error('SVG to PPTX error', e); }
             }
         }
 
