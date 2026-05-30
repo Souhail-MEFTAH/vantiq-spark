@@ -53,12 +53,14 @@ window.PPTXGenerator = {
                     const url = DOMURL.createObjectURL(svg);
                     img.onload = function() {
                         const scale = 2;
-                        canvas.width = img.width * scale;
-                        canvas.height = img.height * scale;
+                        const w = img.width || svgEl.getBoundingClientRect().width || 500;
+                        const h = img.height || svgEl.getBoundingClientRect().height || 300;
+                        canvas.width = w * scale;
+                        canvas.height = h * scale;
                         ctx.scale(scale, scale);
                         ctx.fillStyle = '#1a1a2e'; 
-                        ctx.fillRect(0, 0, img.width, img.height);
-                        ctx.drawImage(img, 0, 0);
+                        ctx.fillRect(0, 0, w, h);
+                        ctx.drawImage(img, 0, 0, w, h);
                         const dataUrl = canvas.toDataURL("image/png");
                         DOMURL.revokeObjectURL(url);
                         resolve(dataUrl);

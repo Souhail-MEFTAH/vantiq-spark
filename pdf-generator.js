@@ -147,12 +147,14 @@ window.PDFGenerator = {
                         const url = DOMURL.createObjectURL(svg);
                         img.onload = function() {
                             const scale = 2;
-                            canvas.width = img.width * scale;
-                            canvas.height = img.height * scale;
+                            const w = img.width || svgEl.getBoundingClientRect().width || 500;
+                            const h = img.height || svgEl.getBoundingClientRect().height || 300;
+                            canvas.width = w * scale;
+                            canvas.height = h * scale;
                             ctx.scale(scale, scale);
                             ctx.fillStyle = '#1a1a2e'; 
-                            ctx.fillRect(0, 0, img.width, img.height);
-                            ctx.drawImage(img, 0, 0);
+                            ctx.fillRect(0, 0, w, h);
+                            ctx.drawImage(img, 0, 0, w, h);
                             const dataUrl = canvas.toDataURL("image/png");
                             DOMURL.revokeObjectURL(url);
                             resolve({ image: dataUrl, width: 500, margin: [0, 15, 0, 15] });
@@ -569,7 +571,17 @@ window.PDFGenerator = {
             } catch(e) { console.error("PDF Section 9 Error", e); }
 
             const pdfName = projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_architecture.pdf';
-            pdfMake.createPdf(docDefinition).download(pdfName);
+            const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+            pdfDocGenerator.getBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = pdfName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
         } catch (error) {
             console.error("PDF Generation Error:", error);
             const errorMsg = translations['pdf-error'] || "Failed to generate PDF. Please check the console for details.";
