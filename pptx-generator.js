@@ -40,7 +40,9 @@ window.PPTXGenerator = {
 
         // Helper to get SVG as PNG data url natively
         const getDiagramImageDataUrl = async (containerSelector) => {
-            const svgEl = document.querySelector(containerSelector + ' svg');
+            const svgEl = typeof containerSelector === 'string' 
+                ? document.querySelector(containerSelector + ' svg') 
+                : containerSelector.querySelector('svg');
             if (!svgEl) return null;
             return new Promise((resolve) => {
                 const timeoutId = setTimeout(() => {
@@ -129,16 +131,19 @@ window.PPTXGenerator = {
 
         // 2e. Domain Model
         if (results.domainModel) {
-            const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
-            slide.addText('Domain Model', { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
-            try {
-                const dataUrl = await getDiagramImageDataUrl('#domain-content .diagram-container');
-                if (dataUrl) {
-                    slide.addImage({ data: dataUrl, x: 0.5, y: 1.6, w: 9, h: 5.5, sizing: { type: 'contain', w: 9, h: 5.5 } });
-                } else {
-                    slide.addText('Domain Model diagram not available or still rendering.', { x: 0.5, y: 2, w: '90%', h: 1, fontSize: 14, color: '888888' });
-                }
-            } catch(e) {}
+            const dm = results.domainModel;
+            const items = [];
+            if (dm.entities && dm.entities.length > 0) {
+                items.push('Entities:');
+                dm.entities.forEach(e => items.push(`  - ${e.name} (${e.type}): ${(e.properties || []).join(', ')}`));
+            }
+            if (dm.events && dm.events.length > 0) {
+                items.push('Events:');
+                dm.events.forEach(e => items.push(`  - ${e.name} [${e.type}]`));
+            }
+            if (items.length > 0) {
+                addListSlide('Domain Model', items);
+            }
         }
 
         // 3. Architecture Overview
@@ -178,7 +183,7 @@ window.PPTXGenerator = {
                 const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
                 slide.addText(dTitle, { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
                 try {
-                    const dataUrl = await getDiagramImageDataUrl('#' + (container.id || 'diagrams-content') + ' .diagram-container');
+                    const dataUrl = await getDiagramImageDataUrl(container);
                     if (dataUrl) {
                         slide.addImage({ data: dataUrl, x: 0.5, y: 1.6, w: 9, h: 5.5, sizing: { type: 'contain', w: 9, h: 5.5 } });
                     }

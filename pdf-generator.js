@@ -139,7 +139,9 @@ window.PDFGenerator = {
             };
 
             const getDiagramImageForPdf = async (containerSelector) => {
-                const svgEl = document.querySelector(containerSelector + ' svg');
+                const svgEl = typeof containerSelector === 'string' 
+                    ? document.querySelector(containerSelector + ' svg') 
+                    : containerSelector.querySelector('svg');
                 if (!svgEl) return null;
                 return new Promise((resolve) => {
                     const timeoutId = setTimeout(() => {
@@ -440,8 +442,8 @@ window.PDFGenerator = {
                     // Pull SVGs from DOM
                     const containers = document.querySelectorAll('#diagrams-content .diagram-container');
                     for (const container of containers) {
-                        const img = await getDiagramImageForPdf('#' + (container.id || 'diagrams-content') + ' .diagram-container');
-                        if (img) addSection([img]);
+                        const imgObj = await getDiagramImageForPdf(container);
+                        if (imgObj) addSection([imgObj]);
                     }
                 }
             }
@@ -590,16 +592,7 @@ window.PDFGenerator = {
 
             const pdfName = projectName.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '_architecture.pdf';
             const pdfDocGenerator = pdfMake.createPdf(docDefinition);
-            pdfDocGenerator.getBlob((blob) => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = pdfName;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            });
+            pdfDocGenerator.download(pdfName);
         } catch (error) {
             console.error("PDF Generation Error:", error);
             const errorMsg = translations['pdf-error'] || "Failed to generate PDF. Please check the console for details.";
