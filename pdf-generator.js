@@ -151,18 +151,23 @@ window.PDFGenerator = {
                         const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
                         const url = DOMURL.createObjectURL(svg);
                         img.onload = function() {
-                            const scale = 2;
-                            const w = img.width || svgEl.getBoundingClientRect().width || 500;
-                            const h = img.height || svgEl.getBoundingClientRect().height || 300;
-                            canvas.width = w * scale;
-                            canvas.height = h * scale;
-                            ctx.scale(scale, scale);
-                            ctx.fillStyle = '#1a1a2e'; 
-                            ctx.fillRect(0, 0, w, h);
-                            ctx.drawImage(img, 0, 0, w, h);
-                            const dataUrl = canvas.toDataURL("image/png");
-                            DOMURL.revokeObjectURL(url);
-                            resolve({ image: dataUrl, width: 500, margin: [0, 15, 0, 15] });
+                            try {
+                                const scale = 2;
+                                const w = img.width || svgEl.getBoundingClientRect().width || 500;
+                                const h = img.height || svgEl.getBoundingClientRect().height || 300;
+                                canvas.width = w * scale;
+                                canvas.height = h * scale;
+                                ctx.scale(scale, scale);
+                                ctx.fillStyle = '#1a1a2e'; 
+                                ctx.fillRect(0, 0, w, h);
+                                ctx.drawImage(img, 0, 0, w, h);
+                                const dataUrl = canvas.toDataURL("image/png");
+                                DOMURL.revokeObjectURL(url);
+                                resolve({ image: dataUrl, width: 500, margin: [0, 15, 0, 15] });
+                            } catch (err) {
+                                console.error('Canvas export error:', err);
+                                resolve(null);
+                            }
                         };
                         img.onerror = function() {
                             console.error('SVG to Image error');

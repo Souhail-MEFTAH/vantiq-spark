@@ -52,18 +52,23 @@ window.PPTXGenerator = {
                     const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
                     const url = DOMURL.createObjectURL(svg);
                     img.onload = function() {
-                        const scale = 2;
-                        const w = img.width || svgEl.getBoundingClientRect().width || 500;
-                        const h = img.height || svgEl.getBoundingClientRect().height || 300;
-                        canvas.width = w * scale;
-                        canvas.height = h * scale;
-                        ctx.scale(scale, scale);
-                        ctx.fillStyle = '#1a1a2e'; 
-                        ctx.fillRect(0, 0, w, h);
-                        ctx.drawImage(img, 0, 0, w, h);
-                        const dataUrl = canvas.toDataURL("image/png");
-                        DOMURL.revokeObjectURL(url);
-                        resolve(dataUrl);
+                        try {
+                            const scale = 2;
+                            const w = img.width || svgEl.getBoundingClientRect().width || 500;
+                            const h = img.height || svgEl.getBoundingClientRect().height || 300;
+                            canvas.width = w * scale;
+                            canvas.height = h * scale;
+                            ctx.scale(scale, scale);
+                            ctx.fillStyle = '#1a1a2e'; 
+                            ctx.fillRect(0, 0, w, h);
+                            ctx.drawImage(img, 0, 0, w, h);
+                            const dataUrl = canvas.toDataURL("image/png");
+                            DOMURL.revokeObjectURL(url);
+                            resolve(dataUrl);
+                        } catch (err) {
+                            console.error('Canvas export error PPTX:', err);
+                            resolve(null);
+                        }
                     };
                     img.onerror = function() { resolve(null); };
                     img.src = url;
@@ -85,10 +90,9 @@ window.PPTXGenerator = {
         if (results.useCaseScope) {
             const scope = results.useCaseScope;
             addListSlide('Use Case Scope', [
-                `Target Users: ${scope.targetUsers?.join(', ') || ''}`,
-                `Primary Flows: ${scope.primaryFlows?.join(', ') || ''}`,
-                `Success Metrics: ${scope.successMetrics?.join(', ') || ''}`,
-                `Out of Scope: ${scope.outOfScope?.join(', ') || ''}`
+                `In Scope: ${scope.inScope?.join(', ') || ''}`,
+                `Out of Scope: ${scope.outOfScope?.join(', ') || ''}`,
+                `Success Metrics: ${(scope.successMetrics || []).map(m => m.metric).join(', ')}`
             ].filter(s => !s.endsWith(': ')));
         }
 
@@ -96,20 +100,20 @@ window.PPTXGenerator = {
         if (results.businessValue) {
             const bv = results.businessValue;
             addListSlide('Business Value', [
-                `Expected ROI: ${bv.expectedROI || ''}`,
-                `Strategic Alignment: ${bv.strategicAlignment || ''}`,
-                `Key KPIs: ${(bv.keyKPIs || []).join(', ')}`,
-                `Risk Mitigation: ${bv.riskMitigation || ''}`
-            ].filter(s => !s.endsWith(': ') && !s.endsWith(':')));
+                `Summary: ${bv.summary || ''}`,
+                `Expected ROI: ${bv.roiProjection?.roiPercentage || ''} (${bv.roiProjection?.expectedReturn || ''})`,
+                `Key KPIs: ${(bv.kpis || []).map(k => k.metric).join(', ')}`,
+                `Risk Mitigations: ${(bv.riskMitigations || []).map(r => r.risk).join(', ')}`
+            ].filter(s => !s.endsWith(': ') && !s.endsWith(': ()')));
         }
 
         // 2d. Competitive Landscape
         if (results.competitive) {
             const comp = results.competitive;
             addListSlide('Competitive Landscape', [
-                `Key Competitors: ${(comp.keyCompetitors || []).join(', ')}`,
-                `Differentiators: ${(comp.differentiators || []).join(', ')}`,
-                `Market Positioning: ${comp.marketPositioning || ''}`
+                `Competitors Evaluated: ${(comp.competitors || []).map(c => c.name).join(', ')}`,
+                `Vantiq Differentiators: ${(comp.differentiators || []).map(d => d.feature).join(', ')}`,
+                `Recommendation: ${comp.recommendation || ''}`
             ].filter(s => !s.endsWith(': ') && !s.endsWith(':')));
         }
 
@@ -183,10 +187,9 @@ window.PPTXGenerator = {
         if (results.implementation) {
             const imp = results.implementation;
             addListSlide('Implementation Strategy', [
-                `Approach: ${imp.approach || ''}`,
-                `Estimated Timeline: ${imp.estimatedTimeline || ''}`,
-                `Key Milestones: ${(imp.keyMilestones || []).map(m => m.milestone || '').join(', ')}`,
-                `Resource Requirements: ${(imp.resourceRequirements || []).join(', ')}`
+                `Services to Build: ${(imp.services || []).map(s => s.name).join(', ')}`,
+                `Event Types: ${(imp.eventTypes || []).map(e => e.name).join(', ')}`,
+                `Deployment Notes: ${imp.deploymentNotes?.edgeConfig || imp.deploymentNotes?.namespaceSetup || ''}`
             ].filter(s => !s.endsWith(': ') && !s.endsWith(':')));
         }
 
@@ -194,9 +197,15 @@ window.PPTXGenerator = {
         if (results.roadmap || results.adjacentUseCases) {
             const rd = results.roadmap || results.adjacentUseCases || {};
             const items = [];
+            
+            if (rd.roadmapPhases && Array.isArray(rd.roadmapPhases)) {
+                items.push('Roadmap Phases:');
+                rd.roadmapPhases.forEach(p => items.push(`  - ${p.phase} (${p.timeline}): ${p.focus}`));
+            }
+            
             if (rd.adjacentUseCases && Array.isArray(rd.adjacentUseCases)) {
                 items.push('Adjacent Use Cases:');
-                rd.adjacentUseCases.forEach(uc => items.push(`  - ${uc.name || uc.title || ''}: ${uc.description || ''}`));
+                rd.adjacentUseCases.forEach(uc => items.push(`  - ${uc.title || uc.name || ''}: ${uc.description || ''}`));
             }
             if (items.length > 0) {
                 addListSlide('Expansion & Roadmap', items);
