@@ -292,10 +292,25 @@
               </div>
               <textarea class="problem-textarea" id="problemInput"
                 data-i18n-placeholder="problem-placeholder"></textarea>
-              <div class="input-actions">
-                <button class="btn btn-primary" id="generateBtn" onclick="app.generate()">
-                  <span>⚡</span> <span data-i18n="btn-generate">Generate Solution</span>
-                </button>
+              <div class="input-actions" style="display: flex; gap: 8px;">
+                <div class="split-btn" style="display: inline-flex; position: relative;">
+                  <button class="btn btn-primary" id="generateBtn" onclick="app.generate()" style="border-top-right-radius: 0; border-bottom-right-radius: 0; padding-right: 16px;">
+                    <span>⚡</span> <span data-i18n="btn-generate">Generate Solution</span>
+                  </button>
+                  <button class="btn btn-primary" id="generateDropdownBtn" onclick="app.toggleGenerateMenu(event)" style="border-top-left-radius: 0; border-bottom-left-radius: 0; padding: 0 10px; border-left: 1px solid rgba(255,255,255,0.2);">
+                    ▼
+                  </button>
+                  <div id="generateMenu" class="dropdown-menu" style="display: none; position: absolute; top: 100%; left: 0; width: 100%; min-width: 200px; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.5); margin-top: 6px; z-index: 1000; overflow: hidden;">
+                    <div class="menu-item" onclick="app.generate('phased')" style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border-default); transition: background 0.2s;">
+                      <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Phased (Default)</div>
+                      <div style="font-size: 11px; color: var(--text-tertiary);">Review each step before proceeding</div>
+                    </div>
+                    <div class="menu-item" onclick="app.generate('uninterrupted')" style="padding: 12px 16px; cursor: pointer; transition: background 0.2s;">
+                      <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">Uninterrupted</div>
+                      <div style="font-size: 11px; color: var(--text-tertiary);">Generate all sections at once</div>
+                    </div>
+                  </div>
+                </div>
                 <button class="btn btn-secondary" id="clearBtn" onclick="app.clearInput()" data-i18n="btn-clear">
                   Clear
                 </button>

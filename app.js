@@ -2344,6 +2344,14 @@ function showAgentError(contentId, agentName, error) {
 
 // ── Checkpoint Gate UI ──
 function showCheckpoint(phaseNumber, phaseName, prompt, nextPhaseFn) {
+    // If uninterrupted mode is active, skip the UI checkpoint and immediately proceed
+    if (state.generationMode === 'uninterrupted') {
+        setTimeout(() => {
+            eval(nextPhaseFn);
+        }, 500); // slight delay for visual breathing room
+        return;
+    }
+
     const lastPanel = document.querySelector('.panel.active') || document.querySelector('.panel:not([style*="display: none"])');
     // Build a checkpoint card and inject it at the bottom of the current view
     const checkpointId = `checkpoint-phase-${phaseNumber}`;
@@ -2790,13 +2798,20 @@ async function runPhase6Expansion() {
 }
 
 // ── Main Entry Point ──
-async function generate() {
+async function generate(mode) {
+    if (document.getElementById('generateMenu')) {
+        document.getElementById('generateMenu').style.display = 'none';
+    }
+    
     const input = document.getElementById('problemInput');
     const text = input.value.trim();
     if (!text) {
         input.focus();
         return;
     }
+
+    // Set generation mode
+    state.generationMode = mode || 'phased';
 
     // Check API key
     if (!aiEngine.hasApiKey()) {
@@ -3621,5 +3636,20 @@ window.app = {
     runPhase3Architecture,
     runPhase4AIConsulting,
     runPhase5Implementation,
-    runPhase6Expansion
+    runPhase6Expansion,
+    toggleGenerateMenu: function(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('generateMenu');
+        if (menu) {
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+    }
 };
+
+// Close dropdowns if clicked outside
+window.addEventListener('click', function(e) {
+    const genMenu = document.getElementById('generateMenu');
+    if (genMenu && e.target.closest('.split-btn') === null) {
+        genMenu.style.display = 'none';
+    }
+});
