@@ -142,6 +142,11 @@ window.PDFGenerator = {
                 const svgEl = document.querySelector(containerSelector + ' svg');
                 if (!svgEl) return null;
                 return new Promise((resolve) => {
+                    const timeoutId = setTimeout(() => {
+                        console.warn('SVG extraction timed out for', containerSelector);
+                        resolve(null);
+                    }, 3000);
+
                     try {
                         const svgString = new XMLSerializer().serializeToString(svgEl);
                         const canvas = document.createElement("canvas");
@@ -151,6 +156,7 @@ window.PDFGenerator = {
                         const svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
                         const url = DOMURL.createObjectURL(svg);
                         img.onload = function() {
+                            clearTimeout(timeoutId);
                             try {
                                 const scale = 2;
                                 const w = img.width || svgEl.getBoundingClientRect().width || 500;
@@ -170,11 +176,13 @@ window.PDFGenerator = {
                             }
                         };
                         img.onerror = function() {
+                            clearTimeout(timeoutId);
                             console.error('SVG to Image error');
                             resolve(null);
                         };
                         img.src = url;
                     } catch(e) {
+                        clearTimeout(timeoutId);
                         console.error('SVG conversion error', e);
                         resolve(null);
                     }

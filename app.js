@@ -1594,6 +1594,10 @@ function importBlueprint() {
 
 // ── PDF Export Config Modal ──
 function exportToPDF() {
+    if (state.generating) {
+        alert(I18N[state.language || 'en']?.['export-generating'] || "Please wait until the solution generation is completely finished before exporting.");
+        return;
+    }
     if (!state.results || Object.keys(state.results).length === 0) {
         alert(I18N[state.language || 'en']?.['export-no-data'] || "No completed blueprint to export.");
         return;
@@ -1681,6 +1685,10 @@ async function executePdfExport() {
 }
 
 async function exportToPPTX() {
+    if (state.generating) {
+        alert(I18N[state.language || 'en']?.['export-generating'] || "Please wait until the solution generation is completely finished before exporting.");
+        return;
+    }
     if (!state.results || Object.keys(state.results).length === 0) {
         alert(I18N[state.language || 'en']?.['export-no-data'] || "No completed blueprint to export.");
         return;
