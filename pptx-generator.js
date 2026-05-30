@@ -81,6 +81,52 @@ window.PPTXGenerator = {
             ].filter(s => !s.endsWith(': ')));
         }
 
+        // 2b. Use Case Scope
+        if (results.useCaseScope) {
+            const scope = results.useCaseScope;
+            addListSlide('Use Case Scope', [
+                `Target Users: ${scope.targetUsers?.join(', ') || ''}`,
+                `Primary Flows: ${scope.primaryFlows?.join(', ') || ''}`,
+                `Success Metrics: ${scope.successMetrics?.join(', ') || ''}`,
+                `Out of Scope: ${scope.outOfScope?.join(', ') || ''}`
+            ].filter(s => !s.endsWith(': ')));
+        }
+
+        // 2c. Business Value
+        if (results.businessValue) {
+            const bv = results.businessValue;
+            addListSlide('Business Value', [
+                `Expected ROI: ${bv.expectedROI || ''}`,
+                `Strategic Alignment: ${bv.strategicAlignment || ''}`,
+                `Key KPIs: ${(bv.keyKPIs || []).join(', ')}`,
+                `Risk Mitigation: ${bv.riskMitigation || ''}`
+            ].filter(s => !s.endsWith(': ') && !s.endsWith(':')));
+        }
+
+        // 2d. Competitive Landscape
+        if (results.competitive) {
+            const comp = results.competitive;
+            addListSlide('Competitive Landscape', [
+                `Key Competitors: ${(comp.keyCompetitors || []).join(', ')}`,
+                `Differentiators: ${(comp.differentiators || []).join(', ')}`,
+                `Market Positioning: ${comp.marketPositioning || ''}`
+            ].filter(s => !s.endsWith(': ') && !s.endsWith(':')));
+        }
+
+        // 2e. Domain Model
+        if (results.domainModel) {
+            const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
+            slide.addText('Domain Model', { x: 0.5, y: 0.8, w: '90%', h: 0.6, fontSize: 24, color: '1A1A2E', bold: true });
+            try {
+                const dataUrl = await getDiagramImageDataUrl('#domain-content .diagram-container');
+                if (dataUrl) {
+                    slide.addImage({ data: dataUrl, x: 0.5, y: 1.6, w: 9, h: 5.5, sizing: { type: 'contain', w: 9, h: 5.5 } });
+                } else {
+                    slide.addText('Domain Model diagram not available or still rendering.', { x: 0.5, y: 2, w: '90%', h: 1, fontSize: 14, color: '888888' });
+                }
+            } catch(e) {}
+        }
+
         // 3. Architecture Overview
         if (results.architecture) {
             const slide = pptx.addSlide({ masterName: 'MASTER_SLIDE' });
@@ -131,6 +177,30 @@ window.PPTXGenerator = {
             addListSlide('AI Models Recommendation', 
                 results.aiModels.recommendations.map(r => r.capability || 'AI Capability')
             );
+        }
+
+        // 7. Implementation Strategy
+        if (results.implementation) {
+            const imp = results.implementation;
+            addListSlide('Implementation Strategy', [
+                `Approach: ${imp.approach || ''}`,
+                `Estimated Timeline: ${imp.estimatedTimeline || ''}`,
+                `Key Milestones: ${(imp.keyMilestones || []).map(m => m.milestone || '').join(', ')}`,
+                `Resource Requirements: ${(imp.resourceRequirements || []).join(', ')}`
+            ].filter(s => !s.endsWith(': ') && !s.endsWith(':')));
+        }
+
+        // 8. Expansion / Roadmap
+        if (results.roadmap || results.adjacentUseCases) {
+            const rd = results.roadmap || results.adjacentUseCases || {};
+            const items = [];
+            if (rd.adjacentUseCases && Array.isArray(rd.adjacentUseCases)) {
+                items.push('Adjacent Use Cases:');
+                rd.adjacentUseCases.forEach(uc => items.push(`  - ${uc.name || uc.title || ''}: ${uc.description || ''}`));
+            }
+            if (items.length > 0) {
+                addListSlide('Expansion & Roadmap', items);
+            }
         }
 
         // Output file

@@ -1,5 +1,10 @@
 window.PDFGenerator = {
     generate: async function (state, config = {}) {
+        // Initialize fonts
+        if (window.pdfMake && window.pdfFonts && window.pdfFonts.pdfMake) {
+            window.pdfMake.vfs = window.pdfFonts.pdfMake.vfs;
+        }
+
         const lang = state.language || 'en';
         const isArabic = lang === 'ar';
         const translations = I18N[lang] || I18N.en;
