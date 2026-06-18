@@ -328,7 +328,18 @@
             </div>
 
             <div class="examples-section">
-              <div class="examples-label" data-i18n="examples-label">Try an example</div>
+              <div class="input-label" style="margin-top: 16px;">
+                <span>📚</span> <span data-i18n="samples-label">Pre-Loaded Full Samples (Instant Load)</span>
+              </div>
+              <div class="example-chips">
+                <div class="example-chip" onclick="app.loadSampleUseCase('retail_inventory')" style="background: rgba(0, 195, 137, 0.15); border-color: rgba(0, 195, 137, 0.3);">🏷️ Retail Inventory</div>
+                <div class="example-chip" onclick="app.loadSampleUseCase('supply_chain')" style="background: rgba(0, 195, 137, 0.15); border-color: rgba(0, 195, 137, 0.3);">🚚 Supply Chain</div>
+                <div class="example-chip" onclick="app.loadSampleUseCase('fraud_detection')" style="background: rgba(0, 195, 137, 0.15); border-color: rgba(0, 195, 137, 0.3);">💳 Fraud Detection</div>
+              </div>
+
+              <div class="input-label" style="margin-top: 16px;">
+                <span>💡</span> <span data-i18n="examples-label">Or try an example prompt</span>
+              </div>
               <div class="example-chips">
                 <div class="example-chip" onclick="app.loadExample(0)" data-i18n="example-wildfire">🔥 Wildfire
                   Detection with Drones</div>
@@ -817,6 +828,7 @@
   <script src="renderers.js?v=3"></script>
   <script src="pdf-generator.js?v=3"></script>
   <script src="pptx-generator.js?v=3"></script>
+  <script src="samples.js?v=3"></script>
   <script src="app.js?v=3"></script>
 </body>
 

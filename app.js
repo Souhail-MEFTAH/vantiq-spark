@@ -2964,6 +2964,61 @@ async function regenerate(agentKey) {
     }
 }
 
+// ── Load Sample Use Case ──
+async function loadSampleUseCase(sampleId) {
+    if (state.generating) return;
+    
+    if (typeof PRELOADED_SAMPLES === 'undefined') {
+        console.error("PRELOADED_SAMPLES is not defined. Ensure samples.js is loaded.");
+        return;
+    }
+    const sample = PRELOADED_SAMPLES[sampleId];
+    if (!sample) return;
+
+    const input = document.getElementById('problemInput');
+    input.value = sample.description;
+
+    state.problemText = sample.description;
+    state.results = JSON.parse(JSON.stringify(sample.results)); 
+
+    document.querySelector('.welcome-section').style.display = 'none';
+    document.querySelector('.results-section').style.display = 'flex';
+    document.getElementById('headerActions').style.display = 'flex';
+    document.querySelector('.footer-menu-container').style.display = 'block';
+    
+    const pipelineSteps = document.getElementById('pipelineSteps');
+    if (pipelineSteps) pipelineSteps.innerHTML = '<div style="color:var(--primary); padding:10px;">Loaded pre-generated sample...</div>';
+    
+    const progress = document.getElementById('pipelineProgress');
+    if (progress) progress.style.width = '100%';
+    
+    if (window.Renderers) {
+        if (state.results.analysis) Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
+        if (state.results.useCaseScope) Renderers.renderUseCaseScope(state.results.useCaseScope, document.getElementById('scope-content'));
+        if (state.results.businessValue) Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
+        if (state.results.competitive) Renderers.renderCompetitive(state.results.competitive, document.getElementById('competitive-content'));
+        if (state.results.domainModel) Renderers.renderDomainModel(state.results.domainModel, document.getElementById('domain-content'));
+        if (state.results.architecture) Renderers.renderArchitecture(state.results.architecture, document.getElementById('architecture-content'));
+        if (state.results.eventSystem) Renderers.renderEventSystem(state.results.eventSystem, document.getElementById('events-content'));
+        if (state.results.diagrams) Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
+        if (state.results.aiModels) Renderers.renderAiModels(state.results.aiModels, document.getElementById('ai-content'));
+        if (state.results.agenticGuide) Renderers.renderAgentic(state.results.agenticGuide, document.getElementById('agentic-content'));
+        if (state.results.implementation) Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
+        if (state.results.roadmap) Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content'));
+        if (state.results.adjacentUseCases) Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content'));
+        
+        setTimeout(async () => {
+            try {
+                if (window.mermaid) {
+                    await window.mermaid.run();
+                }
+            } catch(e) {}
+        }, 100);
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ── Load Example ──
 function loadExample(index) {
     const input = document.getElementById('problemInput');
@@ -3614,6 +3669,7 @@ window.app = {
     generate,
     regenerate,
     loadExample,
+    loadSampleUseCase,
     clearInput,
     showSettings,
     hideSettings,
