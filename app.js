@@ -2983,8 +2983,11 @@ async function loadSampleUseCase(sampleId) {
 
     document.querySelector('.welcome-section').style.display = 'none';
     // document.querySelector('.results-section').style.display = 'flex';
-    document.getElementById('headerActions').style.display = 'flex';
-    document.querySelector('.footer-menu-container').style.display = 'block';
+    const headerActions = document.getElementById('headerActions');
+    if (headerActions) headerActions.style.display = 'flex';
+    
+    const footerMenu = document.getElementById('footerMenuContainer');
+    if (footerMenu) footerMenu.style.display = 'block';
     
     const pipelineSteps = document.getElementById('pipelineSteps');
     if (pipelineSteps) pipelineSteps.innerHTML = '<div style="color:var(--primary); padding:10px;">Loaded pre-generated sample...</div>';
