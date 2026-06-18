@@ -2993,19 +2993,21 @@ async function loadSampleUseCase(sampleId) {
     if (progress) progress.style.width = '100%';
     
     if (window.Renderers) {
-        if (state.results.analysis) Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content'));
-        if (state.results.useCaseScope) Renderers.renderUseCaseScope(state.results.useCaseScope, document.getElementById('scope-content'));
-        if (state.results.businessValue) Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content'));
-        if (state.results.competitive) Renderers.renderCompetitive(state.results.competitive, document.getElementById('competitive-content'));
-        if (state.results.domainModel) Renderers.renderDomainModel(state.results.domainModel, document.getElementById('domain-content'));
-        if (state.results.architecture) Renderers.renderArchitecture(state.results.architecture, document.getElementById('architecture-content'));
-        if (state.results.eventSystem) Renderers.renderEventSystem(state.results.eventSystem, document.getElementById('events-content'));
-        if (state.results.diagrams) Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content'));
-        if (state.results.aiModels) Renderers.renderAiModels(state.results.aiModels, document.getElementById('ai-content'));
-        if (state.results.agenticGuide) Renderers.renderAgentic(state.results.agenticGuide, document.getElementById('agentic-content'));
-        if (state.results.implementation) Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content'));
-        if (state.results.roadmap) Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content'));
-        if (state.results.adjacentUseCases) Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content'));
+        if (state.results.analysis) { Renderers.renderAnalysis(state.results.analysis, document.getElementById('analysis-content')); enableNav('analysis'); }
+        if (state.results.useCaseScope) { Renderers.renderUseCaseScope(state.results.useCaseScope, document.getElementById('usecasescope-content')); enableNav('usecasescope'); }
+        if (state.results.businessValue) { Renderers.renderBusinessValue(state.results.businessValue, document.getElementById('business-content')); enableNav('business'); }
+        if (state.results.competitive) { Renderers.renderCompetitive(state.results.competitive, document.getElementById('competitive-content')); enableNav('competitive'); }
+        if (state.results.domainModel) { Renderers.renderDomainModel(state.results.domainModel, document.getElementById('domain-content')); enableNav('domain'); }
+        if (state.results.architecture) { Renderers.renderArchitecture(state.results.architecture, document.getElementById('architecture-content')); enableNav('architecture'); }
+        if (state.results.eventSystem) { Renderers.renderEventSystem(state.results.eventSystem, document.getElementById('events-content')); enableNav('events'); }
+        if (state.results.diagrams) { Renderers.renderDiagrams(state.results.diagrams, document.getElementById('diagrams-content')); enableNav('diagrams'); }
+        if (state.results.aiModels) { Renderers.renderAiModels(state.results.aiModels, document.getElementById('aimodels-content')); enableNav('aimodels'); }
+        if (state.results.agenticGuide) { Renderers.renderAgentic(state.results.agenticGuide, document.getElementById('agentic-content')); enableNav('agentic'); }
+        if (state.results.implementation) { Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content')); enableNav('implementation'); }
+        if (state.results.roadmap) { Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content')); enableNav('roadmap'); }
+        if (state.results.adjacentUseCases) { Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content')); enableNav('adjacent'); }
+
+        switchPanel('analysis');
         
         setTimeout(async () => {
             try {
