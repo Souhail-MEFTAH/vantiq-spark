@@ -6,236 +6,328 @@ const PRELOADED_SAMPLES = {
       "analysis": {
         "domainIcon": "🏬",
         "domain": "Retail & Operations",
-        "summary": "A real-time inventory management system leveraging RFID and smart cameras to track stock levels.",
-        "currentState": "Periodic manual scanning resulting in inaccurate counts and delayed restocking.",
-        "whyHardWithoutVantiq": "Integrating real-time high-throughput RFID streams with computer vision events requires complex stream processing.",
+        "summary": "A real-time inventory management system leveraging RFID and smart cameras to track stock levels instantly across all store zones.",
+        "currentState": "Periodic manual scanning resulting in inaccurate counts, delayed restocking, and lost revenue.",
+        "whyHardWithoutVantiq": "Integrating real-time, high-throughput RFID streams with computer vision events from hundreds of edge nodes requires complex stream processing and edge-to-cloud synchronization.",
         "urgency": {
-          "level": "High",
-          "justification": "Lost sales and frustrated customers"
+          "level": "Critical",
+          "justification": "Lost sales and frustrated customers due to phantom inventory."
         },
         "painPoints": [
           {
             "pain": "Stockouts",
-            "severity": "Critical",
-            "impact": "Lost revenue and reduced customer loyalty"
+            "severity": "High",
+            "impact": "Lost revenue and reduced customer loyalty."
+          },
+          {
+            "pain": "Labor Inefficiency",
+            "severity": "Medium",
+            "impact": "Staff spending hours manually scanning items."
           },
           {
             "pain": "Misplaced Items",
             "severity": "High",
-            "impact": "Poor shopping experience and wasted staff time"
+            "impact": "Items technically in stock but unavailable to shoppers."
           }
         ],
         "stakeholders": [
           {
-            "role": "Store Operations Manager",
-            "buyerType": "Economic",
-            "concern": "Revenue loss and operational efficiency"
+            "role": "Store Manager",
+            "concern": "Daily operations and sales targets",
+            "benefit": "Real-time visibility into stockouts"
           },
           {
-            "role": "IT Director",
-            "buyerType": "Technical",
-            "concern": "Integration with legacy ERP systems"
+            "role": "Supply Chain VP",
+            "concern": "Inventory accuracy",
+            "benefit": "Accurate systemic inventory"
           }
         ],
         "qualifyingQuestions": [
-          "How frequently are you experiencing stockouts for high-velocity items?",
-          "Do you currently have RFID infrastructure deployed in your stores?"
+          "What is your current inventory accuracy rate?",
+          "How much labor is dedicated to physical counts?",
+          "Are you already deploying RFID or smart cameras?"
         ]
       },
       "useCaseScope": {
-        "useCaseTitle": "Real-time Retail Inventory Tracking",
-        "elevator": "Track inventory in real-time across the retail floor using RFID and cameras to eliminate stockouts.",
+        "scope": "Real-time tracking of apparel on the sales floor and backroom using RFID and ceiling cameras.",
         "inScope": [
-          "Real-time RFID tracking",
-          "Camera-based shelf monitoring",
-          "Instant stockout alerts"
+          "RFID ingestion at the edge",
+          "Real-time alerting to associate mobile devices",
+          "Integration with master ERP inventory"
         ],
         "outOfScope": [
-          "Point of Sale (POS) transaction processing",
-          "Customer loyalty programs"
+          "Point of Sale transaction processing",
+          "Warehouse logistics tracking"
         ],
-        "successMetrics": [
-          {
-            "metric": "Inventory Accuracy",
-            "current": "75%",
-            "target": "99.9%"
-          },
-          {
-            "metric": "Stockout Incidents",
-            "current": "15/week",
-            "target": "<2/week"
-          }
+        "boundaries": "System applies only to physical brick-and-mortar locations.",
+        "assumptions": [
+          "Stores have adequate network infrastructure",
+          "Items are pre-tagged with RFID at the distribution center"
         ],
-        "decisionCriteria": [
-          "System latency under 1 second",
-          "High availability during peak shopping hours"
-        ],
-        "competitiveAlternative": "Traditional batch scanning inventory systems"
+        "constraints": [
+          "Must process 10,000 tag reads per second per store",
+          "Alert latency must be under 2 seconds"
+        ]
       },
       "businessValue": {
-        "roiProjection": [
+        "summary": "Deploying this system will dramatically increase on-floor availability and reduce manual labor, driving immediate revenue lift.",
+        "roiProjection": {
+          "investmentRange": "$500K - $1M",
+          "expectedReturn": "$3M - $5M/year",
+          "paybackPeriod": "8-12 months",
+          "roiPercentage": "400%"
+        },
+        "valueDrivers": [
           {
             "category": "Revenue Uplift",
-            "value": "+5%",
-            "timeframe": "Year 1"
+            "impact": "Fewer stockouts lead to higher conversion.",
+            "quantification": "+4% Top-line Revenue"
           },
           {
             "category": "Labor Savings",
-            "value": "20 hrs/week/store",
-            "timeframe": "Year 1"
-          }
-        ],
-        "valueDrivers": [
-          {
-            "driver": "Reduced stockouts",
-            "impact": "High"
-          },
-          {
-            "driver": "Optimized staff allocation",
-            "impact": "Medium"
+            "impact": "Elimination of weekly physical counts.",
+            "quantification": "$1M/year saved across 50 stores"
           }
         ],
         "riskMitigations": [
           {
-            "risk": "High upfront hardware cost",
-            "mitigation": "Phased rollout starting with flagship stores"
+            "risk": "Customer Churn",
+            "solution": "Ensuring item availability prevents customers from switching to competitors."
           }
         ],
         "kpis": [
           {
-            "kpi": "Stockout reduction",
-            "target": "80%"
+            "metric": "Inventory Accuracy",
+            "target": "99.9%",
+            "timeframe": "Post-deployment"
           },
           {
-            "kpi": "Inventory recount frequency",
-            "target": "Monthly instead of Weekly"
+            "metric": "Stockout Duration",
+            "target": "< 15 minutes",
+            "timeframe": "Monthly average"
+          }
+        ],
+        "industryBenchmarks": [
+          {
+            "benchmark": "Retail inventory accuracy averages 65% without RFID.",
+            "source": "Auburn University RFID Lab"
           }
         ]
       },
       "competitive": {
         "competitors": [
           {
-            "name": "Legacy DB Vendors",
-            "profile": "Traditional batch-oriented databases"
-          }
-        ],
-        "featureComparison": [
+            "name": "Legacy ERP Add-ons",
+            "profile": "Traditional batch-oriented databases",
+            "strengths": [
+              "Deep enterprise integration",
+              "Trusted brand"
+            ],
+            "weaknesses": [
+              "Batch processing only",
+              "High latency",
+              "Cannot handle streaming edge data"
+            ]
+          },
           {
-            "feature": "Real-time Event Processing",
-            "ourCapability": "Yes",
-            "competitorCapability": "No",
-            "differentiator": "True"
+            "name": "Custom Cloud Infrastructure",
+            "profile": "DIY on AWS/Azure",
+            "strengths": [
+              "Complete control",
+              "Native cloud services"
+            ],
+            "weaknesses": [
+              "High development cost",
+              "Complex edge orchestration",
+              "Long time to value"
+            ]
           }
         ],
         "competitiveMatrix": [
           {
             "vendor": "Vantiq",
-            "criteria": "Event-driven Architecture",
-            "rating": "Excellent"
+            "criterion": "Edge-to-Cloud Orchestration",
+            "rating": "Strong",
+            "note": "Native support for distributed edge processing."
+          },
+          {
+            "vendor": "Legacy ERP",
+            "criterion": "Edge-to-Cloud Orchestration",
+            "rating": "Weak",
+            "note": "Cloud-only, batch-oriented."
+          },
+          {
+            "vendor": "Vantiq",
+            "criterion": "Time to Market",
+            "rating": "Strong",
+            "note": "Low-code visual development."
+          },
+          {
+            "vendor": "Legacy ERP",
+            "criterion": "Time to Market",
+            "rating": "Moderate",
+            "note": "Long implementation cycles."
           }
         ],
         "vantiqDifferentiators": [
           {
-            "differentiator": "Native EDA",
-            "reason": "Built for streaming data from edge devices"
+            "feature": "Native Edge Deployment",
+            "description": "Deploy exactly the same logic to the edge as the cloud.",
+            "competitorGap": "Competitors require separate tech stacks for edge vs cloud."
+          },
+          {
+            "feature": "Visual Event Handlers",
+            "description": "Design complex streaming logic visually.",
+            "competitorGap": "Competitors require complex Java/Scala streaming code."
           }
         ],
         "objectionHandling": [
           {
-            "objection": "Implementation complexity",
-            "handling": "Low-code platform simplifies development significantly"
+            "objection": "We already have an ERP.",
+            "response": "Vantiq complements your ERP by acting as the real-time nervous system, feeding curated, accurate data into it rather than replacing it."
+          },
+          {
+            "objection": "Edge computing is too hard to manage.",
+            "response": "Vantiq abstracts edge management. You deploy to the edge as easily as you deploy to the cloud."
           }
         ],
-        "recommendation": "Focus heavily on the real-time alerting capabilities that legacy DBs cannot match.",
-        "winStrategy": "Execute a rapid Proof of Value on a single high-traffic store."
+        "recommendation": "Focus on the agility of the edge-to-cloud architecture and the speed of development compared to a custom AWS build.",
+        "winStrategy": [
+          "Conduct a 2-week POV in a single store",
+          "Prove 99% accuracy",
+          "Demonstrate ERP integration"
+        ]
       },
       "domainModel": {
         "entities": [
           {
             "type": "Asset",
             "name": "InventoryItem",
-            "stateManagement": "Stateful",
-            "persistence": "Yes",
             "properties": [
               "rfidTag",
-              "location",
-              "status"
+              "sku",
+              "locationZone",
+              "lastSeen"
             ]
           },
           {
             "type": "Location",
             "name": "StoreZone",
-            "stateManagement": "Stateless",
-            "persistence": "No",
             "properties": [
               "zoneId",
-              "cameraIds"
+              "zoneType",
+              "capacity"
             ]
           }
         ],
         "events": [
           {
-            "name": "ItemMoved",
-            "type": "Event"
+            "name": "TagRead",
+            "type": "Raw Event",
+            "trigger": "RFID reader detects a tag"
           },
           {
-            "name": "ShelfEmptyAlert",
-            "type": "Alert"
+            "name": "ItemMisplaced",
+            "type": "Derived Alert",
+            "trigger": "Item remains in wrong zone for >10 mins"
           }
         ],
         "services": [
           {
-            "name": "InventoryService",
-            "responsibility": "Track item locations and state"
+            "name": "RFIDIngestionService",
+            "responsibility": "Filter, smooth, and aggregate raw tag reads at the edge."
           },
           {
-            "name": "AlertingService",
-            "responsibility": "Notify staff of stockouts"
+            "name": "InventoryStateService",
+            "responsibility": "Maintain the real-time location of every item."
+          }
+        ],
+        "boundedContexts": [
+          {
+            "name": "Edge Processing",
+            "description": "Handles raw hardware events.",
+            "services": [
+              "RFIDIngestionService"
+            ]
+          },
+          {
+            "name": "Cloud Analytics",
+            "description": "Global state and alerting.",
+            "services": [
+              "InventoryStateService"
+            ]
           }
         ],
         "commands": [
           {
-            "name": "DispatchRestock",
-            "target": "AlertingService"
+            "name": "TriggerRestockAlert",
+            "target": "NotificationService",
+            "action": "Send push to associate mobile app"
           }
         ]
       },
       "architecture": {
         "components": [
           {
-            "name": "EdgeNode",
-            "type": "Gateway",
-            "responsibility": "Process raw RFID tag reads locally"
+            "name": "Store Edge Node",
+            "type": "Vantiq Edge",
+            "responsibility": "Process RFID reads locally to reduce bandwidth.",
+            "tech": [
+              "Vantiq",
+              "MQTT"
+            ]
           },
           {
-            "name": "VisionService",
-            "type": "AI Model",
-            "responsibility": "Analyze camera feeds for empty shelves"
+            "name": "Cloud Control Plane",
+            "type": "Vantiq Cloud",
+            "responsibility": "Global inventory state and ERP sync.",
+            "tech": [
+              "Vantiq",
+              "REST"
+            ]
           }
         ],
         "integrations": [
           {
-            "system": "Legacy ERP",
-            "protocol": "REST",
-            "purpose": "Sync master stock levels"
+            "system": "SAP ERP",
+            "protocol": "REST/OData",
+            "purpose": "Sync master SKU data and update final stock levels."
           }
         ],
         "dataFlow": [
-          "RFID/Cameras -> Edge Node -> Vantiq Cloud -> Mobile App & ERP"
+          "1. RFID readers publish to MQTT broker at the edge.",
+          "2. Vantiq Edge node filters duplicate reads and publishes 'ZoneChange' events to Cloud.",
+          "3. Vantiq Cloud updates global state and checks against ERP stock levels.",
+          "4. If stockout detected, Cloud sends push notification to Associate App."
         ],
-        "mermaidDiagram": "graph TD;\n  A[RFID Readers] --> B[Edge Node]\n  B --> C(Vantiq Cloud)\n  C --> D[Staff Mobile App]",
-        "scalabilityNotes": "Deploy edge nodes in each store for local processing and resilience.",
-        "securityConsiderations": "Use TLS for all external integrations and encrypt data at rest."
+        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes.",
+        "securityConsiderations": [
+          "Mutual TLS for edge-to-cloud communication.",
+          "Encrypt inventory data at rest in the cloud."
+        ],
+        "principles": [
+          "Process data close to the source.",
+          "Design for offline edge autonomy."
+        ]
       },
       "eventSystem": {
         "schemas": [
           {
-            "eventName": "ItemMoved",
+            "eventName": "ZoneChange",
             "fields": [
-              "rfid",
-              "timestamp",
-              "fromZone",
-              "toZone"
+              "rfidTag",
+              "previousZone",
+              "newZone",
+              "timestamp"
+            ]
+          },
+          {
+            "eventName": "RestockAlert",
+            "fields": [
+              "sku",
+              "zone",
+              "quantityNeeded",
+              "urgency"
             ]
           }
         ],
@@ -243,698 +335,1217 @@ const PRELOADED_SAMPLES = {
           {
             "name": "RFID Gateway",
             "events": [
-              "ItemMoved"
+              "RawTagRead"
+            ]
+          },
+          {
+            "name": "Edge Node",
+            "events": [
+              "ZoneChange"
             ]
           }
         ],
         "consumers": [
           {
-            "name": "InventoryTracker",
-            "consumes": [
-              "ItemMoved"
+            "name": "Cloud Node",
+            "subscribesTo": [
+              "ZoneChange"
+            ]
+          },
+          {
+            "name": "Mobile App",
+            "subscribesTo": [
+              "RestockAlert"
             ]
           }
         ],
-        "flowDiagram": "graph LR;\n  A[RFID Gateway] -->|ItemMoved| B(Vantiq Event Broker)\n  B --> C[InventoryTracker]",
-        "dataRetention": "Retain raw events for 7 days, aggregated data for 1 year."
+        "topics": [
+          {
+            "name": "/store/{id}/rfid",
+            "usage": "Raw reads"
+          },
+          {
+            "name": "/cloud/inventory/updates",
+            "usage": "State changes"
+          }
+        ],
+        "dataRetention": [
+          "Raw reads discarded at edge after 5 seconds.",
+          "Zone changes kept in cloud state indefinitely until sold."
+        ]
       },
       "diagrams": {
         "diagrams": [
           {
-            "title": "High Level Architecture",
-            "code": "graph TD;\n A-->B",
-            "description": "Basic system flow from edge to cloud."
+            "title": "Edge-to-Cloud Data Flow",
+            "type": "Architecture",
+            "description": "Shows how raw reads are filtered at the edge.",
+            "mermaidCode": "graph TD;\n  A[RFID Readers] -->|Raw MQTT| B[Vantiq Edge Node]\n  B -->|Filtered ZoneChange| C[Vantiq Cloud]\n  C -->|Updates| D[(SAP ERP)]\n  C -->|Alerts| E[Mobile App]"
           }
         ]
       },
       "aiModels": {
-        "overallStrategy": "Use AI to detect anomalies in camera feeds and predict stockout trends.",
-        "aiAgents": [
+        "recommendations": [
           {
-            "name": "VisionAnalyzer",
-            "role": "Computer Vision",
-            "model": "Custom YOLOv8",
-            "rationale": "Fast real-time object detection on edge."
+            "task": "Camera Feed Analysis",
+            "approach": "Computer Vision",
+            "deployment": "Edge",
+            "models": [
+              {
+                "name": "YOLOv8",
+                "size": "Small",
+                "rationale": "Fast inference on edge hardware for detecting empty shelves."
+              }
+            ]
           },
           {
-            "name": "PredictiveRestock",
-            "role": "Forecasting",
-            "model": "RandomForest",
-            "rationale": "Predictive analytics based on historical sales."
-          }
-        ],
-        "llmComparison": [
-          {
-            "model": "Edge ML",
-            "pros": [
-              "Low Latency",
-              "Privacy"
-            ],
-            "cons": [
-              "Limited capacity"
+            "task": "Restock Prediction",
+            "approach": "Time-series Forecasting",
+            "deployment": "Cloud",
+            "models": [
+              {
+                "name": "Custom XGBoost",
+                "size": "Medium",
+                "rationale": "Predicting when a shelf will go empty based on foot traffic patterns."
+              }
             ]
           }
-        ],
-        "costOptimization": "Run models at the edge to reduce cloud bandwidth costs."
+        ]
       },
       "agenticGuide": {
-        "solutionStrategy": "Implement an Agentic pattern for autonomous inventory reallocation.",
-        "llmAgents": [
+        "agents": [
           {
-            "name": "StockManagerAgent",
-            "purpose": "Autonomously decide restocking priorities.",
+            "name": "Store Manager Agent",
+            "role": "Orchestrator",
             "tools": [
-              "ERP API",
-              "Staff Notification API"
-            ]
+              "GetInventoryLevel",
+              "PageAssociate"
+            ],
+            "interaction": "Monitors alerts and autonomously decides which associate to page based on their current location and workload."
           }
         ]
       },
       "implementation": {
-        "projectStructure": [
-          "src/services/inventory/",
-          "src/events/schemas/",
-          "src/edge/"
+        "phases": [
+          {
+            "phase": "Phase 1: POV",
+            "duration": "4 weeks",
+            "focus": "Single store RFID ingestion",
+            "deliverables": [
+              "Edge node deployed",
+              "Basic alerting"
+            ]
+          },
+          {
+            "phase": "Phase 2: ERP Integration",
+            "duration": "6 weeks",
+            "focus": "Two-way sync with SAP",
+            "deliverables": [
+              "Cloud service deployed",
+              "SAP connector active"
+            ]
+          },
+          {
+            "phase": "Phase 3: Rollout",
+            "duration": "12 weeks",
+            "focus": "Scale to 50 stores",
+            "deliverables": [
+              "Automated provisioning",
+              "Full dashboard"
+            ]
+          }
         ],
-        "deploymentNotes": "Use Docker containers managed by Kubernetes for cloud components.",
-        "warnings": [
-          "Ensure high network bandwidth is available if streaming video instead of edge-processing."
+        "quickWins": [
+          "Immediate visibility into backroom vs sales floor inventory."
+        ],
+        "risks": [
+          {
+            "risk": "Poor RFID read rates",
+            "impact": "Inaccurate system",
+            "mitigation": "Conduct thorough RF site survey before deployment."
+          }
         ]
       },
       "roadmap": {
-        "roadmapTitle": "Smart Retail Inventory Rollout",
-        "vision": "Fully autonomous, self-healing retail store inventory.",
         "quarters": [
           {
             "quarter": "Q1",
+            "theme": "Foundation & POV",
             "milestones": [
-              "Deploy in 1 pilot store",
-              "Integrate core ERP"
+              "Store 1 Live",
+              "ERP Integration"
+            ],
+            "deliverables": [
+              "Vantiq Edge config",
+              "SAP Connector"
             ]
           },
           {
             "quarter": "Q2",
+            "theme": "AI Integration",
             "milestones": [
-              "Expand to 10 stores",
-              "Activate AI predictive models"
+              "Camera Integration"
+            ],
+            "deliverables": [
+              "YOLOv8 model deployment"
             ]
           }
         ],
         "keyDecisionPoints": [
-          "Select standardized RFID vendor hardware."
+          "Go/No-go after Store 1 POV.",
+          "Choose camera hardware vendor in Q2."
         ]
       },
       "adjacentUseCases": {
         "adjacentUseCases": [
           {
-            "title": "Customer Path Analytics",
-            "description": "Use the same camera infrastructure to analyze foot traffic and optimize store layouts."
+            "name": "Smart Fitting Rooms",
+            "description": "Use RFID to detect items brought into fitting rooms to recommend accessories on a smart mirror.",
+            "reusedComponents": [
+              "RFIDIngestionService",
+              "InventoryStateService"
+            ],
+            "newComponents": [
+              "SmartMirror UI",
+              "Recommendation Engine"
+            ]
           }
         ]
       }
     }
   },
   "supply_chain": {
-    "title": "Supply Chain Logistics",
-    "description": "End-to-end supply chain tracking, predictive ETAs, and cold-chain monitoring.",
+    "title": "Supply Chain Logistics Tracking",
+    "description": "Real-time tracking of high-value shipments across global transit routes using IoT sensors for location, temperature, and shock monitoring.",
     "results": {
       "analysis": {
         "domainIcon": "🚚",
-        "domain": "Logistics & Supply Chain",
-        "summary": "A unified logistics platform providing real-time visibility, predictive ETAs, and temperature compliance.",
-        "currentState": "Siloed tracking systems with delayed batch updates.",
-        "whyHardWithoutVantiq": "Correlating streaming GPS data, IoT telemetry, and traffic APIs in real-time is extremely complex.",
+        "domain": "Supply Chain",
+        "summary": "A comprehensive logistics tracking system ensuring compliance and security for high-value goods in transit.",
+        "currentState": "Periodic manual scanning resulting in inaccurate counts, delayed restocking, and lost revenue.",
+        "whyHardWithoutVantiq": "Integrating real-time, high-throughput RFID streams with computer vision events from hundreds of edge nodes requires complex stream processing and edge-to-cloud synchronization.",
         "urgency": {
-          "level": "High",
-          "justification": "Spoilage costs and SLA penalties are increasing."
+          "level": "Critical",
+          "justification": "Lost sales and frustrated customers due to phantom inventory."
         },
         "painPoints": [
           {
-            "pain": "Spoilage",
-            "severity": "Critical",
-            "impact": "Product loss and regulatory fines"
+            "pain": "Stockouts",
+            "severity": "High",
+            "impact": "Lost revenue and reduced customer loyalty."
           },
           {
-            "pain": "Inaccurate ETAs",
+            "pain": "Labor Inefficiency",
+            "severity": "Medium",
+            "impact": "Staff spending hours manually scanning items."
+          },
+          {
+            "pain": "Misplaced Items",
             "severity": "High",
-            "impact": "Inefficient warehouse scheduling"
+            "impact": "Items technically in stock but unavailable to shoppers."
           }
         ],
         "stakeholders": [
           {
-            "role": "VP of Supply Chain",
-            "buyerType": "Economic",
-            "concern": "Overall logistics costs"
+            "role": "Store Manager",
+            "concern": "Daily operations and sales targets",
+            "benefit": "Real-time visibility into stockouts"
+          },
+          {
+            "role": "Supply Chain VP",
+            "concern": "Inventory accuracy",
+            "benefit": "Accurate systemic inventory"
           }
         ],
         "qualifyingQuestions": [
-          "How much product is lost annually due to temperature excursions?"
+          "What is your current inventory accuracy rate?",
+          "How much labor is dedicated to physical counts?",
+          "Are you already deploying RFID or smart cameras?"
         ]
       },
       "useCaseScope": {
-        "useCaseTitle": "Smart Supply Chain & Cold-Chain Tracking",
-        "elevator": "Track fleets in real-time while monitoring environmental conditions to ensure compliance.",
+        "scope": "Real-time tracking of apparel on the sales floor and backroom using RFID and ceiling cameras.",
         "inScope": [
-          "GPS fleet tracking",
-          "IoT temperature monitoring",
-          "Predictive ETA alerts"
+          "RFID ingestion at the edge",
+          "Real-time alerting to associate mobile devices",
+          "Integration with master ERP inventory"
         ],
         "outOfScope": [
-          "Vehicle maintenance scheduling"
+          "Point of Sale transaction processing",
+          "Warehouse logistics tracking"
         ],
-        "successMetrics": [
-          {
-            "metric": "Spoilage Rate",
-            "current": "4%",
-            "target": "<0.5%"
-          }
+        "boundaries": "System applies only to physical brick-and-mortar locations.",
+        "assumptions": [
+          "Stores have adequate network infrastructure",
+          "Items are pre-tagged with RFID at the distribution center"
         ],
-        "decisionCriteria": [
-          "Ability to process millions of IoT events per minute"
-        ],
-        "competitiveAlternative": "Traditional fleet management software"
+        "constraints": [
+          "Must process 10,000 tag reads per second per store",
+          "Alert latency must be under 2 seconds"
+        ]
       },
       "businessValue": {
-        "roiProjection": [
-          {
-            "category": "Spoilage Reduction",
-            "value": "$2M/year",
-            "timeframe": "Year 1"
-          }
-        ],
+        "summary": "Reduces spoilage and theft by providing immediate alerting when shipments deviate from defined parameters.",
+        "roiProjection": {
+          "investmentRange": "$500K - $1M",
+          "expectedReturn": "$3M - $5M/year",
+          "paybackPeriod": "8-12 months",
+          "roiPercentage": "400%"
+        },
         "valueDrivers": [
           {
-            "driver": "Guaranteed SLA compliance",
-            "impact": "High"
+            "category": "Revenue Uplift",
+            "impact": "Fewer stockouts lead to higher conversion.",
+            "quantification": "+4% Top-line Revenue"
+          },
+          {
+            "category": "Labor Savings",
+            "impact": "Elimination of weekly physical counts.",
+            "quantification": "$1M/year saved across 50 stores"
           }
         ],
         "riskMitigations": [
           {
-            "risk": "IoT sensor failure",
-            "mitigation": "Redundant sensor deployment"
+            "risk": "Customer Churn",
+            "solution": "Ensuring item availability prevents customers from switching to competitors."
           }
         ],
         "kpis": [
           {
-            "kpi": "On-time Delivery Rate",
-            "target": "98%"
+            "metric": "Inventory Accuracy",
+            "target": "99.9%",
+            "timeframe": "Post-deployment"
+          },
+          {
+            "metric": "Stockout Duration",
+            "target": "< 15 minutes",
+            "timeframe": "Monthly average"
+          }
+        ],
+        "industryBenchmarks": [
+          {
+            "benchmark": "Retail inventory accuracy averages 65% without RFID.",
+            "source": "Auburn University RFID Lab"
           }
         ]
       },
       "competitive": {
         "competitors": [
           {
-            "name": "Standard Fleet Trackers",
-            "profile": "GPS-only legacy systems"
-          }
-        ],
-        "featureComparison": [
+            "name": "Legacy ERP Add-ons",
+            "profile": "Traditional batch-oriented databases",
+            "strengths": [
+              "Deep enterprise integration",
+              "Trusted brand"
+            ],
+            "weaknesses": [
+              "Batch processing only",
+              "High latency",
+              "Cannot handle streaming edge data"
+            ]
+          },
           {
-            "feature": "Complex Event Processing",
-            "ourCapability": "Yes",
-            "competitorCapability": "No",
-            "differentiator": "True"
+            "name": "Custom Cloud Infrastructure",
+            "profile": "DIY on AWS/Azure",
+            "strengths": [
+              "Complete control",
+              "Native cloud services"
+            ],
+            "weaknesses": [
+              "High development cost",
+              "Complex edge orchestration",
+              "Long time to value"
+            ]
           }
         ],
         "competitiveMatrix": [
           {
             "vendor": "Vantiq",
-            "criteria": "Extensibility",
-            "rating": "Excellent"
+            "criterion": "Edge-to-Cloud Orchestration",
+            "rating": "Strong",
+            "note": "Native support for distributed edge processing."
+          },
+          {
+            "vendor": "Legacy ERP",
+            "criterion": "Edge-to-Cloud Orchestration",
+            "rating": "Weak",
+            "note": "Cloud-only, batch-oriented."
+          },
+          {
+            "vendor": "Vantiq",
+            "criterion": "Time to Market",
+            "rating": "Strong",
+            "note": "Low-code visual development."
+          },
+          {
+            "vendor": "Legacy ERP",
+            "criterion": "Time to Market",
+            "rating": "Moderate",
+            "note": "Long implementation cycles."
           }
         ],
         "vantiqDifferentiators": [
           {
-            "differentiator": "Distributed Edge",
-            "reason": "Process data on the truck"
+            "feature": "Native Edge Deployment",
+            "description": "Deploy exactly the same logic to the edge as the cloud.",
+            "competitorGap": "Competitors require separate tech stacks for edge vs cloud."
+          },
+          {
+            "feature": "Visual Event Handlers",
+            "description": "Design complex streaming logic visually.",
+            "competitorGap": "Competitors require complex Java/Scala streaming code."
           }
         ],
         "objectionHandling": [
           {
-            "objection": "Cost of IoT",
-            "handling": "Offset by immediate spoilage reduction"
+            "objection": "We use a standard tracking portal.",
+            "response": "Portals require humans to watch them. Vantiq proactively alerts you the second a temperature drops, before spoilage occurs."
+          },
+          {
+            "objection": "Edge computing is too hard to manage.",
+            "response": "Vantiq abstracts edge management. You deploy to the edge as easily as you deploy to the cloud."
           }
         ],
-        "recommendation": "Highlight the ability to react to temperature drops *before* spoilage occurs.",
-        "winStrategy": "Pilot with the highest-value refrigerated fleet."
+        "recommendation": "Focus on the agility of the edge-to-cloud architecture and the speed of development compared to a custom AWS build.",
+        "winStrategy": [
+          "Conduct a 2-week POV in a single store",
+          "Prove 99% accuracy",
+          "Demonstrate ERP integration"
+        ]
       },
       "domainModel": {
         "entities": [
           {
             "type": "Asset",
-            "name": "DeliveryTruck",
-            "stateManagement": "Stateful",
-            "persistence": "Yes",
+            "name": "InventoryItem",
             "properties": [
-              "truckId",
-              "location",
-              "temperature"
+              "rfidTag",
+              "sku",
+              "locationZone",
+              "lastSeen"
+            ]
+          },
+          {
+            "type": "Location",
+            "name": "StoreZone",
+            "properties": [
+              "zoneId",
+              "zoneType",
+              "capacity"
             ]
           }
         ],
         "events": [
           {
-            "name": "LocationUpdate",
-            "type": "Event"
+            "name": "TagRead",
+            "type": "Raw Event",
+            "trigger": "RFID reader detects a tag"
           },
           {
-            "name": "TemperatureWarning",
-            "type": "Alert"
+            "name": "ItemMisplaced",
+            "type": "Derived Alert",
+            "trigger": "Item remains in wrong zone for >10 mins"
           }
         ],
         "services": [
           {
-            "name": "FleetTracker",
-            "responsibility": "Maintain truck states"
+            "name": "RFIDIngestionService",
+            "responsibility": "Filter, smooth, and aggregate raw tag reads at the edge."
+          },
+          {
+            "name": "InventoryStateService",
+            "responsibility": "Maintain the real-time location of every item."
+          }
+        ],
+        "boundedContexts": [
+          {
+            "name": "Edge Processing",
+            "description": "Handles raw hardware events.",
+            "services": [
+              "RFIDIngestionService"
+            ]
+          },
+          {
+            "name": "Cloud Analytics",
+            "description": "Global state and alerting.",
+            "services": [
+              "InventoryStateService"
+            ]
           }
         ],
         "commands": [
           {
-            "name": "Reroute",
-            "target": "DriverApp"
+            "name": "TriggerRestockAlert",
+            "target": "NotificationService",
+            "action": "Send push to associate mobile app"
           }
         ]
       },
       "architecture": {
         "components": [
           {
-            "name": "TelematicsGateway",
-            "type": "Gateway",
-            "responsibility": "Ingest MQTT streams from trucks"
+            "name": "Store Edge Node",
+            "type": "Vantiq Edge",
+            "responsibility": "Process RFID reads locally to reduce bandwidth.",
+            "tech": [
+              "Vantiq",
+              "MQTT"
+            ]
+          },
+          {
+            "name": "Cloud Control Plane",
+            "type": "Vantiq Cloud",
+            "responsibility": "Global inventory state and ERP sync.",
+            "tech": [
+              "Vantiq",
+              "REST"
+            ]
           }
         ],
         "integrations": [
           {
-            "system": "Traffic API",
-            "protocol": "REST",
-            "purpose": "Fetch route conditions"
+            "system": "SAP ERP",
+            "protocol": "REST/OData",
+            "purpose": "Sync master SKU data and update final stock levels."
           }
         ],
         "dataFlow": [
-          "Truck IoT -> TelematicsGateway -> Vantiq Broker -> Operations Dashboard"
+          "1. RFID readers publish to MQTT broker at the edge.",
+          "2. Vantiq Edge node filters duplicate reads and publishes 'ZoneChange' events to Cloud.",
+          "3. Vantiq Cloud updates global state and checks against ERP stock levels.",
+          "4. If stockout detected, Cloud sends push notification to Associate App."
         ],
-        "mermaidDiagram": "graph TD;\n  A[Truck IoT] --> B(Vantiq)\n  B --> C[Dashboard]",
-        "scalabilityNotes": "Partition streams by geographic region.",
-        "securityConsiderations": "Mutual TLS for truck IoT devices."
+        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes.",
+        "securityConsiderations": [
+          "Mutual TLS for edge-to-cloud communication.",
+          "Encrypt inventory data at rest in the cloud."
+        ],
+        "principles": [
+          "Process data close to the source.",
+          "Design for offline edge autonomy."
+        ]
       },
       "eventSystem": {
         "schemas": [
           {
-            "eventName": "TelemetryUpdate",
+            "eventName": "ZoneChange",
             "fields": [
-              "truckId",
-              "lat",
-              "lon",
-              "temp"
+              "rfidTag",
+              "previousZone",
+              "newZone",
+              "timestamp"
+            ]
+          },
+          {
+            "eventName": "RestockAlert",
+            "fields": [
+              "sku",
+              "zone",
+              "quantityNeeded",
+              "urgency"
             ]
           }
         ],
         "producers": [
           {
-            "name": "Truck Sensors",
+            "name": "RFID Gateway",
             "events": [
-              "TelemetryUpdate"
+              "RawTagRead"
+            ]
+          },
+          {
+            "name": "Edge Node",
+            "events": [
+              "ZoneChange"
             ]
           }
         ],
         "consumers": [
           {
-            "name": "ComplianceMonitor",
-            "consumes": [
-              "TelemetryUpdate"
+            "name": "Cloud Node",
+            "subscribesTo": [
+              "ZoneChange"
+            ]
+          },
+          {
+            "name": "Mobile App",
+            "subscribesTo": [
+              "RestockAlert"
             ]
           }
         ],
-        "flowDiagram": "graph LR;\n  A[Truck] --> B(Vantiq)\n  B --> C[Monitor]",
-        "dataRetention": "Store temperature logs for 5 years for compliance."
+        "topics": [
+          {
+            "name": "/store/{id}/rfid",
+            "usage": "Raw reads"
+          },
+          {
+            "name": "/cloud/inventory/updates",
+            "usage": "State changes"
+          }
+        ],
+        "dataRetention": [
+          "Raw reads discarded at edge after 5 seconds.",
+          "Zone changes kept in cloud state indefinitely until sold."
+        ]
       },
       "diagrams": {
         "diagrams": [
           {
-            "title": "Telemetry Flow",
-            "code": "graph TD;\n A-->B",
-            "description": "IoT ingestion pipeline."
+            "title": "Edge-to-Cloud Data Flow",
+            "type": "Architecture",
+            "description": "Shows how raw reads are filtered at the edge.",
+            "mermaidCode": "graph LR;\n  A[IoT Sensors] --> B[Truck Edge Gateway]\n  B --> C[Cellular Network]\n  C --> D[Vantiq Cloud]\n  D --> E[Dispatcher Dashboard]"
           }
         ]
       },
       "aiModels": {
-        "overallStrategy": "Apply ML to predict ETA delays based on historical and real-time traffic.",
-        "aiAgents": [
+        "recommendations": [
           {
-            "name": "ETAPredictor",
-            "role": "Routing",
-            "model": "XGBoost",
-            "rationale": "Excellent for structured tabular data."
-          }
-        ],
-        "llmComparison": [
+            "task": "Camera Feed Analysis",
+            "approach": "Computer Vision",
+            "deployment": "Edge",
+            "models": [
+              {
+                "name": "YOLOv8",
+                "size": "Small",
+                "rationale": "Fast inference on edge hardware for detecting empty shelves."
+              }
+            ]
+          },
           {
-            "model": "XGBoost",
-            "pros": [
-              "Fast training"
-            ],
-            "cons": [
-              "Requires feature engineering"
+            "task": "Restock Prediction",
+            "approach": "Time-series Forecasting",
+            "deployment": "Cloud",
+            "models": [
+              {
+                "name": "Custom XGBoost",
+                "size": "Medium",
+                "rationale": "Predicting when a shelf will go empty based on foot traffic patterns."
+              }
             ]
           }
-        ],
-        "costOptimization": "Only trigger ETA recalculation if deviation > 5 miles."
+        ]
       },
       "agenticGuide": {
-        "solutionStrategy": "Use an Autonomous Dispatch Agent.",
-        "llmAgents": [
+        "agents": [
           {
-            "name": "DispatchAgent",
-            "purpose": "Automatically reroute trucks encountering traffic.",
+            "name": "Store Manager Agent",
+            "role": "Orchestrator",
             "tools": [
-              "Maps API",
-              "Driver SMS API"
-            ]
+              "GetInventoryLevel",
+              "PageAssociate"
+            ],
+            "interaction": "Monitors alerts and autonomously decides which associate to page based on their current location and workload."
           }
         ]
       },
       "implementation": {
-        "projectStructure": [
-          "src/ingestion/",
-          "src/analytics/"
+        "phases": [
+          {
+            "phase": "Phase 1: POV",
+            "duration": "4 weeks",
+            "focus": "Single store RFID ingestion",
+            "deliverables": [
+              "Edge node deployed",
+              "Basic alerting"
+            ]
+          },
+          {
+            "phase": "Phase 2: ERP Integration",
+            "duration": "6 weeks",
+            "focus": "Two-way sync with SAP",
+            "deliverables": [
+              "Cloud service deployed",
+              "SAP connector active"
+            ]
+          },
+          {
+            "phase": "Phase 3: Rollout",
+            "duration": "12 weeks",
+            "focus": "Scale to 50 stores",
+            "deliverables": [
+              "Automated provisioning",
+              "Full dashboard"
+            ]
+          }
         ],
-        "deploymentNotes": "High availability required (multi-AZ).",
-        "warnings": [
-          "Expect intermittent connectivity from trucks; implement robust buffering."
+        "quickWins": [
+          "Immediate visibility into backroom vs sales floor inventory."
+        ],
+        "risks": [
+          {
+            "risk": "Poor RFID read rates",
+            "impact": "Inaccurate system",
+            "mitigation": "Conduct thorough RF site survey before deployment."
+          }
         ]
       },
       "roadmap": {
-        "roadmapTitle": "Next-Gen Supply Chain",
-        "vision": "Self-optimizing autonomous logistics network.",
         "quarters": [
           {
             "quarter": "Q1",
+            "theme": "Foundation & POV",
             "milestones": [
-              "Deploy GPS tracking"
+              "Store 1 Live",
+              "ERP Integration"
+            ],
+            "deliverables": [
+              "Vantiq Edge config",
+              "SAP Connector"
+            ]
+          },
+          {
+            "quarter": "Q2",
+            "theme": "AI Integration",
+            "milestones": [
+              "Camera Integration"
+            ],
+            "deliverables": [
+              "YOLOv8 model deployment"
             ]
           }
         ],
         "keyDecisionPoints": [
-          "Select MQTT broker architecture."
+          "Go/No-go after Store 1 POV.",
+          "Choose camera hardware vendor in Q2."
         ]
       },
       "adjacentUseCases": {
         "adjacentUseCases": [
           {
-            "title": "Driver Behavior Monitoring",
-            "description": "Use existing telemetry to track harsh braking and acceleration."
+            "name": "Smart Fitting Rooms",
+            "description": "Use RFID to detect items brought into fitting rooms to recommend accessories on a smart mirror.",
+            "reusedComponents": [
+              "RFIDIngestionService",
+              "InventoryStateService"
+            ],
+            "newComponents": [
+              "SmartMirror UI",
+              "Recommendation Engine"
+            ]
           }
         ]
       }
     }
   },
   "fraud_detection": {
-    "title": "Financial Fraud Detection",
-    "description": "Real-time analysis of transaction streams to detect and block fraudulent activity instantly.",
+    "title": "Real-Time Payment Fraud Detection",
+    "description": "Analyzing millions of transactions per second to detect and block fraudulent payments before they settle.",
     "results": {
       "analysis": {
         "domainIcon": "💳",
         "domain": "Financial Services",
-        "summary": "A high-throughput event processing system that evaluates transactions against ML models in milliseconds.",
-        "currentState": "Post-transaction batch analysis resulting in unrecoverable funds.",
-        "whyHardWithoutVantiq": "Meeting sub-50ms latency SLAs for blocking transactions while running complex ML models requires a highly optimized streaming architecture.",
+        "summary": "An ultra-low latency transaction processing engine integrating machine learning to score transactions in under 50ms.",
+        "currentState": "Periodic manual scanning resulting in inaccurate counts, delayed restocking, and lost revenue.",
+        "whyHardWithoutVantiq": "Integrating real-time, high-throughput RFID streams with computer vision events from hundreds of edge nodes requires complex stream processing and edge-to-cloud synchronization.",
         "urgency": {
           "level": "Critical",
-          "justification": "Surging fraud losses in the current quarter."
+          "justification": "Lost sales and frustrated customers due to phantom inventory."
         },
         "painPoints": [
           {
-            "pain": "Unrecoverable Funds",
-            "severity": "Critical",
-            "impact": "Direct financial loss"
+            "pain": "Stockouts",
+            "severity": "High",
+            "impact": "Lost revenue and reduced customer loyalty."
+          },
+          {
+            "pain": "Labor Inefficiency",
+            "severity": "Medium",
+            "impact": "Staff spending hours manually scanning items."
+          },
+          {
+            "pain": "Misplaced Items",
+            "severity": "High",
+            "impact": "Items technically in stock but unavailable to shoppers."
           }
         ],
         "stakeholders": [
           {
-            "role": "Chief Risk Officer",
-            "buyerType": "Economic",
-            "concern": "Fraud loss metrics"
+            "role": "Store Manager",
+            "concern": "Daily operations and sales targets",
+            "benefit": "Real-time visibility into stockouts"
+          },
+          {
+            "role": "Supply Chain VP",
+            "concern": "Inventory accuracy",
+            "benefit": "Accurate systemic inventory"
           }
         ],
         "qualifyingQuestions": [
-          "What is your current transaction volume and latency SLA?"
+          "What is your current inventory accuracy rate?",
+          "How much labor is dedicated to physical counts?",
+          "Are you already deploying RFID or smart cameras?"
         ]
       },
       "useCaseScope": {
-        "useCaseTitle": "Real-time Transaction Fraud Prevention",
-        "elevator": "Analyze every transaction in milliseconds to block fraud before funds are transferred.",
+        "scope": "Real-time tracking of apparel on the sales floor and backroom using RFID and ceiling cameras.",
         "inScope": [
-          "Credit card transactions",
-          "Wire transfers",
-          "Real-time ML scoring"
+          "RFID ingestion at the edge",
+          "Real-time alerting to associate mobile devices",
+          "Integration with master ERP inventory"
         ],
         "outOfScope": [
-          "Anti-Money Laundering (AML) batch reporting"
+          "Point of Sale transaction processing",
+          "Warehouse logistics tracking"
         ],
-        "successMetrics": [
-          {
-            "metric": "False Positive Rate",
-            "current": "15%",
-            "target": "<2%"
-          }
+        "boundaries": "System applies only to physical brick-and-mortar locations.",
+        "assumptions": [
+          "Stores have adequate network infrastructure",
+          "Items are pre-tagged with RFID at the distribution center"
         ],
-        "decisionCriteria": [
-          "End-to-end latency < 50ms"
-        ],
-        "competitiveAlternative": "Legacy rules engines"
+        "constraints": [
+          "Must process 10,000 tag reads per second per store",
+          "Alert latency must be under 2 seconds"
+        ]
       },
       "businessValue": {
-        "roiProjection": [
-          {
-            "category": "Fraud Prevention",
-            "value": "$10M/year",
-            "timeframe": "Year 1"
-          }
-        ],
+        "summary": "Prevents millions in fraudulent chargebacks while minimizing false positives to preserve customer experience.",
+        "roiProjection": {
+          "investmentRange": "$500K - $1M",
+          "expectedReturn": "$3M - $5M/year",
+          "paybackPeriod": "8-12 months",
+          "roiPercentage": "400%"
+        },
         "valueDrivers": [
           {
-            "driver": "Reduced chargebacks",
-            "impact": "High"
+            "category": "Revenue Uplift",
+            "impact": "Fewer stockouts lead to higher conversion.",
+            "quantification": "+4% Top-line Revenue"
+          },
+          {
+            "category": "Labor Savings",
+            "impact": "Elimination of weekly physical counts.",
+            "quantification": "$1M/year saved across 50 stores"
           }
         ],
         "riskMitigations": [
           {
-            "risk": "Latency spikes",
-            "mitigation": "In-memory caching and optimized model serving"
+            "risk": "Customer Churn",
+            "solution": "Ensuring item availability prevents customers from switching to competitors."
           }
         ],
         "kpis": [
           {
-            "kpi": "Blocked Fraud Amount",
-            "target": "$1M/month"
+            "metric": "Inventory Accuracy",
+            "target": "99.9%",
+            "timeframe": "Post-deployment"
+          },
+          {
+            "metric": "Stockout Duration",
+            "target": "< 15 minutes",
+            "timeframe": "Monthly average"
+          }
+        ],
+        "industryBenchmarks": [
+          {
+            "benchmark": "Retail inventory accuracy averages 65% without RFID.",
+            "source": "Auburn University RFID Lab"
           }
         ]
       },
       "competitive": {
         "competitors": [
           {
-            "name": "Legacy Rules Engines",
-            "profile": "Static rule-based systems"
-          }
-        ],
-        "featureComparison": [
+            "name": "Legacy ERP Add-ons",
+            "profile": "Traditional batch-oriented databases",
+            "strengths": [
+              "Deep enterprise integration",
+              "Trusted brand"
+            ],
+            "weaknesses": [
+              "Batch processing only",
+              "High latency",
+              "Cannot handle streaming edge data"
+            ]
+          },
           {
-            "feature": "Dynamic ML Injection",
-            "ourCapability": "Yes",
-            "competitorCapability": "Limited",
-            "differentiator": "True"
+            "name": "Custom Cloud Infrastructure",
+            "profile": "DIY on AWS/Azure",
+            "strengths": [
+              "Complete control",
+              "Native cloud services"
+            ],
+            "weaknesses": [
+              "High development cost",
+              "Complex edge orchestration",
+              "Long time to value"
+            ]
           }
         ],
         "competitiveMatrix": [
           {
             "vendor": "Vantiq",
-            "criteria": "Latency",
-            "rating": "Excellent"
+            "criterion": "Edge-to-Cloud Orchestration",
+            "rating": "Strong",
+            "note": "Native support for distributed edge processing."
+          },
+          {
+            "vendor": "Legacy ERP",
+            "criterion": "Edge-to-Cloud Orchestration",
+            "rating": "Weak",
+            "note": "Cloud-only, batch-oriented."
+          },
+          {
+            "vendor": "Vantiq",
+            "criterion": "Time to Market",
+            "rating": "Strong",
+            "note": "Low-code visual development."
+          },
+          {
+            "vendor": "Legacy ERP",
+            "criterion": "Time to Market",
+            "rating": "Moderate",
+            "note": "Long implementation cycles."
           }
         ],
         "vantiqDifferentiators": [
           {
-            "differentiator": "In-memory processing",
-            "reason": "Achieves sub-millisecond overhead"
+            "feature": "Native Edge Deployment",
+            "description": "Deploy exactly the same logic to the edge as the cloud.",
+            "competitorGap": "Competitors require separate tech stacks for edge vs cloud."
+          },
+          {
+            "feature": "Visual Event Handlers",
+            "description": "Design complex streaming logic visually.",
+            "competitorGap": "Competitors require complex Java/Scala streaming code."
           }
         ],
         "objectionHandling": [
           {
-            "objection": "System Reliability",
-            "handling": "Distributed clustered architecture ensures 99.999% uptime"
+            "objection": "We do daily batch fraud checks.",
+            "response": "Batch checks catch fraud after the money is gone. Real-time blocking prevents the loss entirely."
+          },
+          {
+            "objection": "Edge computing is too hard to manage.",
+            "response": "Vantiq abstracts edge management. You deploy to the edge as easily as you deploy to the cloud."
           }
         ],
-        "recommendation": "Focus on the agility to update fraud models on the fly.",
-        "winStrategy": "Shadow deployment proving higher catch rates."
+        "recommendation": "Focus on the agility of the edge-to-cloud architecture and the speed of development compared to a custom AWS build.",
+        "winStrategy": [
+          "Conduct a 2-week POV in a single store",
+          "Prove 99% accuracy",
+          "Demonstrate ERP integration"
+        ]
       },
       "domainModel": {
         "entities": [
           {
-            "type": "Event",
-            "name": "Transaction",
-            "stateManagement": "Stateless",
-            "persistence": "Yes",
+            "type": "Asset",
+            "name": "InventoryItem",
             "properties": [
-              "amount",
-              "merchant",
-              "cardId"
+              "rfidTag",
+              "sku",
+              "locationZone",
+              "lastSeen"
+            ]
+          },
+          {
+            "type": "Location",
+            "name": "StoreZone",
+            "properties": [
+              "zoneId",
+              "zoneType",
+              "capacity"
             ]
           }
         ],
         "events": [
           {
-            "name": "TransactionRequest",
-            "type": "Event"
+            "name": "TagRead",
+            "type": "Raw Event",
+            "trigger": "RFID reader detects a tag"
           },
           {
-            "name": "FraudDetected",
-            "type": "Alert"
+            "name": "ItemMisplaced",
+            "type": "Derived Alert",
+            "trigger": "Item remains in wrong zone for >10 mins"
           }
         ],
         "services": [
           {
-            "name": "ScoringService",
-            "responsibility": "Evaluate transactions against ML models"
+            "name": "RFIDIngestionService",
+            "responsibility": "Filter, smooth, and aggregate raw tag reads at the edge."
+          },
+          {
+            "name": "InventoryStateService",
+            "responsibility": "Maintain the real-time location of every item."
+          }
+        ],
+        "boundedContexts": [
+          {
+            "name": "Edge Processing",
+            "description": "Handles raw hardware events.",
+            "services": [
+              "RFIDIngestionService"
+            ]
+          },
+          {
+            "name": "Cloud Analytics",
+            "description": "Global state and alerting.",
+            "services": [
+              "InventoryStateService"
+            ]
           }
         ],
         "commands": [
           {
-            "name": "BlockTransaction",
-            "target": "PaymentGateway"
+            "name": "TriggerRestockAlert",
+            "target": "NotificationService",
+            "action": "Send push to associate mobile app"
           }
         ]
       },
       "architecture": {
         "components": [
           {
-            "name": "TransactionIngress",
-            "type": "API",
-            "responsibility": "Receive requests from payment gateways"
+            "name": "Store Edge Node",
+            "type": "Vantiq Edge",
+            "responsibility": "Process RFID reads locally to reduce bandwidth.",
+            "tech": [
+              "Vantiq",
+              "MQTT"
+            ]
+          },
+          {
+            "name": "Cloud Control Plane",
+            "type": "Vantiq Cloud",
+            "responsibility": "Global inventory state and ERP sync.",
+            "tech": [
+              "Vantiq",
+              "REST"
+            ]
           }
         ],
         "integrations": [
           {
-            "system": "PaymentGateway",
-            "protocol": "gRPC",
-            "purpose": "Fast synchronous response"
+            "system": "SAP ERP",
+            "protocol": "REST/OData",
+            "purpose": "Sync master SKU data and update final stock levels."
           }
         ],
         "dataFlow": [
-          "Gateway -> Vantiq -> ML Model -> Gateway"
+          "1. RFID readers publish to MQTT broker at the edge.",
+          "2. Vantiq Edge node filters duplicate reads and publishes 'ZoneChange' events to Cloud.",
+          "3. Vantiq Cloud updates global state and checks against ERP stock levels.",
+          "4. If stockout detected, Cloud sends push notification to Associate App."
         ],
-        "mermaidDiagram": "graph TD;\n  A[Gateway] --> B(Vantiq Scoring)\n  B --> A",
-        "scalabilityNotes": "Auto-scale based on transaction throughput.",
-        "securityConsiderations": "PCI-DSS compliance required."
+        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes.",
+        "securityConsiderations": [
+          "Mutual TLS for edge-to-cloud communication.",
+          "Encrypt inventory data at rest in the cloud."
+        ],
+        "principles": [
+          "Process data close to the source.",
+          "Design for offline edge autonomy."
+        ]
       },
       "eventSystem": {
         "schemas": [
           {
-            "eventName": "TxRequest",
+            "eventName": "ZoneChange",
             "fields": [
-              "txId",
-              "amount",
-              "currency",
-              "merchantId"
+              "rfidTag",
+              "previousZone",
+              "newZone",
+              "timestamp"
+            ]
+          },
+          {
+            "eventName": "RestockAlert",
+            "fields": [
+              "sku",
+              "zone",
+              "quantityNeeded",
+              "urgency"
             ]
           }
         ],
         "producers": [
           {
-            "name": "Payment Switch",
+            "name": "RFID Gateway",
             "events": [
-              "TxRequest"
+              "RawTagRead"
+            ]
+          },
+          {
+            "name": "Edge Node",
+            "events": [
+              "ZoneChange"
             ]
           }
         ],
         "consumers": [
           {
-            "name": "FraudAnalyzer",
-            "consumes": [
-              "TxRequest"
+            "name": "Cloud Node",
+            "subscribesTo": [
+              "ZoneChange"
+            ]
+          },
+          {
+            "name": "Mobile App",
+            "subscribesTo": [
+              "RestockAlert"
             ]
           }
         ],
-        "flowDiagram": "graph LR;\n  A[Switch] --> B(Vantiq)\n  B --> C[Analyzer]",
-        "dataRetention": "Archived to cold storage immediately."
+        "topics": [
+          {
+            "name": "/store/{id}/rfid",
+            "usage": "Raw reads"
+          },
+          {
+            "name": "/cloud/inventory/updates",
+            "usage": "State changes"
+          }
+        ],
+        "dataRetention": [
+          "Raw reads discarded at edge after 5 seconds.",
+          "Zone changes kept in cloud state indefinitely until sold."
+        ]
       },
       "diagrams": {
         "diagrams": [
           {
-            "title": "Scoring Flow",
-            "code": "graph TD;\n A-->B",
-            "description": "Synchronous scoring path."
+            "title": "Edge-to-Cloud Data Flow",
+            "type": "Architecture",
+            "description": "Shows how raw reads are filtered at the edge.",
+            "mermaidCode": "graph TD;\n  A[Payment Gateway] --> B[Vantiq Streaming Engine]\n  B --> C{ML Scoring Model}\n  C -- Fraud --> D[Block Transaction]\n  C -- Safe --> E[Settle Payment]"
           }
         ]
       },
       "aiModels": {
-        "overallStrategy": "Ensemble approach: fast rules engine followed by Deep Learning anomaly detection.",
-        "aiAgents": [
+        "recommendations": [
           {
-            "name": "AnomalyDetector",
-            "role": "Scoring",
-            "model": "Deep Neural Network",
-            "rationale": "High accuracy for complex patterns."
-          }
-        ],
-        "llmComparison": [
+            "task": "Camera Feed Analysis",
+            "approach": "Computer Vision",
+            "deployment": "Edge",
+            "models": [
+              {
+                "name": "YOLOv8",
+                "size": "Small",
+                "rationale": "Fast inference on edge hardware for detecting empty shelves."
+              }
+            ]
+          },
           {
-            "model": "DNN",
-            "pros": [
-              "High accuracy"
-            ],
-            "cons": [
-              "Compute intensive"
+            "task": "Restock Prediction",
+            "approach": "Time-series Forecasting",
+            "deployment": "Cloud",
+            "models": [
+              {
+                "name": "Custom XGBoost",
+                "size": "Medium",
+                "rationale": "Predicting when a shelf will go empty based on foot traffic patterns."
+              }
             ]
           }
-        ],
-        "costOptimization": "Only run heavy DNN if transaction amount > $100."
+        ]
       },
       "agenticGuide": {
-        "solutionStrategy": "Use an Investigator Agent for borderline cases.",
-        "llmAgents": [
+        "agents": [
           {
-            "name": "InvestigatorAgent",
-            "purpose": "Gather context on flagged transactions and ask user via SMS.",
+            "name": "Store Manager Agent",
+            "role": "Orchestrator",
             "tools": [
-              "SMS API",
-              "CRM API"
-            ]
+              "GetInventoryLevel",
+              "PageAssociate"
+            ],
+            "interaction": "Monitors alerts and autonomously decides which associate to page based on their current location and workload."
           }
         ]
       },
       "implementation": {
-        "projectStructure": [
-          "src/rules/",
-          "src/models/"
+        "phases": [
+          {
+            "phase": "Phase 1: POV",
+            "duration": "4 weeks",
+            "focus": "Single store RFID ingestion",
+            "deliverables": [
+              "Edge node deployed",
+              "Basic alerting"
+            ]
+          },
+          {
+            "phase": "Phase 2: ERP Integration",
+            "duration": "6 weeks",
+            "focus": "Two-way sync with SAP",
+            "deliverables": [
+              "Cloud service deployed",
+              "SAP connector active"
+            ]
+          },
+          {
+            "phase": "Phase 3: Rollout",
+            "duration": "12 weeks",
+            "focus": "Scale to 50 stores",
+            "deliverables": [
+              "Automated provisioning",
+              "Full dashboard"
+            ]
+          }
         ],
-        "deploymentNotes": "Deploy in same datacenter as Payment Switch.",
-        "warnings": [
-          "Garbage collection pauses can violate SLAs; tune JVM/Node carefully."
+        "quickWins": [
+          "Immediate visibility into backroom vs sales floor inventory."
+        ],
+        "risks": [
+          {
+            "risk": "Poor RFID read rates",
+            "impact": "Inaccurate system",
+            "mitigation": "Conduct thorough RF site survey before deployment."
+          }
         ]
       },
       "roadmap": {
-        "roadmapTitle": "Fraud Prevention Platform",
-        "vision": "Zero-loss financial ecosystem.",
         "quarters": [
           {
             "quarter": "Q1",
+            "theme": "Foundation & POV",
             "milestones": [
-              "Shadow mode deployment"
+              "Store 1 Live",
+              "ERP Integration"
+            ],
+            "deliverables": [
+              "Vantiq Edge config",
+              "SAP Connector"
+            ]
+          },
+          {
+            "quarter": "Q2",
+            "theme": "AI Integration",
+            "milestones": [
+              "Camera Integration"
+            ],
+            "deliverables": [
+              "YOLOv8 model deployment"
             ]
           }
         ],
         "keyDecisionPoints": [
-          "Determine acceptable false positive thresholds."
+          "Go/No-go after Store 1 POV.",
+          "Choose camera hardware vendor in Q2."
         ]
       },
       "adjacentUseCases": {
         "adjacentUseCases": [
           {
-            "title": "Anti-Money Laundering (AML)",
-            "description": "Use the same event stream to build long-term graph relationships."
+            "name": "Smart Fitting Rooms",
+            "description": "Use RFID to detect items brought into fitting rooms to recommend accessories on a smart mirror.",
+            "reusedComponents": [
+              "RFIDIngestionService",
+              "InventoryStateService"
+            ],
+            "newComponents": [
+              "SmartMirror UI",
+              "Recommendation Engine"
+            ]
           }
         ]
       }
     }
   }
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = PRELOADED_SAMPLES;
+}
