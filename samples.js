@@ -157,16 +157,16 @@ const PRELOADED_SAMPLES = {
             "note": "Cloud-only, batch-oriented."
           },
           {
+            "vendor": "Custom Cloud",
+            "criterion": "Time to Market",
+            "rating": "Weak",
+            "note": "Requires heavy custom coding."
+          },
+          {
             "vendor": "Vantiq",
             "criterion": "Time to Market",
             "rating": "Strong",
             "note": "Low-code visual development."
-          },
-          {
-            "vendor": "Legacy ERP",
-            "criterion": "Time to Market",
-            "rating": "Moderate",
-            "note": "Long implementation cycles."
           }
         ],
         "vantiqDifferentiators": [
@@ -207,7 +207,8 @@ const PRELOADED_SAMPLES = {
               "rfidTag",
               "sku",
               "locationZone",
-              "lastSeen"
+              "lastSeen",
+              "status"
             ]
           },
           {
@@ -216,20 +217,52 @@ const PRELOADED_SAMPLES = {
             "properties": [
               "zoneId",
               "zoneType",
-              "capacity"
+              "capacity",
+              "readerIds"
+            ]
+          },
+          {
+            "type": "Event",
+            "name": "StockoutEvent",
+            "properties": [
+              "eventId",
+              "sku",
+              "zone",
+              "timestamp",
+              "resolved"
+            ]
+          },
+          {
+            "type": "User",
+            "name": "StoreAssociate",
+            "properties": [
+              "employeeId",
+              "name",
+              "currentZone",
+              "taskQueue"
             ]
           }
         ],
         "events": [
           {
-            "name": "TagRead",
+            "name": "RawTagRead",
             "type": "Raw Event",
             "trigger": "RFID reader detects a tag"
+          },
+          {
+            "name": "ZoneChange",
+            "type": "Derived Event",
+            "trigger": "Item moves from one zone to another"
           },
           {
             "name": "ItemMisplaced",
             "type": "Derived Alert",
             "trigger": "Item remains in wrong zone for >10 mins"
+          },
+          {
+            "name": "StockoutAlert",
+            "type": "Business Event",
+            "trigger": "Inventory for an active SKU drops below threshold on the sales floor"
           }
         ],
         "services": [
@@ -240,21 +273,37 @@ const PRELOADED_SAMPLES = {
           {
             "name": "InventoryStateService",
             "responsibility": "Maintain the real-time location of every item."
+          },
+          {
+            "name": "NotificationService",
+            "responsibility": "Route alerts to the correct store associate based on location."
+          },
+          {
+            "name": "ERPIntegrationService",
+            "responsibility": "Sync inventory state with the central ERP system."
           }
         ],
         "boundedContexts": [
           {
-            "name": "Edge Processing",
+            "name": "Edge Processing Context",
             "description": "Handles raw hardware events.",
             "services": [
               "RFIDIngestionService"
             ]
           },
           {
-            "name": "Cloud Analytics",
+            "name": "Core Inventory Context",
             "description": "Global state and alerting.",
             "services": [
-              "InventoryStateService"
+              "InventoryStateService",
+              "ERPIntegrationService"
+            ]
+          },
+          {
+            "name": "Task Management Context",
+            "description": "Associate tasking.",
+            "services": [
+              "NotificationService"
             ]
           }
         ],
@@ -263,6 +312,11 @@ const PRELOADED_SAMPLES = {
             "name": "TriggerRestockAlert",
             "target": "NotificationService",
             "action": "Send push to associate mobile app"
+          },
+          {
+            "name": "SyncInventory",
+            "target": "ERPIntegrationService",
+            "action": "Push current counts to ERP"
           }
         ]
       },
@@ -270,20 +324,41 @@ const PRELOADED_SAMPLES = {
         "components": [
           {
             "name": "Store Edge Node",
-            "type": "Vantiq Edge",
+            "type": "Gateway",
             "responsibility": "Process RFID reads locally to reduce bandwidth.",
             "tech": [
-              "Vantiq",
-              "MQTT"
+              "Vantiq Edge",
+              "MQTT",
+              "Docker"
             ]
           },
           {
             "name": "Cloud Control Plane",
-            "type": "Vantiq Cloud",
+            "type": "Service",
             "responsibility": "Global inventory state and ERP sync.",
             "tech": [
-              "Vantiq",
+              "Vantiq Cloud",
               "REST"
+            ]
+          },
+          {
+            "name": "Associate App",
+            "type": "App",
+            "responsibility": "Receive task notifications.",
+            "tech": [
+              "iOS",
+              "Android",
+              "WebSockets"
+            ]
+          },
+          {
+            "name": "Vision Analytics",
+            "type": "AI Model",
+            "responsibility": "Process RTSP camera feeds.",
+            "tech": [
+              "YOLOv8",
+              "Python",
+              "Vantiq"
             ]
           }
         ],
@@ -292,6 +367,16 @@ const PRELOADED_SAMPLES = {
             "system": "SAP ERP",
             "protocol": "REST/OData",
             "purpose": "Sync master SKU data and update final stock levels."
+          },
+          {
+            "system": "Impinj Readers",
+            "protocol": "LLRP/MQTT",
+            "purpose": "Ingest raw tag events."
+          },
+          {
+            "system": "Twilio",
+            "protocol": "REST",
+            "purpose": "Send SMS alerts for critical incidents."
           }
         ],
         "dataFlow": [
@@ -300,10 +385,12 @@ const PRELOADED_SAMPLES = {
           "3. Vantiq Cloud updates global state and checks against ERP stock levels.",
           "4. If stockout detected, Cloud sends push notification to Associate App."
         ],
-        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes.",
+        "mermaidDiagram": "graph TD;\n  A[RFID Readers] -->|Raw MQTT| B[Vantiq Edge Node]\n  B -->|Filtered ZoneChange| C[Vantiq Cloud]\n  C -->|Updates| D[(SAP ERP)]\n  C -->|Alerts| E[Mobile App]",
+        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes, ensuring horizontal scalability.",
         "securityConsiderations": [
           "Mutual TLS for edge-to-cloud communication.",
-          "Encrypt inventory data at rest in the cloud."
+          "Encrypt inventory data at rest in the cloud.",
+          "Role-based access control for associate apps."
         ],
         "principles": [
           "Process data close to the source.",
@@ -312,6 +399,15 @@ const PRELOADED_SAMPLES = {
       },
       "eventSystem": {
         "schemas": [
+          {
+            "eventName": "RawTagRead",
+            "fields": [
+              "epc",
+              "antennaPort",
+              "rssi",
+              "timestamp"
+            ]
+          },
           {
             "eventName": "ZoneChange",
             "fields": [
@@ -336,13 +432,19 @@ const PRELOADED_SAMPLES = {
             "name": "RFID Gateway",
             "events": [
               "RawTagRead"
-            ]
+            ],
+            "protocol": "MQTT",
+            "frequency": "10,000/sec",
+            "throughput": "High"
           },
           {
             "name": "Edge Node",
             "events": [
               "ZoneChange"
-            ]
+            ],
+            "protocol": "Vantiq Async",
+            "frequency": "50/sec",
+            "throughput": "Medium"
           }
         ],
         "consumers": [
@@ -350,13 +452,17 @@ const PRELOADED_SAMPLES = {
             "name": "Cloud Node",
             "subscribesTo": [
               "ZoneChange"
-            ]
+            ],
+            "action": "Update State",
+            "errorStrategy": "Retry"
           },
           {
             "name": "Mobile App",
             "subscribesTo": [
               "RestockAlert"
-            ]
+            ],
+            "action": "Show Notification",
+            "errorStrategy": "Log"
           }
         ],
         "topics": [
@@ -369,18 +475,44 @@ const PRELOADED_SAMPLES = {
             "usage": "State changes"
           }
         ],
+        "flowDiagram": "sequenceDiagram\n  participant RFID\n  participant Edge\n  participant Cloud\n  participant App\n  RFID->>Edge: RawTagRead\n  Edge->>Edge: Filter & Aggregate\n  Edge->>Cloud: ZoneChange\n  Cloud->>Cloud: Check Stock Rules\n  Cloud->>App: RestockAlert",
         "dataRetention": [
-          "Raw reads discarded at edge after 5 seconds.",
-          "Zone changes kept in cloud state indefinitely until sold."
+          {
+            "eventType": "RawTagRead",
+            "retentionPeriod": "5 minutes",
+            "rationale": "Only needed for immediate smoothing at the edge."
+          },
+          {
+            "eventType": "ZoneChange",
+            "retentionPeriod": "30 days",
+            "rationale": "Used for analytics and heat mapping."
+          },
+          {
+            "eventType": "RestockAlert",
+            "retentionPeriod": "1 year",
+            "rationale": "Audit and associate performance metrics."
+          }
         ]
       },
       "diagrams": {
         "diagrams": [
           {
-            "title": "Edge-to-Cloud Data Flow",
-            "type": "Architecture",
-            "description": "Shows how raw reads are filtered at the edge.",
-            "mermaidCode": "graph TD;\n  A[RFID Readers] -->|Raw MQTT| B[Vantiq Edge Node]\n  B -->|Filtered ZoneChange| C[Vantiq Cloud]\n  C -->|Updates| D[(SAP ERP)]\n  C -->|Alerts| E[Mobile App]"
+            "title": "System Architecture",
+            "type": "architecture",
+            "description": "High-level overview of the distributed edge-to-cloud infrastructure.",
+            "mermaid": "graph TD;\n  subgraph Edge[Store Location]\n    R1[RFID Readers] -->|MQTT| M[Mosquitto Broker]\n    C1[Cameras] -->|RTSP| AI[Vision Service]\n    M --> VEdge[Vantiq Edge Node]\n    AI --> VEdge\n  end\n  subgraph Cloud[Vantiq Cloud]\n    VEdge -->|Vantiq Async| VCloud[Vantiq Cloud Engine]\n    VCloud <--> DB[(State DB)]\n  end\n  subgraph External[Enterprise Systems]\n    VCloud <-->|REST| ERP[(SAP ERP)]\n    VCloud -->|Push| App[Associate Mobile App]\n  end"
+          },
+          {
+            "title": "Component Interaction Flow",
+            "type": "component",
+            "description": "Details the sequence of events during a stockout scenario.",
+            "mermaid": "sequenceDiagram\n  participant R as RFID Reader\n  participant E as Edge Node\n  participant C as Cloud Service\n  participant S as SAP ERP\n  participant A as Associate App\n  R->>E: Tag Read (Item removed)\n  E->>C: Zone Change (Sales Floor -> Out)\n  C->>C: Update In-Memory State\n  C->>C: Evaluate Stock Rule\n  C->>S: Query Master Inventory\n  S-->>C: Current Stock: 0\n  C->>A: Push Notification: Restock SKU"
+          },
+          {
+            "title": "Deployment Topology",
+            "type": "deployment",
+            "description": "Physical deployment of nodes across the retail footprint.",
+            "mermaid": "graph TB;\n  subgraph Region[North America]\n    subgraph Store1[Store 101]\n      EN1[Edge Node Docker] --> CR[Cloud Router]\n    end\n    subgraph Store2[Store 102]\n      EN2[Edge Node Docker] --> CR\n    end\n    CR --> VC[Vantiq Cloud Cluster AWS]\n  end"
           }
         ]
       },
@@ -419,9 +551,19 @@ const PRELOADED_SAMPLES = {
             "role": "Orchestrator",
             "tools": [
               "GetInventoryLevel",
-              "PageAssociate"
+              "PageAssociate",
+              "CheckSchedule"
             ],
             "interaction": "Monitors alerts and autonomously decides which associate to page based on their current location and workload."
+          },
+          {
+            "name": "Replenishment Agent",
+            "role": "Specialist",
+            "tools": [
+              "QueryERP",
+              "DraftPurchaseOrder"
+            ],
+            "interaction": "Automatically drafts purchase orders when warehouse stock drops below safety thresholds."
           }
         ]
       },
@@ -433,7 +575,8 @@ const PRELOADED_SAMPLES = {
             "focus": "Single store RFID ingestion",
             "deliverables": [
               "Edge node deployed",
-              "Basic alerting"
+              "Basic alerting",
+              "Hardware tuned"
             ]
           },
           {
@@ -451,18 +594,34 @@ const PRELOADED_SAMPLES = {
             "focus": "Scale to 50 stores",
             "deliverables": [
               "Automated provisioning",
-              "Full dashboard"
+              "Full dashboard",
+              "Associate training"
+            ]
+          },
+          {
+            "phase": "Phase 4: AI Agent integration",
+            "duration": "8 weeks",
+            "focus": "Agentic orchestration",
+            "deliverables": [
+              "Store Manager Agent live",
+              "Automated task routing"
             ]
           }
         ],
         "quickWins": [
-          "Immediate visibility into backroom vs sales floor inventory."
+          "Immediate visibility into backroom vs sales floor inventory.",
+          "Automated nightly stock reconciliation."
         ],
         "risks": [
           {
-            "risk": "Poor RFID read rates",
-            "impact": "Inaccurate system",
-            "mitigation": "Conduct thorough RF site survey before deployment."
+            "risk": "Poor RFID read rates due to metal fixtures",
+            "impact": "High",
+            "mitigation": "Conduct thorough RF site survey before deployment and adjust antenna placement."
+          },
+          {
+            "risk": "Associate adoption",
+            "impact": "Medium",
+            "mitigation": "Design ultra-simple UI for the mobile app and gamify restock tasks."
           }
         ]
       },
@@ -482,18 +641,43 @@ const PRELOADED_SAMPLES = {
           },
           {
             "quarter": "Q2",
-            "theme": "AI Integration",
+            "theme": "Cloud Scale",
+            "milestones": [
+              "50 Stores Live",
+              "Dashboards Deployed"
+            ],
+            "deliverables": [
+              "Monitoring Console",
+              "Provisioning Scripts"
+            ]
+          },
+          {
+            "quarter": "Q3",
+            "theme": "AI Vision Integration",
             "milestones": [
               "Camera Integration"
             ],
             "deliverables": [
-              "YOLOv8 model deployment"
+              "YOLOv8 model deployment",
+              "Multimodal event fusion"
+            ]
+          },
+          {
+            "quarter": "Q4",
+            "theme": "Agentic Autonomy",
+            "milestones": [
+              "Agents Deployed"
+            ],
+            "deliverables": [
+              "Store Manager Agent",
+              "Dynamic task allocation"
             ]
           }
         ],
         "keyDecisionPoints": [
           "Go/No-go after Store 1 POV.",
-          "Choose camera hardware vendor in Q2."
+          "Choose camera hardware vendor in Q2.",
+          "Evaluate agent performance in Q4."
         ]
       },
       "adjacentUseCases": {
@@ -508,6 +692,29 @@ const PRELOADED_SAMPLES = {
             "newComponents": [
               "SmartMirror UI",
               "Recommendation Engine"
+            ]
+          },
+          {
+            "name": "Loss Prevention",
+            "description": "Trigger cameras and lock doors if unpaid items move toward the exit.",
+            "reusedComponents": [
+              "RFIDIngestionService",
+              "ZoneChange"
+            ],
+            "newComponents": [
+              "SecurityAlertService",
+              "DoorControlIntegration"
+            ]
+          },
+          {
+            "name": "Dynamic Pricing",
+            "description": "Automatically lower prices on digital signs for items that have been on the floor too long.",
+            "reusedComponents": [
+              "InventoryStateService"
+            ],
+            "newComponents": [
+              "PricingEngine",
+              "DigitalSignIntegration"
             ]
           }
         ]
@@ -672,16 +879,16 @@ const PRELOADED_SAMPLES = {
             "note": "Cloud-only, batch-oriented."
           },
           {
+            "vendor": "Custom Cloud",
+            "criterion": "Time to Market",
+            "rating": "Weak",
+            "note": "Requires heavy custom coding."
+          },
+          {
             "vendor": "Vantiq",
             "criterion": "Time to Market",
             "rating": "Strong",
             "note": "Low-code visual development."
-          },
-          {
-            "vendor": "Legacy ERP",
-            "criterion": "Time to Market",
-            "rating": "Moderate",
-            "note": "Long implementation cycles."
           }
         ],
         "vantiqDifferentiators": [
@@ -722,7 +929,8 @@ const PRELOADED_SAMPLES = {
               "rfidTag",
               "sku",
               "locationZone",
-              "lastSeen"
+              "lastSeen",
+              "status"
             ]
           },
           {
@@ -731,20 +939,52 @@ const PRELOADED_SAMPLES = {
             "properties": [
               "zoneId",
               "zoneType",
-              "capacity"
+              "capacity",
+              "readerIds"
+            ]
+          },
+          {
+            "type": "Event",
+            "name": "StockoutEvent",
+            "properties": [
+              "eventId",
+              "sku",
+              "zone",
+              "timestamp",
+              "resolved"
+            ]
+          },
+          {
+            "type": "User",
+            "name": "StoreAssociate",
+            "properties": [
+              "employeeId",
+              "name",
+              "currentZone",
+              "taskQueue"
             ]
           }
         ],
         "events": [
           {
-            "name": "TagRead",
+            "name": "RawTagRead",
             "type": "Raw Event",
             "trigger": "RFID reader detects a tag"
+          },
+          {
+            "name": "ZoneChange",
+            "type": "Derived Event",
+            "trigger": "Item moves from one zone to another"
           },
           {
             "name": "ItemMisplaced",
             "type": "Derived Alert",
             "trigger": "Item remains in wrong zone for >10 mins"
+          },
+          {
+            "name": "StockoutAlert",
+            "type": "Business Event",
+            "trigger": "Inventory for an active SKU drops below threshold on the sales floor"
           }
         ],
         "services": [
@@ -755,21 +995,37 @@ const PRELOADED_SAMPLES = {
           {
             "name": "InventoryStateService",
             "responsibility": "Maintain the real-time location of every item."
+          },
+          {
+            "name": "NotificationService",
+            "responsibility": "Route alerts to the correct store associate based on location."
+          },
+          {
+            "name": "ERPIntegrationService",
+            "responsibility": "Sync inventory state with the central ERP system."
           }
         ],
         "boundedContexts": [
           {
-            "name": "Edge Processing",
+            "name": "Edge Processing Context",
             "description": "Handles raw hardware events.",
             "services": [
               "RFIDIngestionService"
             ]
           },
           {
-            "name": "Cloud Analytics",
+            "name": "Core Inventory Context",
             "description": "Global state and alerting.",
             "services": [
-              "InventoryStateService"
+              "InventoryStateService",
+              "ERPIntegrationService"
+            ]
+          },
+          {
+            "name": "Task Management Context",
+            "description": "Associate tasking.",
+            "services": [
+              "NotificationService"
             ]
           }
         ],
@@ -778,6 +1034,11 @@ const PRELOADED_SAMPLES = {
             "name": "TriggerRestockAlert",
             "target": "NotificationService",
             "action": "Send push to associate mobile app"
+          },
+          {
+            "name": "SyncInventory",
+            "target": "ERPIntegrationService",
+            "action": "Push current counts to ERP"
           }
         ]
       },
@@ -785,20 +1046,41 @@ const PRELOADED_SAMPLES = {
         "components": [
           {
             "name": "Store Edge Node",
-            "type": "Vantiq Edge",
+            "type": "Gateway",
             "responsibility": "Process RFID reads locally to reduce bandwidth.",
             "tech": [
-              "Vantiq",
-              "MQTT"
+              "Vantiq Edge",
+              "MQTT",
+              "Docker"
             ]
           },
           {
             "name": "Cloud Control Plane",
-            "type": "Vantiq Cloud",
+            "type": "Service",
             "responsibility": "Global inventory state and ERP sync.",
             "tech": [
-              "Vantiq",
+              "Vantiq Cloud",
               "REST"
+            ]
+          },
+          {
+            "name": "Associate App",
+            "type": "App",
+            "responsibility": "Receive task notifications.",
+            "tech": [
+              "iOS",
+              "Android",
+              "WebSockets"
+            ]
+          },
+          {
+            "name": "Vision Analytics",
+            "type": "AI Model",
+            "responsibility": "Process RTSP camera feeds.",
+            "tech": [
+              "YOLOv8",
+              "Python",
+              "Vantiq"
             ]
           }
         ],
@@ -807,6 +1089,16 @@ const PRELOADED_SAMPLES = {
             "system": "SAP ERP",
             "protocol": "REST/OData",
             "purpose": "Sync master SKU data and update final stock levels."
+          },
+          {
+            "system": "Impinj Readers",
+            "protocol": "LLRP/MQTT",
+            "purpose": "Ingest raw tag events."
+          },
+          {
+            "system": "Twilio",
+            "protocol": "REST",
+            "purpose": "Send SMS alerts for critical incidents."
           }
         ],
         "dataFlow": [
@@ -815,10 +1107,12 @@ const PRELOADED_SAMPLES = {
           "3. Vantiq Cloud updates global state and checks against ERP stock levels.",
           "4. If stockout detected, Cloud sends push notification to Associate App."
         ],
-        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes.",
+        "mermaidDiagram": "graph TD;\n  A[RFID Readers] -->|Raw MQTT| B[Vantiq Edge Node]\n  B -->|Filtered ZoneChange| C[Vantiq Cloud]\n  C -->|Updates| D[(SAP ERP)]\n  C -->|Alerts| E[Mobile App]",
+        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes, ensuring horizontal scalability.",
         "securityConsiderations": [
           "Mutual TLS for edge-to-cloud communication.",
-          "Encrypt inventory data at rest in the cloud."
+          "Encrypt inventory data at rest in the cloud.",
+          "Role-based access control for associate apps."
         ],
         "principles": [
           "Process data close to the source.",
@@ -827,6 +1121,15 @@ const PRELOADED_SAMPLES = {
       },
       "eventSystem": {
         "schemas": [
+          {
+            "eventName": "RawTagRead",
+            "fields": [
+              "epc",
+              "antennaPort",
+              "rssi",
+              "timestamp"
+            ]
+          },
           {
             "eventName": "ZoneChange",
             "fields": [
@@ -851,13 +1154,19 @@ const PRELOADED_SAMPLES = {
             "name": "RFID Gateway",
             "events": [
               "RawTagRead"
-            ]
+            ],
+            "protocol": "MQTT",
+            "frequency": "10,000/sec",
+            "throughput": "High"
           },
           {
             "name": "Edge Node",
             "events": [
               "ZoneChange"
-            ]
+            ],
+            "protocol": "Vantiq Async",
+            "frequency": "50/sec",
+            "throughput": "Medium"
           }
         ],
         "consumers": [
@@ -865,13 +1174,17 @@ const PRELOADED_SAMPLES = {
             "name": "Cloud Node",
             "subscribesTo": [
               "ZoneChange"
-            ]
+            ],
+            "action": "Update State",
+            "errorStrategy": "Retry"
           },
           {
             "name": "Mobile App",
             "subscribesTo": [
               "RestockAlert"
-            ]
+            ],
+            "action": "Show Notification",
+            "errorStrategy": "Log"
           }
         ],
         "topics": [
@@ -884,18 +1197,44 @@ const PRELOADED_SAMPLES = {
             "usage": "State changes"
           }
         ],
+        "flowDiagram": "sequenceDiagram\n  participant RFID\n  participant Edge\n  participant Cloud\n  participant App\n  RFID->>Edge: RawTagRead\n  Edge->>Edge: Filter & Aggregate\n  Edge->>Cloud: ZoneChange\n  Cloud->>Cloud: Check Stock Rules\n  Cloud->>App: RestockAlert",
         "dataRetention": [
-          "Raw reads discarded at edge after 5 seconds.",
-          "Zone changes kept in cloud state indefinitely until sold."
+          {
+            "eventType": "RawTagRead",
+            "retentionPeriod": "5 minutes",
+            "rationale": "Only needed for immediate smoothing at the edge."
+          },
+          {
+            "eventType": "ZoneChange",
+            "retentionPeriod": "30 days",
+            "rationale": "Used for analytics and heat mapping."
+          },
+          {
+            "eventType": "RestockAlert",
+            "retentionPeriod": "1 year",
+            "rationale": "Audit and associate performance metrics."
+          }
         ]
       },
       "diagrams": {
         "diagrams": [
           {
-            "title": "Edge-to-Cloud Data Flow",
-            "type": "Architecture",
-            "description": "Shows how raw reads are filtered at the edge.",
-            "mermaidCode": "graph LR;\n  A[IoT Sensors] --> B[Truck Edge Gateway]\n  B --> C[Cellular Network]\n  C --> D[Vantiq Cloud]\n  D --> E[Dispatcher Dashboard]"
+            "title": "System Architecture",
+            "type": "architecture",
+            "description": "High-level overview of the distributed edge-to-cloud infrastructure.",
+            "mermaid": "graph LR;\n  A[IoT Sensors] -->|Cellular| B[Vantiq Cloud]\n  B --> C{Rule Engine}\n  C -- Temp Alert --> D[Dispatcher Dashboard]\n  C -- OK --> E[(Log DB)]"
+          },
+          {
+            "title": "Component Interaction Flow",
+            "type": "component",
+            "description": "Details the sequence of events during a stockout scenario.",
+            "mermaid": "sequenceDiagram\n  Sensor->>Cloud: Temp: 8C\n  Cloud->>Cloud: Evaluate Threshold (Max 5C)\n  Cloud->>Dispatcher: Alert: Spoilage Risk\n  Cloud->>DriverApp: Alert: Check Reefer Unit"
+          },
+          {
+            "title": "Deployment Topology",
+            "type": "deployment",
+            "description": "Physical deployment of nodes across the retail footprint.",
+            "mermaid": "graph TB;\n  subgraph Region[North America]\n    subgraph Store1[Store 101]\n      EN1[Edge Node Docker] --> CR[Cloud Router]\n    end\n    subgraph Store2[Store 102]\n      EN2[Edge Node Docker] --> CR\n    end\n    CR --> VC[Vantiq Cloud Cluster AWS]\n  end"
           }
         ]
       },
@@ -934,9 +1273,19 @@ const PRELOADED_SAMPLES = {
             "role": "Orchestrator",
             "tools": [
               "GetInventoryLevel",
-              "PageAssociate"
+              "PageAssociate",
+              "CheckSchedule"
             ],
             "interaction": "Monitors alerts and autonomously decides which associate to page based on their current location and workload."
+          },
+          {
+            "name": "Replenishment Agent",
+            "role": "Specialist",
+            "tools": [
+              "QueryERP",
+              "DraftPurchaseOrder"
+            ],
+            "interaction": "Automatically drafts purchase orders when warehouse stock drops below safety thresholds."
           }
         ]
       },
@@ -948,7 +1297,8 @@ const PRELOADED_SAMPLES = {
             "focus": "Single store RFID ingestion",
             "deliverables": [
               "Edge node deployed",
-              "Basic alerting"
+              "Basic alerting",
+              "Hardware tuned"
             ]
           },
           {
@@ -966,18 +1316,34 @@ const PRELOADED_SAMPLES = {
             "focus": "Scale to 50 stores",
             "deliverables": [
               "Automated provisioning",
-              "Full dashboard"
+              "Full dashboard",
+              "Associate training"
+            ]
+          },
+          {
+            "phase": "Phase 4: AI Agent integration",
+            "duration": "8 weeks",
+            "focus": "Agentic orchestration",
+            "deliverables": [
+              "Store Manager Agent live",
+              "Automated task routing"
             ]
           }
         ],
         "quickWins": [
-          "Immediate visibility into backroom vs sales floor inventory."
+          "Immediate visibility into backroom vs sales floor inventory.",
+          "Automated nightly stock reconciliation."
         ],
         "risks": [
           {
-            "risk": "Poor RFID read rates",
-            "impact": "Inaccurate system",
-            "mitigation": "Conduct thorough RF site survey before deployment."
+            "risk": "Poor RFID read rates due to metal fixtures",
+            "impact": "High",
+            "mitigation": "Conduct thorough RF site survey before deployment and adjust antenna placement."
+          },
+          {
+            "risk": "Associate adoption",
+            "impact": "Medium",
+            "mitigation": "Design ultra-simple UI for the mobile app and gamify restock tasks."
           }
         ]
       },
@@ -997,18 +1363,43 @@ const PRELOADED_SAMPLES = {
           },
           {
             "quarter": "Q2",
-            "theme": "AI Integration",
+            "theme": "Cloud Scale",
+            "milestones": [
+              "50 Stores Live",
+              "Dashboards Deployed"
+            ],
+            "deliverables": [
+              "Monitoring Console",
+              "Provisioning Scripts"
+            ]
+          },
+          {
+            "quarter": "Q3",
+            "theme": "AI Vision Integration",
             "milestones": [
               "Camera Integration"
             ],
             "deliverables": [
-              "YOLOv8 model deployment"
+              "YOLOv8 model deployment",
+              "Multimodal event fusion"
+            ]
+          },
+          {
+            "quarter": "Q4",
+            "theme": "Agentic Autonomy",
+            "milestones": [
+              "Agents Deployed"
+            ],
+            "deliverables": [
+              "Store Manager Agent",
+              "Dynamic task allocation"
             ]
           }
         ],
         "keyDecisionPoints": [
           "Go/No-go after Store 1 POV.",
-          "Choose camera hardware vendor in Q2."
+          "Choose camera hardware vendor in Q2.",
+          "Evaluate agent performance in Q4."
         ]
       },
       "adjacentUseCases": {
@@ -1023,6 +1414,29 @@ const PRELOADED_SAMPLES = {
             "newComponents": [
               "SmartMirror UI",
               "Recommendation Engine"
+            ]
+          },
+          {
+            "name": "Loss Prevention",
+            "description": "Trigger cameras and lock doors if unpaid items move toward the exit.",
+            "reusedComponents": [
+              "RFIDIngestionService",
+              "ZoneChange"
+            ],
+            "newComponents": [
+              "SecurityAlertService",
+              "DoorControlIntegration"
+            ]
+          },
+          {
+            "name": "Dynamic Pricing",
+            "description": "Automatically lower prices on digital signs for items that have been on the floor too long.",
+            "reusedComponents": [
+              "InventoryStateService"
+            ],
+            "newComponents": [
+              "PricingEngine",
+              "DigitalSignIntegration"
             ]
           }
         ]
@@ -1187,16 +1601,16 @@ const PRELOADED_SAMPLES = {
             "note": "Cloud-only, batch-oriented."
           },
           {
+            "vendor": "Custom Cloud",
+            "criterion": "Time to Market",
+            "rating": "Weak",
+            "note": "Requires heavy custom coding."
+          },
+          {
             "vendor": "Vantiq",
             "criterion": "Time to Market",
             "rating": "Strong",
             "note": "Low-code visual development."
-          },
-          {
-            "vendor": "Legacy ERP",
-            "criterion": "Time to Market",
-            "rating": "Moderate",
-            "note": "Long implementation cycles."
           }
         ],
         "vantiqDifferentiators": [
@@ -1237,7 +1651,8 @@ const PRELOADED_SAMPLES = {
               "rfidTag",
               "sku",
               "locationZone",
-              "lastSeen"
+              "lastSeen",
+              "status"
             ]
           },
           {
@@ -1246,20 +1661,52 @@ const PRELOADED_SAMPLES = {
             "properties": [
               "zoneId",
               "zoneType",
-              "capacity"
+              "capacity",
+              "readerIds"
+            ]
+          },
+          {
+            "type": "Event",
+            "name": "StockoutEvent",
+            "properties": [
+              "eventId",
+              "sku",
+              "zone",
+              "timestamp",
+              "resolved"
+            ]
+          },
+          {
+            "type": "User",
+            "name": "StoreAssociate",
+            "properties": [
+              "employeeId",
+              "name",
+              "currentZone",
+              "taskQueue"
             ]
           }
         ],
         "events": [
           {
-            "name": "TagRead",
+            "name": "RawTagRead",
             "type": "Raw Event",
             "trigger": "RFID reader detects a tag"
+          },
+          {
+            "name": "ZoneChange",
+            "type": "Derived Event",
+            "trigger": "Item moves from one zone to another"
           },
           {
             "name": "ItemMisplaced",
             "type": "Derived Alert",
             "trigger": "Item remains in wrong zone for >10 mins"
+          },
+          {
+            "name": "StockoutAlert",
+            "type": "Business Event",
+            "trigger": "Inventory for an active SKU drops below threshold on the sales floor"
           }
         ],
         "services": [
@@ -1270,21 +1717,37 @@ const PRELOADED_SAMPLES = {
           {
             "name": "InventoryStateService",
             "responsibility": "Maintain the real-time location of every item."
+          },
+          {
+            "name": "NotificationService",
+            "responsibility": "Route alerts to the correct store associate based on location."
+          },
+          {
+            "name": "ERPIntegrationService",
+            "responsibility": "Sync inventory state with the central ERP system."
           }
         ],
         "boundedContexts": [
           {
-            "name": "Edge Processing",
+            "name": "Edge Processing Context",
             "description": "Handles raw hardware events.",
             "services": [
               "RFIDIngestionService"
             ]
           },
           {
-            "name": "Cloud Analytics",
+            "name": "Core Inventory Context",
             "description": "Global state and alerting.",
             "services": [
-              "InventoryStateService"
+              "InventoryStateService",
+              "ERPIntegrationService"
+            ]
+          },
+          {
+            "name": "Task Management Context",
+            "description": "Associate tasking.",
+            "services": [
+              "NotificationService"
             ]
           }
         ],
@@ -1293,6 +1756,11 @@ const PRELOADED_SAMPLES = {
             "name": "TriggerRestockAlert",
             "target": "NotificationService",
             "action": "Send push to associate mobile app"
+          },
+          {
+            "name": "SyncInventory",
+            "target": "ERPIntegrationService",
+            "action": "Push current counts to ERP"
           }
         ]
       },
@@ -1300,20 +1768,41 @@ const PRELOADED_SAMPLES = {
         "components": [
           {
             "name": "Store Edge Node",
-            "type": "Vantiq Edge",
+            "type": "Gateway",
             "responsibility": "Process RFID reads locally to reduce bandwidth.",
             "tech": [
-              "Vantiq",
-              "MQTT"
+              "Vantiq Edge",
+              "MQTT",
+              "Docker"
             ]
           },
           {
             "name": "Cloud Control Plane",
-            "type": "Vantiq Cloud",
+            "type": "Service",
             "responsibility": "Global inventory state and ERP sync.",
             "tech": [
-              "Vantiq",
+              "Vantiq Cloud",
               "REST"
+            ]
+          },
+          {
+            "name": "Associate App",
+            "type": "App",
+            "responsibility": "Receive task notifications.",
+            "tech": [
+              "iOS",
+              "Android",
+              "WebSockets"
+            ]
+          },
+          {
+            "name": "Vision Analytics",
+            "type": "AI Model",
+            "responsibility": "Process RTSP camera feeds.",
+            "tech": [
+              "YOLOv8",
+              "Python",
+              "Vantiq"
             ]
           }
         ],
@@ -1322,6 +1811,16 @@ const PRELOADED_SAMPLES = {
             "system": "SAP ERP",
             "protocol": "REST/OData",
             "purpose": "Sync master SKU data and update final stock levels."
+          },
+          {
+            "system": "Impinj Readers",
+            "protocol": "LLRP/MQTT",
+            "purpose": "Ingest raw tag events."
+          },
+          {
+            "system": "Twilio",
+            "protocol": "REST",
+            "purpose": "Send SMS alerts for critical incidents."
           }
         ],
         "dataFlow": [
@@ -1330,10 +1829,12 @@ const PRELOADED_SAMPLES = {
           "3. Vantiq Cloud updates global state and checks against ERP stock levels.",
           "4. If stockout detected, Cloud sends push notification to Associate App."
         ],
-        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes.",
+        "mermaidDiagram": "graph TD;\n  A[RFID Readers] -->|Raw MQTT| B[Vantiq Edge Node]\n  B -->|Filtered ZoneChange| C[Vantiq Cloud]\n  C -->|Updates| D[(SAP ERP)]\n  C -->|Alerts| E[Mobile App]",
+        "scalabilityNotes": "Edge nodes handle the massive volume of raw reads. Cloud only processes state changes, ensuring horizontal scalability.",
         "securityConsiderations": [
           "Mutual TLS for edge-to-cloud communication.",
-          "Encrypt inventory data at rest in the cloud."
+          "Encrypt inventory data at rest in the cloud.",
+          "Role-based access control for associate apps."
         ],
         "principles": [
           "Process data close to the source.",
@@ -1342,6 +1843,15 @@ const PRELOADED_SAMPLES = {
       },
       "eventSystem": {
         "schemas": [
+          {
+            "eventName": "RawTagRead",
+            "fields": [
+              "epc",
+              "antennaPort",
+              "rssi",
+              "timestamp"
+            ]
+          },
           {
             "eventName": "ZoneChange",
             "fields": [
@@ -1366,13 +1876,19 @@ const PRELOADED_SAMPLES = {
             "name": "RFID Gateway",
             "events": [
               "RawTagRead"
-            ]
+            ],
+            "protocol": "MQTT",
+            "frequency": "10,000/sec",
+            "throughput": "High"
           },
           {
             "name": "Edge Node",
             "events": [
               "ZoneChange"
-            ]
+            ],
+            "protocol": "Vantiq Async",
+            "frequency": "50/sec",
+            "throughput": "Medium"
           }
         ],
         "consumers": [
@@ -1380,13 +1896,17 @@ const PRELOADED_SAMPLES = {
             "name": "Cloud Node",
             "subscribesTo": [
               "ZoneChange"
-            ]
+            ],
+            "action": "Update State",
+            "errorStrategy": "Retry"
           },
           {
             "name": "Mobile App",
             "subscribesTo": [
               "RestockAlert"
-            ]
+            ],
+            "action": "Show Notification",
+            "errorStrategy": "Log"
           }
         ],
         "topics": [
@@ -1399,18 +1919,44 @@ const PRELOADED_SAMPLES = {
             "usage": "State changes"
           }
         ],
+        "flowDiagram": "sequenceDiagram\n  participant RFID\n  participant Edge\n  participant Cloud\n  participant App\n  RFID->>Edge: RawTagRead\n  Edge->>Edge: Filter & Aggregate\n  Edge->>Cloud: ZoneChange\n  Cloud->>Cloud: Check Stock Rules\n  Cloud->>App: RestockAlert",
         "dataRetention": [
-          "Raw reads discarded at edge after 5 seconds.",
-          "Zone changes kept in cloud state indefinitely until sold."
+          {
+            "eventType": "RawTagRead",
+            "retentionPeriod": "5 minutes",
+            "rationale": "Only needed for immediate smoothing at the edge."
+          },
+          {
+            "eventType": "ZoneChange",
+            "retentionPeriod": "30 days",
+            "rationale": "Used for analytics and heat mapping."
+          },
+          {
+            "eventType": "RestockAlert",
+            "retentionPeriod": "1 year",
+            "rationale": "Audit and associate performance metrics."
+          }
         ]
       },
       "diagrams": {
         "diagrams": [
           {
-            "title": "Edge-to-Cloud Data Flow",
-            "type": "Architecture",
-            "description": "Shows how raw reads are filtered at the edge.",
-            "mermaidCode": "graph TD;\n  A[Payment Gateway] --> B[Vantiq Streaming Engine]\n  B --> C{ML Scoring Model}\n  C -- Fraud --> D[Block Transaction]\n  C -- Safe --> E[Settle Payment]"
+            "title": "System Architecture",
+            "type": "architecture",
+            "description": "High-level overview of the distributed edge-to-cloud infrastructure.",
+            "mermaid": "graph TD;\n  A[Payment Gateway] --> B[Vantiq Streaming Engine]\n  B --> C{ML Scoring Model}\n  C -- Fraud Score > 90 --> D[Block Transaction]\n  C -- Fraud Score < 90 --> E[Settle Payment]"
+          },
+          {
+            "title": "Component Interaction Flow",
+            "type": "component",
+            "description": "Details the sequence of events during a stockout scenario.",
+            "mermaid": "sequenceDiagram\n  Gateway->>Vantiq: Auth Request ($500)\n  Vantiq->>MLModel: Get Fraud Score\n  MLModel-->>Vantiq: Score: 95\n  Vantiq->>Gateway: Decline Request\n  Vantiq->>CRM: Flag Account"
+          },
+          {
+            "title": "Deployment Topology",
+            "type": "deployment",
+            "description": "Physical deployment of nodes across the retail footprint.",
+            "mermaid": "graph TB;\n  subgraph Region[North America]\n    subgraph Store1[Store 101]\n      EN1[Edge Node Docker] --> CR[Cloud Router]\n    end\n    subgraph Store2[Store 102]\n      EN2[Edge Node Docker] --> CR\n    end\n    CR --> VC[Vantiq Cloud Cluster AWS]\n  end"
           }
         ]
       },
@@ -1449,9 +1995,19 @@ const PRELOADED_SAMPLES = {
             "role": "Orchestrator",
             "tools": [
               "GetInventoryLevel",
-              "PageAssociate"
+              "PageAssociate",
+              "CheckSchedule"
             ],
             "interaction": "Monitors alerts and autonomously decides which associate to page based on their current location and workload."
+          },
+          {
+            "name": "Replenishment Agent",
+            "role": "Specialist",
+            "tools": [
+              "QueryERP",
+              "DraftPurchaseOrder"
+            ],
+            "interaction": "Automatically drafts purchase orders when warehouse stock drops below safety thresholds."
           }
         ]
       },
@@ -1463,7 +2019,8 @@ const PRELOADED_SAMPLES = {
             "focus": "Single store RFID ingestion",
             "deliverables": [
               "Edge node deployed",
-              "Basic alerting"
+              "Basic alerting",
+              "Hardware tuned"
             ]
           },
           {
@@ -1481,18 +2038,34 @@ const PRELOADED_SAMPLES = {
             "focus": "Scale to 50 stores",
             "deliverables": [
               "Automated provisioning",
-              "Full dashboard"
+              "Full dashboard",
+              "Associate training"
+            ]
+          },
+          {
+            "phase": "Phase 4: AI Agent integration",
+            "duration": "8 weeks",
+            "focus": "Agentic orchestration",
+            "deliverables": [
+              "Store Manager Agent live",
+              "Automated task routing"
             ]
           }
         ],
         "quickWins": [
-          "Immediate visibility into backroom vs sales floor inventory."
+          "Immediate visibility into backroom vs sales floor inventory.",
+          "Automated nightly stock reconciliation."
         ],
         "risks": [
           {
-            "risk": "Poor RFID read rates",
-            "impact": "Inaccurate system",
-            "mitigation": "Conduct thorough RF site survey before deployment."
+            "risk": "Poor RFID read rates due to metal fixtures",
+            "impact": "High",
+            "mitigation": "Conduct thorough RF site survey before deployment and adjust antenna placement."
+          },
+          {
+            "risk": "Associate adoption",
+            "impact": "Medium",
+            "mitigation": "Design ultra-simple UI for the mobile app and gamify restock tasks."
           }
         ]
       },
@@ -1512,18 +2085,43 @@ const PRELOADED_SAMPLES = {
           },
           {
             "quarter": "Q2",
-            "theme": "AI Integration",
+            "theme": "Cloud Scale",
+            "milestones": [
+              "50 Stores Live",
+              "Dashboards Deployed"
+            ],
+            "deliverables": [
+              "Monitoring Console",
+              "Provisioning Scripts"
+            ]
+          },
+          {
+            "quarter": "Q3",
+            "theme": "AI Vision Integration",
             "milestones": [
               "Camera Integration"
             ],
             "deliverables": [
-              "YOLOv8 model deployment"
+              "YOLOv8 model deployment",
+              "Multimodal event fusion"
+            ]
+          },
+          {
+            "quarter": "Q4",
+            "theme": "Agentic Autonomy",
+            "milestones": [
+              "Agents Deployed"
+            ],
+            "deliverables": [
+              "Store Manager Agent",
+              "Dynamic task allocation"
             ]
           }
         ],
         "keyDecisionPoints": [
           "Go/No-go after Store 1 POV.",
-          "Choose camera hardware vendor in Q2."
+          "Choose camera hardware vendor in Q2.",
+          "Evaluate agent performance in Q4."
         ]
       },
       "adjacentUseCases": {
@@ -1538,6 +2136,29 @@ const PRELOADED_SAMPLES = {
             "newComponents": [
               "SmartMirror UI",
               "Recommendation Engine"
+            ]
+          },
+          {
+            "name": "Loss Prevention",
+            "description": "Trigger cameras and lock doors if unpaid items move toward the exit.",
+            "reusedComponents": [
+              "RFIDIngestionService",
+              "ZoneChange"
+            ],
+            "newComponents": [
+              "SecurityAlertService",
+              "DoorControlIntegration"
+            ]
+          },
+          {
+            "name": "Dynamic Pricing",
+            "description": "Automatically lower prices on digital signs for items that have been on the floor too long.",
+            "reusedComponents": [
+              "InventoryStateService"
+            ],
+            "newComponents": [
+              "PricingEngine",
+              "DigitalSignIntegration"
             ]
           }
         ]
