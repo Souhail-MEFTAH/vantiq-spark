@@ -2981,8 +2981,12 @@ async function loadSampleUseCase(sampleId) {
     state.problemText = sample.description;
     state.results = JSON.parse(JSON.stringify(sample.results)); 
 
-    document.querySelector('.welcome-section').style.display = 'none';
-    // document.querySelector('.results-section').style.display = 'flex';
+    // Keep the input panel visible but show results alongside it
+    // Only hide welcome decorative elements, not the entire input section
+    const welcomeTitle = document.querySelector('.welcome-title');
+    if (welcomeTitle) welcomeTitle.style.display = 'none';
+    const welcomeSubtitle = document.querySelector('.welcome-subtitle');
+    if (welcomeSubtitle) welcomeSubtitle.style.display = 'none';
     const headerActions = document.getElementById('headerActions');
     if (headerActions) headerActions.style.display = 'flex';
     
@@ -3009,13 +3013,14 @@ async function loadSampleUseCase(sampleId) {
         if (state.results.implementation) { Renderers.renderImplementation(state.results.implementation, document.getElementById('implementation-content')); enableNav('implementation'); }
         if (state.results.roadmap) { Renderers.renderRoadmap(state.results.roadmap, document.getElementById('roadmap-content')); enableNav('roadmap'); }
         if (state.results.adjacentUseCases) { Renderers.renderAdjacentUseCases(state.results.adjacentUseCases, document.getElementById('adjacent-content')); enableNav('adjacent'); }
+        if (state.results.platformValueGrowth) { Renderers.renderPlatformValueGrowth(state.results.platformValueGrowth, document.getElementById('valuegrowth-content')); enableNav('valuegrowth'); }
 
         switchPanel('analysis');
         
         setTimeout(async () => {
             try {
-                if (window.mermaid) {
-                    await window.mermaid.run();
+                if (typeof renderMermaidDiagrams === 'function') {
+                    await renderMermaidDiagrams();
                 }
             } catch(e) {}
         }, 100);
